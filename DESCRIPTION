@@ -1,0 +1,50 @@
+Package: bsem
+Type: Package
+Title: Bayesian Structural Equation Models using Rstan
+Version: 1.0.0
+Authors@R: 
+    c(person(given = "Renato",
+           family = "Panaro",
+           role = c("aut", "cre"),
+           email = "renatovp@ime.usp.br",
+           comment = c(ORCID = "0000-0002-1903-2091", URL= "https://rvpanaro.github.io/")),
+	person(given = "Vinícius",
+           family = "Mayrink",
+           role = "aut",
+           email = "vdinizm@gmail.com",
+           comment = c(ORCID = "0000-0002-5683-8326", URL= "http://www.est.ufmg.br/~vdinizm/")))
+Maintainer: Renato Panaro <renatovp@ime.usp.br>
+Description: Flexible routines to allow Structural Equation modeling particular cases using rstan integration. 'bsem' includes Bayesian Exploratory Analysis, Bayesian Confirmatory Analysis, Factor Analysis and Structural Equation Models. RV Panaro (2020).
+License: GPL-3
+Biarch: true
+Depends: 
+    R (>= 3.5.0),
+    loo (>= 2.1.0),
+    coda (>= 0.19-3),
+    MASS (>= 7.3-51.4)				
+Imports: 
+    methods,
+    Rcpp (>= 0.12.0),
+    rstan (>= 2.18.1),
+    rstantools (>= 1.5.1),
+    lattice(>= 0.20-38)
+LinkingTo: 
+    BH (>= 1.66.0),
+    Rcpp (>= 0.12.0),
+    RcppEigen (>= 0.3.3.3.0),
+    rstan (>= 2.18.1),
+    StanHeaders (>= 2.18.0)
+Suggests:
+    knitr,
+    devtools,
+    roxygen2,
+    testthat (>= 2.1.0),
+    covr,
+    rmarkdown 	
+Encoding: UTF-8
+LazyData: true
+SystemRequirements: GNU make
+BugReports: https://github.com/rvpanaro/bsem/issues
+VignetteBuilder: knitr
+RoxygenNote: 7.1.0
+URL: https://github.com/rvpanaro/bsem

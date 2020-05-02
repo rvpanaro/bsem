@@ -1,0 +1,23 @@
+destination: docs
+template:
+  params:
+    docsearch:
+      api_key:
+      index_name: bsem
+    bootswatch: cosmo
+url: https://rvpanaro.github.io/bsem/
+authors:
+  Panaro RV:
+    href: https://rvpanaro.github.io/
+  Mayrink VD:
+    href: http://www.est.ufmg.br/~vdinizm/
+development:
+  mode: auto
+reference:
+- title: "Details"
+- contents:
+  - starts_with("bsem")
+- title: "Fitter functions"
+  desc: "Functions for fitting a BP based survival regression model."
+- contents:
+  - starts_with("bsem")
