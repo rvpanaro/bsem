@@ -14,7 +14,7 @@ data("set2")
 
 # Blocks for confirmatory factor analysis
 t <- Sys.time();fit1 <- bsem::sem(blocks = set1$blocks, data = set1$set,
-                  iter = 4000, chains = 4,
+                  iter = 20, chains = 4,
                   scaled = F); Sys.time()-t
 fit1
 summary(fit1)
@@ -28,7 +28,7 @@ gridExtra::grid.arrange(bsem::arrayplot(set1$real$alpha, -2,2),
 
 t <- Sys.time();fit2 <- bsem::sem(blocks = set2$blocks, data = set2$set,
                   paths = set2$paths,
-                  iter = 4000, warmup = 2000,
+                  iter = 10000, warmup = 5000,
                   chains = 4,
                   scaled = F);Sys.time()-t
 fit2
@@ -40,11 +40,7 @@ gridExtra::grid.arrange(bsem::arrayplot(set2$real$lambda, -4,4),
 gridExtra::grid.arrange(bsem::arrayplot(set2$real$alpha, -4,4),
                         bsem::arrayplot(fit2$mean_loadings, -4,4))
 
-abs(set2$real$alpha)-abs(fit2$mean_loadings) %>% round(4)
-
-bayesplot::mcmc_trace(fit2$samples$alpha[,,endsWith(dimnames(fit2$samples$alpha)$parameters,"2]")])
-
-X11()
-bayesplot::mcmc_trace(fit2$samples$lambda[,, startsWith(dimnames(fit2$samples$lambda)$parameters,"lambda[4")])
+bayesplot::mcmc_trace(fit2$samples$alpha[,,1])
+bayesplot::mcmc_trace(fit2$samples$alpha[,,2])
 bayesplot::mcmc_trace(fit2$samples$beta)
 

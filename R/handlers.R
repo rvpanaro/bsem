@@ -73,9 +73,9 @@ handler3 <- function(missing_signals){
 
   if(missing_signals){
     for(k in 1:e$K){
-        aux[e$B[[k]],k] <- runif(lengths(e$B)[k], -0.1, 0.1)
+        aux[e$B[[k]],k] <- runif(lengths(e$B)[k], 0.5, 2) * sign(rnorm(lengths(e$B)[k]))
       }
-      aux[-unlist(e$B),] <- runif(e$K, -0.1, 0.1)
+      aux[-unlist(e$B),] <- runif(e$K, 0.5, 2) * sign(rnorm(e$K))
     }
   else{
     if(length(e$signals) != length(e$B) || lengths(e$signals) != lengths(e$B)){
@@ -83,9 +83,9 @@ handler3 <- function(missing_signals){
     }
 
     for(k in 1:e$K){
-        aux[e$B[[k]], k] <- e$signals[[k]]
+        aux[e$B[[k]], k] <- runif(e$K, 0.5, 2) * e$signals[[k]]
       }
-      aux[-unlist(e$B),] <- e$signals[[k]]
+      aux[-unlist(e$B),] <- runif(e$K, 0.5, 2) * e$signals[[k]]
     }
 
   init <-  list()
@@ -123,6 +123,9 @@ handler4 <- function(){
 handler5 <- function(){
   e <- parent.frame()
   for(k in 1:e$K){
+    # print("k")
+    # print(k)
+
     id_alp <- paste0("alpha[", e$B[[k]],",", k,"]")
 
     c_means <- apply(array(e$samples$alpha[,,id_alp],c(dim(e$samples$alpha)[1],dim(e$samples$alpha)[2],length(id_alp))), c(2,3), mean)
@@ -138,18 +141,35 @@ handler5 <- function(){
         for(i in which(startsWith(x = dimnames(e$samples$lambda)[3]$parameters, prefix = paste0("lambda[",k)))){
           e$samples$lambda[,,i]<- e$samples$lambda[,,i] %*% -diag(2*(c_means[,1]>0) -1)
         }
-        print(c_means)
+        # print("c_means")
+        # print(c_means)
           if(e$stanfit@model_name %in% c("sem", "semNA")){
             if(k %in% array(e$idlamb)){
-              print(paste("idlamb", which(array(e$idlamb) == k)))
-              for(j in which(array(e$idlamb) == k)){
-                e$samples$beta[,,j]<- e$samples$beta[,,j] %*% -diag(2*(c_means[,1]>0) -1)
+              # print('idlamb')
+              # print(array(e$idlamb))
+              # print(which(array(e$idlamb) == k))
+                for(j in which(array(e$idlamb) == k)){
+                  # print("before")
+                  # print(colMeans(e$samples$beta[,,j]))
+                  e$samples$beta[,,j]<- e$samples$beta[,,j] %*% -diag(2*(c_means[,1]>0) -1)
+                  # print("after")
+                  # print(colMeans(e$samples$beta[,,j]))
+                }
               }
-              print(paste("idy", e$idlamb[,which(e$idy == k)]))
-              # for(j in e$idlamb[,which(e$idy == k)]){
-              #   e$samples$beta[,,j]<- e$samples$beta[,,j] %*% -diag(2*(c_means[,1]>0) -1)
-              # }
-            }
+              # print('idy')
+              # print(k %in% 1:e$Ny)
+              if(k %in% 1:e$Ny){
+                idx <- cbind(c(1, cumsum(e$nbeta[-length(e$nbeta)])+1), c(cumsum(e$nbeta)))
+                for(j in seq(idx[k,1], idx[k,2])){
+                  # print(seq(idx[k,1], idx[k,2]))
+                  # print("before")
+                  # print(colMeans(e$samples$beta[,,j]))
+                  e$samples$beta[,,j]<- e$samples$beta[,,j] %*% -diag(2*(c_means[,1]>0) -1)
+                  # print("after")
+                  # print(colMeans(e$samples$beta[,,j]))
+                }
+              }
+
           }
         }
       }

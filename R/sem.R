@@ -29,13 +29,12 @@ sem <-
                          noise = c("gamma(2.1, 1.1)")),
            cores =  parallel::detectCores(),
            pars = c("alpha", "lambda", "sigma2", "Xna"),
-           iter = 4000,
+           iter = 2000,
            chains = 4,
            scaled = TRUE,
            ...){
 
-          q = 1
-    ifelse(scaled, X <- t(scale(data)), X <- t(data)) # format: lines = R-space (variables) and columns= Q-space (observations)
+      ifelse(scaled, X <- t(scale(data)), X <- t(data)) # format: lines = R-space (variables) and columns= Q-space (observations)
     if(is.null(row_names)){row_names <- paste0('obs',1:nrow(data))}
     if(is.null(colnames(data))){colnames(data) <- paste0('var',1:ncol(data))}
     if(is.null(names(blocks))){names(blocks) <- paste0('latent', 1:length(blocks))}
@@ -109,7 +108,7 @@ sem <-
                             data = standata, pars = pars,
                             verbose = FALSE, init = init,
                             chains = chains, iter = iter,
-                            cores = cores, ...))
+                            cores = cores,  ...))
       }
       else{    ## with inner model
         handler4()
@@ -125,7 +124,7 @@ sem <-
                             data = standata, pars = pars,
                             verbose = FALSE, init = init,
                             chains = chains, iter = iter,
-                            cores = cores, ...))
+                            cores = cores,  ...))
       }
     }
     else{    ## missing variable fit
@@ -136,7 +135,7 @@ sem <-
                             data = standata, pars = pars,
                             verbose = FALSE, init = init,
                             chains = chains, iter = iter,
-                            cores = cores, ...))
+                            cores = cores,  ...))
       }
       else{  ## with inner model
         handler4()
@@ -152,7 +151,7 @@ sem <-
                             data = standata, pars = pars,
                             verbose = FALSE, init = init,
                             chains = chains, iter = iter,
-                            cores = cores, ...))
+                            cores = cores,  ...))
       }
     }
     cat("\nExtracting posterior samples, please wait...\n")

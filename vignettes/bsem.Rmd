@@ -153,7 +153,6 @@ gridExtra::grid.arrange(p1, p2, p3,
                         layout_matrix = matrix(c(1,1,2,3), ncol = 2))
 ```
 
-
 The next sections describe how the package can be used to estimate the parameters presented. We can use set1 data to exemplify the use of ``bsem::sem``. In this case, we are facing an exploratory factor analysis (EFA) model.
 
 ## Factor analysis example
@@ -161,8 +160,7 @@ The next sections describe how the package can be used to estimate the parameter
 The implemented routines allow a partial EFA/CFA or full CFA. So, at least one variable must be chosen to express each construct before running to the analysis. In other words, the user needs to specify at least one manifest variable per block. In this way, the other variables can be incorporated into a later CFA. That said, note that, for example, some of the loadings used to generate set1 are zero.
 
 ```{r, eval = F}
-efa_fit <- bsem::sem(data = set1$set, blocks = set1$blocks,
-                     iter = 4000,  warmup = 1000,
+efa_fit <- bsem::sem(data = set1$set, blocks = set1$blocks, 
                      chains = 1, scaled = F)
 
 p1 <- bsem::arrayplot(efa_fit$scores, main = 'estimates', 
@@ -200,28 +198,24 @@ It is worth mentioning that the paths are named with block names. There are two 
 set2$blocks$Y
 ```
 
-
 ```{r}
 cfa_fit <- bsem::sem(data = set2$set, blocks = set2$blocks,
-                     paths = set2$paths, iter = 4000,
-                     warmup = 1000, chains = 1, scaled = F)
+                     paths = set2$paths, chains =1, scaled = F)
 
 summary(cfa_fit)
 
-p1 <- bsem::arrayplot(cfa_fit$scores, main = 'estimates', mini = -2, maxi = 2)
-p2 <- bsem::arrayplot(set2$real$lambda, main = 'lambda (scores)', mini = -2, maxi = 2)
+p1 <- bsem::arrayplot(cfa_fit$scores, main = 'estimates', mini = -4, maxi = 4)
+p2 <- bsem::arrayplot(set2$real$lambda, main = 'lambda (scores)', mini = -4, maxi = 4)
 
 gridExtra::grid.arrange(p1, p2)
 
-p1 <- bsem::arrayplot(cfa_fit$loadings, main = 'estimates', mini = -2, maxi = 2)
-p2 <- bsem::arrayplot(set2$real$alpha, main = 'alpha (loadings)', mini = -2, maxi = 2)
+p1 <- bsem::arrayplot(cfa_fit$loadings, main = 'estimates', mini = -4, maxi = 4)
+p2 <- bsem::arrayplot(set2$real$alpha, main = 'alpha (loadings)', mini = -4, maxi = 4)
 
-gridExtra::grid.arrange(p1, p2, layout_matrix =matrix(c(1,1,2,2), ncol = 2))
+gridExtra::grid.arrange(p1, p2, layout_matrix = matrix(c(1,1,2,2), ncol = 2))
 ```
 
-
 As with the ML estimation, the summary method is extended to the ``spsurv::spbp`` class when applying to a Bayesian fit. Along with the regression estimates, this output also contains descriptive statistics for the posterior hazard ratio denoted by ``_exp`` (in the console output) and the diagnosis statistics from the ``loo`` package. The effective sample size  ``n_eff`` gives an estimate of the independent draws from the posterior distribution, and ``Rhat`` referred to as the potential scale reduction statistic,  is one of the useful ways to monitor whether a chain has converged to the equilibrium distribution. This statistic measures the ratio between the average variation of the samples within each chain and the variation of the combined samples in the chains; if the chains have not converged to a common distribution, this statistic will be greater than one. It is worth noting that all, the information provided by the ``Stan`` output, including warnings, is passed to the final user. One can have access to the ``stanfit`` object with the ``fit$stanfit`` command. In particular, one can have access to built-in plot functions and even to a ``shiny`` app (details in [https://shiny.rstudio.com/](https://shiny.rstudio.com/) developed by ``Stan`` developer's team. The summary outcome is as follows:
-
 
 # Graphical analysis 
 
