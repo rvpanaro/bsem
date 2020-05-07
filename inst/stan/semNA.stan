@@ -16,6 +16,7 @@ data{
   matrix[Nv,K] v;
   real<lower=0> a;
   real<lower=0> b;
+  real<lower=0> s;
 }
 
 parameters{
@@ -51,7 +52,7 @@ model{
   sigma2 ~ inv_gamma(a, b);
 
   // coefficients and regressors priors
-  beta ~ normal(0, sqrt(10));
+  beta ~ normal(0, sqrt(s));
 
   // missing data prior
   for(i in 1:Nna){

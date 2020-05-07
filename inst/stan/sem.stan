@@ -13,6 +13,7 @@ data{
   matrix[Nv,K] v;
   real<lower=0> a;
   real<lower=0> b;
+  real<lower=0> s;
   //////////////////
 }
 
@@ -48,7 +49,7 @@ model{
   sigma2 ~ inv_gamma(a, b);
 
   // coefficients prior and regression
-  beta ~ normal(0, sqrt(10));
+  beta ~ normal(0, sqrt(s));
 }
 // empty line avoids crash
 

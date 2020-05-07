@@ -30,7 +30,6 @@
 #'    \item{blocks}{list of 5 integer arrays describing the relationship between observed and unobserved variables}
 #'    \item{signals}{list of 5 integer arrays describing the block signals}
 #'    \item{paths}{list of 3 integer arrays describing three linear regressions among unobserved variables}
-
 #' }
 #'
 #' @keywords datasets set1 set2

@@ -33,7 +33,7 @@ static int current_statement_begin__;
 stan::io::program_reader prog_reader__() {
     stan::io::program_reader reader;
     reader.add_event(0, 0, "start", "model_sem");
-    reader.add_event(55, 53, "end", "model_sem");
+    reader.add_event(56, 54, "end", "model_sem");
     return reader;
 }
 #include <stan_meta_header.hpp>
@@ -53,6 +53,7 @@ private:
         matrix_d v;
         double a;
         double b;
+        double s;
 public:
     model_sem(stan::io::var_context& context__,
         std::ostream* pstream__ = 0)
@@ -237,24 +238,31 @@ public:
             pos__ = 0;
             b = vals_r__[pos__++];
             check_greater_or_equal(function__, "b", b, 0);
+            current_statement_begin__ = 16;
+            context__.validate_dims("data initialization", "s", "double", context__.to_vec());
+            s = double(0);
+            vals_r__ = context__.vals_r("s");
+            pos__ = 0;
+            s = vals_r__[pos__++];
+            check_greater_or_equal(function__, "s", s, 0);
             // initialize transformed data variables
             // execute transformed data statements
             // validate transformed data
             // validate, set parameter ranges
             num_params_r__ = 0U;
             param_ranges_i__.clear();
-            current_statement_begin__ = 20;
+            current_statement_begin__ = 21;
             validate_non_negative_index("alpha", "Nv", Nv);
             validate_non_negative_index("alpha", "K", K);
             num_params_r__ += (Nv * K);
-            current_statement_begin__ = 21;
+            current_statement_begin__ = 22;
             validate_non_negative_index("lambda", "K", K);
             validate_non_negative_index("lambda", "Ne", Ne);
             num_params_r__ += (K * Ne);
-            current_statement_begin__ = 22;
+            current_statement_begin__ = 23;
             validate_non_negative_index("sigma2", "Nv", Nv);
             num_params_r__ += Nv;
-            current_statement_begin__ = 24;
+            current_statement_begin__ = 25;
             validate_non_negative_index("beta", "sum(nbeta)", sum(nbeta));
             num_params_r__ += sum(nbeta);
         } catch (const std::exception& e) {
@@ -274,7 +282,7 @@ public:
         (void) pos__; // dummy call to supress warning
         std::vector<double> vals_r__;
         std::vector<int> vals_i__;
-        current_statement_begin__ = 20;
+        current_statement_begin__ = 21;
         if (!(context__.contains_r("alpha")))
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable alpha missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("alpha");
@@ -295,7 +303,7 @@ public:
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable alpha: ") + e.what()), current_statement_begin__, prog_reader__());
         }
-        current_statement_begin__ = 21;
+        current_statement_begin__ = 22;
         if (!(context__.contains_r("lambda")))
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable lambda missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("lambda");
@@ -316,7 +324,7 @@ public:
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable lambda: ") + e.what()), current_statement_begin__, prog_reader__());
         }
-        current_statement_begin__ = 22;
+        current_statement_begin__ = 23;
         if (!(context__.contains_r("sigma2")))
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable sigma2 missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("sigma2");
@@ -333,7 +341,7 @@ public:
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(std::runtime_error(std::string("Error transforming variable sigma2: ") + e.what()), current_statement_begin__, prog_reader__());
         }
-        current_statement_begin__ = 24;
+        current_statement_begin__ = 25;
         if (!(context__.contains_r("beta")))
             stan::lang::rethrow_located(std::runtime_error(std::string("Variable beta missing")), current_statement_begin__, prog_reader__());
         vals_r__ = context__.vals_r("beta");
@@ -375,28 +383,28 @@ public:
         try {
             stan::io::reader<local_scalar_t__> in__(params_r__, params_i__);
             // model parameters
-            current_statement_begin__ = 20;
+            current_statement_begin__ = 21;
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> alpha;
             (void) alpha;  // dummy to suppress unused var warning
             if (jacobian__)
                 alpha = in__.matrix_constrain(Nv, K, lp__);
             else
                 alpha = in__.matrix_constrain(Nv, K);
-            current_statement_begin__ = 21;
+            current_statement_begin__ = 22;
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, Eigen::Dynamic> lambda;
             (void) lambda;  // dummy to suppress unused var warning
             if (jacobian__)
                 lambda = in__.matrix_constrain(K, Ne, lp__);
             else
                 lambda = in__.matrix_constrain(K, Ne);
-            current_statement_begin__ = 22;
+            current_statement_begin__ = 23;
             Eigen::Matrix<local_scalar_t__, Eigen::Dynamic, 1> sigma2;
             (void) sigma2;  // dummy to suppress unused var warning
             if (jacobian__)
                 sigma2 = in__.vector_constrain(Nv, lp__);
             else
                 sigma2 = in__.vector_constrain(Nv);
-            current_statement_begin__ = 24;
+            current_statement_begin__ = 25;
             Eigen::Matrix<local_scalar_t__, 1, Eigen::Dynamic> beta;
             (void) beta;  // dummy to suppress unused var warning
             if (jacobian__)
@@ -404,29 +412,29 @@ public:
             else
                 beta = in__.row_vector_constrain(sum(nbeta));
             // model body
-            current_statement_begin__ = 28;
+            current_statement_begin__ = 29;
             for (int i = 1; i <= Nob; ++i) {
-                current_statement_begin__ = 29;
+                current_statement_begin__ = 30;
                 lp_accum__.add(normal_log<propto__>(get_base1(X, get_base1(get_base1(idob, i, "idob", 1), 1, "idob", 2), get_base1(get_base1(idob, i, "idob", 1), 2, "idob", 2), "X", 1), multiply(stan::model::rvalue(alpha, stan::model::cons_list(stan::model::index_uni(get_base1(get_base1(idob, i, "idob", 1), 1, "idob", 2)), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "alpha"), stan::model::rvalue(lambda, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_uni(get_base1(get_base1(idob, i, "idob", 1), 2, "idob", 2)), stan::model::nil_index_list())), "lambda")), stan::math::sqrt(get_base1(sigma2, get_base1(get_base1(idob, i, "idob", 1), 1, "idob", 2), "sigma2", 1))));
             }
-            current_statement_begin__ = 33;
+            current_statement_begin__ = 34;
             lp_accum__.add(normal_log<propto__>(stan::model::rvalue(lambda, stan::model::cons_list(stan::model::index_uni(get_base1(idy, 1, "idy", 1)), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "lambda"), multiply(stan::model::rvalue(beta, stan::model::cons_list(stan::model::index_min_max(1, get_base1(nbeta, 1, "nbeta", 1)), stan::model::nil_index_list()), "beta"), stan::model::rvalue(lambda, stan::model::cons_list(stan::model::index_multi(stan::model::rvalue(idlamb, stan::model::cons_list(stan::model::index_min_max(1, get_base1(nbeta, 1, "nbeta", 1)), stan::model::nil_index_list()), "idlamb")), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "lambda")), 1));
-            current_statement_begin__ = 36;
+            current_statement_begin__ = 37;
             for (int k = 1; k <= K; ++k) {
-                current_statement_begin__ = 37;
+                current_statement_begin__ = 38;
                 lp_accum__.add(normal_log<propto__>(stan::model::rvalue(alpha, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_uni(k), stan::model::nil_index_list())), "alpha"), 0, stan::math::sqrt(stan::model::rvalue(v, stan::model::cons_list(stan::model::index_omni(), stan::model::cons_list(stan::model::index_uni(k), stan::model::nil_index_list())), "v"))));
             }
-            current_statement_begin__ = 40;
+            current_statement_begin__ = 41;
             for (int i = 2; i <= Ny; ++i) {
-                current_statement_begin__ = 41;
+                current_statement_begin__ = 42;
                 lp_accum__.add(normal_log<propto__>(stan::model::rvalue(lambda, stan::model::cons_list(stan::model::index_uni(get_base1(idy, i, "idy", 1)), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "lambda"), multiply(stan::model::rvalue(beta, stan::model::cons_list(stan::model::index_min_max((sum(stan::model::rvalue(nbeta, stan::model::cons_list(stan::model::index_min_max(1, (i - 1)), stan::model::nil_index_list()), "nbeta")) + 1), sum(stan::model::rvalue(nbeta, stan::model::cons_list(stan::model::index_min_max(1, i), stan::model::nil_index_list()), "nbeta"))), stan::model::nil_index_list()), "beta"), stan::model::rvalue(lambda, stan::model::cons_list(stan::model::index_multi(stan::model::rvalue(idlamb, stan::model::cons_list(stan::model::index_min_max((sum(stan::model::rvalue(nbeta, stan::model::cons_list(stan::model::index_min_max(1, (i - 1)), stan::model::nil_index_list()), "nbeta")) + 1), sum(stan::model::rvalue(nbeta, stan::model::cons_list(stan::model::index_min_max(1, i), stan::model::nil_index_list()), "nbeta"))), stan::model::nil_index_list()), "idlamb")), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "lambda")), 1));
             }
-            current_statement_begin__ = 45;
+            current_statement_begin__ = 46;
             lp_accum__.add(normal_log<propto__>(to_vector(stan::model::rvalue(lambda, stan::model::cons_list(stan::model::index_multi(idyi), stan::model::cons_list(stan::model::index_omni(), stan::model::nil_index_list())), "lambda")), 0, 1));
-            current_statement_begin__ = 48;
+            current_statement_begin__ = 49;
             lp_accum__.add(inv_gamma_log<propto__>(sigma2, a, b));
-            current_statement_begin__ = 51;
-            lp_accum__.add(normal_log<propto__>(beta, 0, stan::math::sqrt(10)));
+            current_statement_begin__ = 52;
+            lp_accum__.add(normal_log<propto__>(beta, 0, stan::math::sqrt(s)));
         } catch (const std::exception& e) {
             stan::lang::rethrow_located(e, current_statement_begin__, prog_reader__());
             // Next line prevents compiler griping about no return

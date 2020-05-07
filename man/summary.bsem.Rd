@@ -4,7 +4,7 @@
 \alias{summary.bsem}
 \title{'bsem' object summary}
 \usage{
-\method{summary}{bsem}(x, digits = max(getOption("digits") - 4, 3), ...)
+\method{summary}{bsem}(x, digits = 4, ...)
 }
 \arguments{
 \item{x}{an object of class spbp}

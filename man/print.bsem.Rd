@@ -4,10 +4,10 @@
 \alias{print.bsem}
 \title{'bsem' object print}
 \usage{
-\method{print}{bsem}(x, digits = max(getOption("digits") - 4, 3), ...)
+\method{print}{bsem}(x, digits = 4, ...)
 }
 \arguments{
-\item{x}{an object of class spbp}
+\item{x}{an object of class bsem}
 
 \item{digits}{number of digits to display}
 

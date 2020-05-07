@@ -13,11 +13,11 @@ author:
     address       : "Belo Horizonte-MG, Brasil"
     email         : "vdinizm@gmail.com"
 
-keywords          : "proportional ha"
+keywords          : "structural equation model, factor analysis"
 date: "`r Sys.Date()`"
 output:
   html_document:
-    theme: lumen
+    theme: paper
     toc: true
     toc_float:
       collapsed: true
@@ -38,19 +38,19 @@ text-align: justify
 # Introduction
 
 
-This vignette describes the first instructions on how to fit the particular cases of the structural equation models available in the `bsem` package such as the confirmatory and exploratory factor analysis. The full (outer and inner) structural equation model provided here allows for evaluation of relationships between observed variables and, also, among unobserved variables. In addition to this vignette, you can have access to [Mayrink and Lucas](https://projecteuclid.org/DPubS?service=UI&version=1.0&verb=Display&handle=euclid.aoas/1372338468) (2013) and [Mayrink and Lucas](https://projecteuclid.org/euclid.bjps/1414674773) (2015).
+This vignette describes the first instructions on how to fit the particular cases of structural equation models (SEMs) using the `bsem` package. Examples include confirmatory factor analysis (CFA) and confirmatory SEM. The flexible full SEM model (outer model + inner model), provided here, enables the evaluation of user-defined constructs (latent variables) along with the analysis of established relationships among the latent scores (estimates). In addition to this vignette, you can have access to Bayesian factor analysis instructions in [Mayrink and Lucas](https://projecteuclid.org/DPubS?service=UI&version=1.0&verb=Display&handle=euclid.aoas/1372338468) (2013) and [Mayrink and Lucas](https://projecteuclid.org/euclid.bjps/1414674773) (2015) .
 
 Consider:
 
 - the outer model as:
 $$\boldsymbol{X_{p\times n}} = \boldsymbol{\alpha}_{p\times k}\boldsymbol{\lambda}_{k\times n} +\boldsymbol{\varepsilon}_{p\times n}$$
-where $\boldsymbol{X}$ is the data matrix with the variables in the rows and observations in columns,  $\boldsymbol{\alpha}_{p\times j},~j =1,\dots,k$ is the column vector of constant effects (loadings) for the $j^{th}$ latent variable and $\boldsymbol{\lambda}_{j\times n}$ is the row vector of scores for the  $j^{th}$ unobserved variable. Normality is assumed for the errors as $\boldsymbol{\varepsilon}_{p\times i}\sim N(\boldsymbol{0}, \Sigma_{p\times p}), ~i = 1,\dots, n$, where $\Sigma$ is diagonal $(\sigma_1^2, \sigma_2^2, \dots,\sigma_p^2)  \boldsymbol{I_p}$.
+where $\boldsymbol{X}$ is the standardized data matrix with the variables in the rows and observations in columns,  $\boldsymbol{\alpha}_{p\times j}$ is the column vector of constant effects (loadings) for the $j^{th}$ latent variable and $\boldsymbol{\lambda}_{j\times n}$ is the row vector of scores for the  $j^{th}$ unobserved variable$,~j =1,\dots,k$. Normality is assumed for the errors as $\boldsymbol{\varepsilon}_{p\times i}\sim N(\boldsymbol{0}, \boldsymbol{\Sigma}_{p\times p}), ~i = 1,\dots, n$, where the covariance is diagonal $\boldsymbol{\Sigma} = (\sigma_1^2, \sigma_2^2, \dots,\sigma_p^2)  \boldsymbol{I_p}$.
 
 - the inner model as:
 $$\boldsymbol{\lambda}_{j\times n} = \boldsymbol{\beta}^{\top} {\lambda^{(-j)}}  + \nu~$$
 where $\boldsymbol{\beta}$ is a column vector of constant coefficients, ${\lambda^{(-j)}}_{ k-1\times n}$ is the matrix of scores excluding the $j^{th}$ row scores and the error assumes $\nu\sim N(0,1)$.
 
-The instructions in this document were divided into 5 subsequent sections: [installation](#installation), [description](#description), [usage](#usage), [graphical analysis](#graphical-analysis), and [remarks](#remarks).
+The guidelines in this document were divided into 5 subsequent sections: [installation](#installation), [description](#description), [usage](#usage), [graphical analysis](#graphical-analysis), and [remarks](#remarks).
 
 # Installation
 
@@ -70,8 +70,7 @@ library("devtools")
 install.packages("bsem")
 ```
 
-During the installation, other dependencies might be required, such as ``lattice``,``loo``, ``plotrix``, ``coda``,  ``rstan`` and ``MASS``. The ``bsem::sem`` routine is the main function of this package, as it allows Bayesian analysis to fit related structural equation models. The default arguments used to build this routine will be introduced in the next section. 
-
+During the installation, other dependencies might be required, such as ``lattice``, ``viridis``, ``coda``, ``DiagrammeR``, ``visNetwork`` and, obviously, ``rstan``. Other packages are also suggested such as ``ggplot2``, ``bayesplot`` and ``tidybayes``. The default arguments used to build the ``bsem::sem`` routine will be introduced in the next sections this function is the main function of this package, as it allows the Bayesian analysis for SEM and its particular cases.
 
 # Description
 
@@ -82,7 +81,7 @@ The data and additional commands are passed through the ``bsem::sem`` function a
 - ``blocks``: a list indicating the variables that might express relationship to the latent variables assigned (outer model); latent variables must be named
 - ``signals``: a list indicating the variables that might express relation to the latent variable assigned (outer model)
 - ``row_names``: identifier for each set of variables (observation = row); optional
-- ``priors``: prior specification for the error variance ``sigma2`` and regression coefficients ``beta``
+- ``prior_specs``: prior specification for the error variance ``sigma2`` and regression coefficients ``beta``
 - ``cores``: number of core threads to be used; arbitrary, however the quantity of cores in use does not exceed the number of chains
 - ``pars``: character vector with the names of the parameters to be considered after fitting; "alpha" refers to the loadings, "lambda" to the scores, "sigma2" to the errors, "Xna" to missing data, "log_lik" to the log likelihood summation
 - ``iter``: number of MCMC iterations
@@ -91,179 +90,360 @@ The data and additional commands are passed through the ``bsem::sem`` function a
 - ``...``: further arguments passed to ``rstan::sampling`` such as ``warmup``, ``control``
 
 ```{r, eval = F}
-bsem::sem(
-  data,
-  paths,
-  blocks,
-  signals,
-  row_names,
-  priors = list(beta = c("normal(0,1)"), 
-                noise = c("inv_gamma(2.1, 1.1)")),
-  cores = parallel::detectCores(),
-  pars = c("alpha", "lambda", "sigma2", "Xna", "log_lik"),
-  iter = 4000,
-  chains = 1,
-  scaled = TRUE,
-  ...
-)
+bsem::sem(data,
+           paths,
+           blocks,
+           signals,
+           row_names = rownames(data),
+           prior_specs = list(coef = c("normal(0,1)"),
+                         error_var = c("inv_gamma(2.1, 1.1)")),
+           cores =  parallel::detectCores(),
+           pars = c("alpha", "lambda", "sigma2", "Xna"),
+           iter = 2000,
+           chains = 4,
+           scaled = TRUE,
+          ...)
 ```
 
-The above function automatically selects the appropriate routine according to the specified arguments, examples are given in the next section.
+The above function automatically selects the appropriate routine according to the specified arguments, examples are given in the next section. One can reproduce the examples bellow by copying and pasting the following code to the ``R`` console.  For these examples, simulated artificial data was created so that we can verify that the estimates are close enough to the true parameter values used to generate the data.
 
-# Usage
+# Examples
 
-One can reproduce the examples bellow by copying and pasting the following code to the ``R`` console.  For these examples, simulated artificial data was created so that we can verify that the estimates are close enough to the true parameter values used to generate the data.  This is a former analysis in light of other analysis based on more than one replication such as the Monte Carlo simulation study.
+This section describes how the package can be used to estimate artificial parameters. This is a former analysis in light of other studies based on replication such as Monte Carlo simulation study methods. 
 
-## Artificial data
+## Uni-factor CFA
 
-Two artificial databases are part of the package content as *.rdata* files. Therefore, they can be retrieved using the specific  "character" name within the ``data()`` argument. The first data set was built based on the factor analysis model in which the factor scores are considered independent. The second database considers a linear relationship between these scores; Here's how to access data sets:
+```{r, include = F}
+set.seed(2020)
+```
 
-````{r, message = F}
-library(bsem)
+This example is based on the uni-factor model ( [Reckase](https://journals.sagepub.com/doi/abs/10.3102/10769986004003207), 1979). 
+
+- The number of variables (columns), observations (rows) and latent variables to be simulated are defined:
+
+```{r}
+Nv <- 8; Ne <- 30; K <- 1 
+```
+ 
+- A list object `B` is necessary to represent each block that indicates which manifest variables are related to each construct:
+ 
+```{r}
+ B <- list(F1 = 1:Nv); B
+```
+
+- Artificial variances are used to generate errors of a normal distribution with 0 mean:
+
+```{r}
+ sigma2 <- runif(Nv, 0.1, 0.9)
+
+ # errors matrix
+ errors <- array(0, c(Nv, Ne)) 
+ for(i in 1:Nv){errors[i,] <- rnorm(Ne, 0, sqrt(sigma2[i]))}
+```
+
+- Factor scores (lambda) are generated from a standard normal distribution and the factor loadings (alpha) from a uniform distribution with support ranging from 0.5 to 2. The factor loading direction is generated using signals simulated from the `sample` function.
+
+```{r}
+lambda <- array(rnorm(K*Ne), c(K, Ne)) # Factor scores matrix
+ 
+# Factor loadings matrix
+alpha <- array(0, c(Nv, K))
+
+for(k in 1:K){alpha[B[[k]],k] = runif(lengths(B)[k], 0.5, 2) * sample(c(-1,1), lengths(B)[k], replace = T)}
+
+signals <- list(F1 = array(sign(alpha)))
+```
+
+- Finally, a new artificial data set is produced with the matrix product below:
+
+```{r}
+ X = t(alpha %*% lambda + errors)
+```
+
+Given that the data set was generated synthetically, we can run `bsem::sem` to check if they retrieve the true values of the parameters used in the generation of the database. We simply use the data argument and the blocks argument to specify the one-factor model:
+
+```{r, results = F}
+unifact <- bsem::sem(X, blocks = B, signals = signals, chains = 1)
+```
+
+Descriptive statistics for the posterior factor loadings are showed in the R console inspired on the `rstan` fashion (based on ``rstan::monitor``). In general, the posterior mean is the Bayesian estimator first choice:
+
+```{r}
+unifact
+```
+
+The structural model can be easily viewed with the plotting routine `bsem::plot`:
+
+```{r}
+plot(unifact)
+```
+
+Moreover, we can compare the posterior factor loadings and the scores with the true values using the `bsem::arrayplot` function. For example:
+
+```{r}
+gridExtra::grid.arrange(bsem::arrayplot(lambda, main = "scores (lambda)", -4,4),
+                        bsem::arrayplot(unifact$mean_scores, main = "scores estimate", -4,4),
+                        bsem::arrayplot(alpha, main = "loadings (alpha)", -4,4),
+                        bsem::arrayplot(unifact$mean_loadings, main = "loadings estimate", -4,4),
+                        layout_matrix = matrix(c(1,1,3,3,2,2,4,4), ncol= 2))
+
+```
+
+The ``bsem::arrayplot`` graphs show that the loadings and scores pattern were captured by the model. In order to intensify the contrast between the estimates it may be necessary to increase the number of iterations or the warmup period since this is a model with many parameters. Remember each chains runs in a separate thread, thus, it is recommended specifying a number of cores at least equal to the number of chains. Indeed, from our experience, an increase in the number of iterations raises the runtime but considerably improves the interval and point estimates.  
+
+## Bi-factor CFA
+
+The data generated for the uni-factor example, is also used here. This example refers to an application of the bi-factor model ( [Jennrich and Bentler](https://link.springer.com/article/10.1007/s11336-011-9218-4), 2011; [Gibbons and Hedeker](https://link.springer.com/article/10.1007/s11336-011-9218-4), 1992). The ideia behind this application is to show how flexible is SEM. From our generated data we have that variables should manifest only the latent variable `F1`. 
+
+- The list object `B` represents each block, indicating which manifest variables are related to each construct. `B` and, consequently, `signals` are modified for a bi-factor analysis.
+
+```{r}
+B$G1 <- 1:3 
+B$G2 <- 4:6
+B$G3 <- 7:8
+
+B
+```
+
+```{r}
+signals$G1 <- rep(1,3) 
+signals$G2 <- rep(1,3)
+signals$G3 <- rep(1,2)
+
+signals
+```
+
+
+Simply use the data argument and the blocks argument to specify the bi-factor model above:
+
+```{r, results = F}
+bifact <- bsem::sem(X, blocks = B, signals = signals, chains = 1)
+```
+
+Descriptive statistics for the posterior factor loadings are showed in the result in `rstan` fashion:
+
+The structural model is displayed using `bsem::plot`:
+
+```{r}
+plot(bifact, layout = 'nicely')
+```
+
+Compare the posterior factor loadings and the scores with the true values using the `bsem::arrayplot` function:
+
+```{r}
+gridExtra::grid.arrange(bsem::arrayplot(lambda, main = "scores (lambda)", -4,4),
+                        bsem::arrayplot(bifact$mean_scores, main = "scores estimate", -4,4),
+                        bsem::arrayplot(alpha, main = "loadings (alpha)", -4,4),
+                        bsem::arrayplot(bifact$mean_loadings, main = "loadings estimate", -4,4),
+                        layout_matrix = matrix(c(1,1,3,3,2,2,4,4), ncol= 2))
+```
+
+The ``bsem::arrayplot`` graphs show that the loadings and scores pattern were captured by the model. An increase in the number of iterations or the warmup period may improve the point estimates. As expected, the outcome estimates evidance a one-factor model, which means other latent variables would not be helpful in explaining this data (as we know from the generation). This conclusion can also be achieved looking at the diagram.`
+  
+## Multi-factor CFA (uncorrelated)
+
+Artificial data sets are part of the package content as *.rdata* files. Therefore, they can be retrieved using the specific  "character" name within the ``data()`` argument. The `set1` and` set2` examples were generated using routines similar to those shown in the uni-factor example.
+
+```{r, results = F, message=F}
+library('bsem')
+```
+
+```{r}
 data("set1")
-names(set1$real)
 ```
 
-A quick code to visualize the true parameter values used to genrate set1 data:
+The implemented routines allow partial and full uncorrelated confirmatory factor analysis (CFA). So, at least one variable must be chosen to express each construct before running into the analysis. In other words, the user needs to specify at least one manifest variable that lead each block. In this way, partial EFA/CFA assists the researcher in evidencing the possible structures to be tested in a conceptual (full) CFA later on.
 
-````{r, message = F}
-library(gridExtra)
-
-p1 <- bsem::arrayplot(set1$real$lambda, main = 'lambda (scores)')
-p2 <- bsem::arrayplot(set1$real$alpha, main = 'alpha (loadings)')
-p3 <- bsem::arrayplot(set1$real$sigma2, main = 'sigma2 (error variance)')
-
-gridExtra::grid.arrange(p1, p2, p3, 
-                        layout_matrix = matrix(c(1,1,2,3), ncol = 2))
-```
-
-Similar visualization, set2: 
+- The list of blocks represent that indicates only the manifest variables related to each construct:
 
 ```{r}
-data("set2")
-names(set2$real)
+set1$blocks
+```
+
+- Descriptive statistics for the posterior factor loadings are showed in the result in `rstan` fashion (based on ``rstan::monitor``):
+
+```{r, results = F}
+multifact <- bsem::sem(data = set1$set, blocks = set1$blocks, chains = 1, scaled = F)
+```
+
+- The structural model can be easily viewed with the plotting routine `bsem::plot`:
+
+```{r}
+plot(multifact)
 ```
 
 ```{r}
-p1 <- bsem::arrayplot(set2$real$lambda, main = 'lambda (scores)')
-p2 <- bsem::arrayplot(set2$real$alpha, main = 'alpha (loadings)')
-p3 <- bsem::arrayplot(set2$real$sigma2, main = 'sigma2 (error variance)')
-
-gridExtra::grid.arrange(p1, p2, p3,
-                        layout_matrix = matrix(c(1,1,2,3), ncol = 2))
+gridExtra::grid.arrange(
+  bsem::arrayplot(multifact$mean_scores, main = 'estimates',  mini = -2, maxi = 2),
+  bsem::arrayplot(set1$real$lambda, main = 'lambda (scores)', mini = -2, maxi = 2),
+  bsem::arrayplot(multifact$mean_loadings, main = 'estimates', 
+                  mini = -2, maxi = 2),
+  bsem::arrayplot(set1$real$alpha, main = 'alpha (loadings)',  mini = -2, maxi = 2),
+  layout_matrix= matrix(c(1,1,3,3,2,2,4,4), ncol = 2))
 ```
 
-The next sections describe how the package can be used to estimate the parameters presented. We can use set1 data to exemplify the use of ``bsem::sem``. In this case, we are facing an exploratory factor analysis (EFA) model.
+The state-of-art ``bsem`` package only provides estimates for uncorrelated SEMs.  The recursive arrows indicate the estimate for each error variance. From this example, we found that the estimates pattern are tighly close to the true values of the parameters even when the signals are not passed. Also, we have observed that the part of the analysis is intended to confirm the predefined constructs CFA (first loadings matrix lines) and the other is intended to express which variable can compose a later full CFA.
 
-## Factor analysis example
-
-The implemented routines allow a partial EFA/CFA or full CFA. So, at least one variable must be chosen to express each construct before running to the analysis. In other words, the user needs to specify at least one manifest variable per block. In this way, the other variables can be incorporated into a later CFA. That said, note that, for example, some of the loadings used to generate set1 are zero.
-
-```{r, eval = F}
-efa_fit <- bsem::sem(data = set1$set, blocks = set1$blocks, 
-                     chains = 1, scaled = F)
-
-p1 <- bsem::arrayplot(efa_fit$scores, main = 'estimates', 
-                      mini = -2, maxi = 2)
-p2 <- bsem::arrayplot(set1$real$lambda, main = 'lambda (scores)',
-                      mini = -2, maxi = 2)
-
-gridExtra::grid.arrange(p1, p2)
-
-p1 <- bsem::arrayplot(efa_fit$loadings, main = 'estimates', 
-                      mini = -2, maxi = 2)
-p2 <- bsem::arrayplot(set1$real$alpha, main = 'alpha (loadings)', 
-                      mini = -2, maxi = 2)
-
-gridExtra::grid.arrange(p1, p2, 
-                        layout_matrix =matrix(c(1,1,2,2), ncol = 2))
-```
-
-## SEM example
+## SEM
 
 In the last example, not all variables were used in the formulation of predefined constructs. In many applications, with the help of technical knowledge, it is possible to establish relationships between all variables in the data set and the constructs under study. This case characterizes the confirmatory factor analisys (CFA). Besides that,
 we can also verify linear relationships between latent variables. The blocks can be passed as named lists and the database with colnames and rownames. For example, for set2 we have:
 
 ```{r}
+library('bsem')
 data("set2")
-names(set2$paths)
-names(set2$blocks)
-colnames(set2$set)
-rownames(set2$set)
 ```
 
-It is worth mentioning that the paths are named with block names. There are two ways to define the model: 1) the blocks and the data set are not named previously (internally named); 2) named blocks and named paths are passed to their respective arguments; otherwise should generate an error. Also noteworthy that "Y" represents a manifest variable expressed by a single manifest variable:
+It is worth mentioning that the paths are named with block names. There are two ways to define the model: 1) the blocks and the data set are not named previously (internally named); 2) named blocks and named paths are passed to their respective arguments; otherwise should generate an error.
+
+The data argument, the blocks and the paths arguments should specify ta full uncorrelated SEM model. The blocks represent the manifest variables that form each construct while the paths represent the linear relationships between the latent variables:
+
+```{r, results = F}
+sem <- bsem::sem(data = set2$set, blocks = set2$blocks,
+                     paths = set2$paths, signals = set2$signals,
+                 chains =4, scaled = F)
+```
+
+````{r}
+plot(sem)
+```
 
 ```{r}
-set2$blocks$Y
+gridExtra::grid.arrange(bsem::arrayplot(sem$mean_scores, main = 'estimates', mini = -4, maxi = 4), 
+                      bsem::arrayplot(set2$real$lambda, main = 'lambda (scores)', mini = -4, maxi = 4),
+                      bsem::arrayplot(sem$mean_loadings, main = 'estimates', mini = -4, maxi = 4),
+                      bsem::arrayplot(set2$real$alpha, main = 'alpha (loadings)', mini = -4, maxi = 4),
+                      layout_matrix = matrix(c(1,1,3,3,2,2,4,4), ncol = 2))
 ```
+
+Again, we found that the estimates pattern are tighly close to the true values of the parameters. This examples highlights a complete confirmatory SEM analysis. The regression coefficients estimates are:
 
 ```{r}
-cfa_fit <- bsem::sem(data = set2$set, blocks = set2$blocks,
-                     paths = set2$paths, chains =1, scaled = F)
-
-summary(cfa_fit)
-
-p1 <- bsem::arrayplot(cfa_fit$scores, main = 'estimates', mini = -4, maxi = 4)
-p2 <- bsem::arrayplot(set2$real$lambda, main = 'lambda (scores)', mini = -4, maxi = 4)
-
-gridExtra::grid.arrange(p1, p2)
-
-p1 <- bsem::arrayplot(cfa_fit$loadings, main = 'estimates', mini = -4, maxi = 4)
-p2 <- bsem::arrayplot(set2$real$alpha, main = 'alpha (loadings)', mini = -4, maxi = 4)
-
-gridExtra::grid.arrange(p1, p2, layout_matrix = matrix(c(1,1,2,2), ncol = 2))
+pander::pander(cbind(sem$coef, set2$real$beta))
 ```
 
-As with the ML estimation, the summary method is extended to the ``spsurv::spbp`` class when applying to a Bayesian fit. Along with the regression estimates, this output also contains descriptive statistics for the posterior hazard ratio denoted by ``_exp`` (in the console output) and the diagnosis statistics from the ``loo`` package. The effective sample size  ``n_eff`` gives an estimate of the independent draws from the posterior distribution, and ``Rhat`` referred to as the potential scale reduction statistic,  is one of the useful ways to monitor whether a chain has converged to the equilibrium distribution. This statistic measures the ratio between the average variation of the samples within each chain and the variation of the combined samples in the chains; if the chains have not converged to a common distribution, this statistic will be greater than one. It is worth noting that all, the information provided by the ``Stan`` output, including warnings, is passed to the final user. One can have access to the ``stanfit`` object with the ``fit$stanfit`` command. In particular, one can have access to built-in plot functions and even to a ``shiny`` app (details in [https://shiny.rstudio.com/](https://shiny.rstudio.com/) developed by ``Stan`` developer's team. The summary outcome is as follows:
+# Graphical posterior analysis 
 
-# Graphical analysis 
+All content exposed in the examples can be retrived by the user folowing the comand lines above. Although, keep in mind that we must check posterior statistics in order to assess whether the estimates are good to describe the proposed CFA or SEM model.
 
-The next code chunk shows the code for trace and density plotting and to give access to the shiny app from the shinystan package  ``shinystan``.
-Figures  illustrate the trace plot and the density plot of the BPPH for the ``larynx`` data set. The graphs show unimodal posterior densities and well behaved chains with good mixing, this is a good behavior indication. 
-```{r, eval=F}
-rstan::traceplot(fit$stanfit, pars = c("beta", "gamma"))
-rstan::stan_dens(fit$stanfit, pars = c("beta", "gamma"))
+## Interval estimate
+
+Two types of intervals can be obtained:  
+
+### HPD interval  
+- The narrowest (highest posterior density - HPD) credibility interval can be retrieved using `.$credint`. We have computed HPD intervals fo the factor loadings (alpha), scores (lambda), and regression coefficients (beta).
+
+```{r}
+names(sem$credint)
 ```
 
-```{r, eval=F}
-shinystan::launch_shinystan(fit$stanfit)
+- This data can be used to plot interval estimates using two packages, `ggplot2` and `tidybayes`:
+
+```{r, results = F, message = F, warning= F} 
+library("ggplot2")
+library("tidybayes")
 ```
 
-Not least, a S3 method had to be created rather than extended. The ``survivor`` method was created to accomplish the calculation of the survival function evaluated in each time point. The goal is similar to the ``survival::survfit`` S3 method, that could be extended instead. The difference is that ``spbp`` classes allows both Bayesian and frequentist approaches. The following code was used to generate Figure: 
+- `dt` data.frame object has the mean loadings and the HPD interval lower and upper limits (`ll` and `lu`):
 
-```{r, eval=F}
-## CoxPH model
-fitcoxph <- survival::coxph(Surv(time , delta)~age + factor(stage),
-data = larynx)
-
-## Determine the groups of patients
-newdata <-  data.frame(age =c(77,77,77,77), stage = c(1,2,3,4))
-
-## survfit Breslow estimator
-breslowsurv <- survival::survfit(fitcoxph, newdata = newdata)
-
-## spbp point-wise estimate
-spbpsurv <- spsurv::survivor(fit, newdata = newdata)
-
-plot(breslowsurv, bty = "n", lwd = 3, main = "77 years old patient survival per Stage")
-
-points(spbpsurv$time, spbpsurv$survival1, col = 1, pch = 23)
-points(spbpsurv$time, spbpsurv$survival2, col = 2, pch = 23)
-points(spbpsurv$time, spbpsurv$survival3, col = 3, pch = 23)
-points(spbpsurv$time, spbpsurv$survival4, col = 4, pch = 23)
-
-legend("topright", c("Stage I", "Stage II", "Stage III", "Stage IV"), pch = 23, bty = "n", col = 1:4)
+```{r}
+dt <- data.frame(li = sem$credint$loadings[,1],
+                 lu = sem$credint$loadings[,2],
+                 m = c(sem$mean_loadings))
 ```
+
+- `lnames` and `snames` are used to find the loadings of the conceptual model (those that might not equal zero).
+
+```{r}
+lnames <-rownames(sem$mean_loadings)
+snames <- rownames(sem$mean_scores)
+```
+
+- `find` help us finding these values:
+
+```{r}
+find <- paste0("alpha[", which(lnames %in% unlist(sem$blocks)), ",", rep(1:length(sem$blocks), lengths(sem$blocks)), "]")
+
+dt <- dt[find,]
+```
+
+- One of the options to plot the loadings HPD intervals chart is:
+```{r}
+ggplot(aes(y = find, x = m, xmin = li, xmax = lu), data = dt) +
+  geom_pointintervalh() + theme_classic() +
+  labs(title = paste("Latent variable", colnames(sem$mean_loadings)[3]),
+       x = "Highest posterior density interval",
+       y = "variable")
+```
+
+In the SEM example above, all intervals regarding the loading estimates from the  conceptual relationships do not include zero. 
+
+### Equal tails interval
+
+Alternatively, it is possible to access equal tails credibility intevals using the `bayesplot` package:
+
+````{r, message = F, message = F}
+library("bayesplot")
+```
+
+- `find` help us finding the loading values that have been previously determined to estimate the latent scores:
+
+```{r, eval =F}
+find <- paste0("alpha[", which(lnames %in% unlist(sem$blocks)), ",", rep(1:length(sem$blocks), lengths(sem$blocks)), "]")
+
+dt <- dt[find,]
+```
+
+- The equal tails intervals are:
+
+````{r, warning = F}
+gridExtra::grid.arrange(mcmc_areas(sem$posterior$alpha[,,find]),
+                        mcmc_intervals(sem$posterior$alpha[,,find]),
+                        layout_matrix = matrix(c(1,1,2,2), ncol = 2))
+````
+
+In addition to the possibilities for intervals, other `mcmc_.` type graphs are highly recommended, several options include histograms, violin plots, pair plots and others.
+
+# Descriptives
+
+- The `bsem::summary` routine prints descriptive statistics to the R console:
+
+```{r}
+summary(sem)
+```
+
+The effective sample size  ``n_eff`` gives an estimate of the independent draws from the posterior distribution, and ``Rhat`` referred to as the potential scale reduction statistic,  is one of the useful ways to monitor whether a chain has converged to the equilibrium distribution. This statistic measures the ratio between the average variation of the samples within each chain and the variation of the combined samples in the chains; if the chains have not converged to a common region, this statistic will be greater than one. 
+
+- It is worth noting that, one can have acces to all the information provided by the ``Stan`` output object using the ``.$stanfit`` command:
+
+```{r}
+class(sem$stanfit) 
+```
+
+In particular, one can have access to built-in plot functions and even to a ``shiny`` app (details in [https://shiny.rstudio.com/](https://shiny.rstudio.com/) developed by ``Stan`` developer's team
+
+For the shiny app run:
+
+```{r, eval = F}
+shinystan::launch_shinystan(sem$stanfit)
+```
+
+A crucial difference in obtaining the same statistics printed by the `bsem::summary` function is the use of the signals argument in the `bsem::sem` routine. The signal specification, (-1 or 1) for each of the factor loadings, forces the initial values of each chain to have the same direction and, naturally, these chains converge to nearby regions. Otherwise, the signal of some factor loading chain may be opposite as a consequece of random initialization. In order to circumveit this issue, the package automatically transform posterior chains using simple `for` loops and `if` statements to recalculate the descriptives using `rstan::monitor`.
+
+- The monitoring result is returned with `.$` : 
+
+```{r}
+head(sem$stats, 2) 
+```
+
+
+The content of this vignette introduces the ``bsem`` package. Here, the analysis was dedicated to
+illustrating, in practice, the commands implemented in the proposed package. We
+still have work to do to improve and update this tool, however, the present version is ready
+for the main statistical study in the field of latent variable analysis. 
 
 # Remarks
 
-The content of this vignette introduces the ``bsem`` package. Here, the analysis was dedicated to
-illustrating, in practice, the commands implemented in the proposed package spsurv. We
-still have work to do to improve and update this tool, however, the present version is ready
-for the main statistical study in the field of survival analysis. The routines presented
-in this dissertation are unprecedented. Many efforts with regard to the
-instruction the routines documentation were carried out concurrently with the
-spsurv package implementation. This document is part of the content submitted to [CRAN](https://cran.r-project.org/). The package is also in public use and is available at
-the github development platform, the link is: https://github.com/rvpanaro/spsurv.
+The routines presented above are unprecedented. This document is part of the content submitted to [CRAN](https://cran.r-project.org/). The package is also in public use and is available at
+the github development platform, the link is: https://github.com/rvpanaro/bsem.
 

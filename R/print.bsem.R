@@ -1,7 +1,7 @@
 #' 'bsem' object print
 #'
 #' @export
-#' @param x an object of class spbp
+#' @param x an object of class bsem
 #' @param digits number of digits to display
 #' @param ... further arguments passed to or from print methods
 #' @method print bsem
@@ -50,7 +50,7 @@
 #' @return none
 
 summary.bsem <-
-  function(x, digits = max(getOption('digits')-4, 3), ...){
+  function(x, digits = 4, ...){
     savedig <- options(digits = digits)
     on.exit(options(savedig))
 

@@ -1,18 +1,25 @@
 #' Array Plotting
 #'
-#' Graphical representation for matrix class objects using lattice package.
+#' Graphical representation for matrix class objects using lattice package
 #'
 #' @export arrayplot
-#' @param matrix a numerical data.frame or matrix object.
-#' @param colors 1 = blue/red, 0 = white/black.
-#' @param mini,maxi color range.
+#' @param y a numerical data.frame or matrix object
+#' @param colors 1 = blue/red, 0 = white/black
+#' @param mini, minimum color range (might cause blank spots if mispecified)
+#' @param mini, maximum color range (might cause blank spots if mispecified)
+#' @param ylab y axis label passed to \code{lattice::levelplot}  function
+#' @param xlab x axis label passed to \code{lattice::levelplot} function
+#' @param main plot title passed to \code{lattice::levelplot} function
 #' @examples
 #'
-#' data(iris)
+#' data(set2)
 #'
-#' plotMatrix(iris[, c(1,2,3)])
-#' plotMatrix(iris[, c(1,2,3)], colors = 0)
+#' arrayplot(set2$real$alpha)
+#' arrayplot(set2$real$alpha, colors = 0)
 #' @importFrom lattice levelplot panel.levelplot
+#'
+#'
+#' @seealso
 
 arrayplot <-
   function(y,

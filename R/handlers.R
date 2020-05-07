@@ -4,7 +4,8 @@ handler1 <- function(){
 
   # ----
   ## array of priors for the idiosyncratic noise
-  noisep <- try(lapply(e$priors$noise, read_prior), silent = T)
+
+  noisep <- try(lapply(e$prior_specs$error_var, read_prior), silent = T)
   priordist <- sapply(noisep, `[[`, 1)
   par1 <- sapply(noisep, `[[`,2)
   par2 <- sapply(noisep, `[[`,3)
@@ -21,23 +22,23 @@ handler1 <- function(){
   e$par2_noise <- array(as.numeric(par2), dim = e$Nv)
 
   # ----
-  ## array of priors for the regression coefficients
+  ## (not yet!) array of priors for the regression coefficients
 
-  # betap <- try(lapply(e$priors$beta, read_prior), silent = T)
-  # if(is.na(betap[2])) betap <- c("normal", "0", "1")
-  #
-  # priordist <- sapply(betap, `[[`, 1)
-  # par1 <- sapply(betap, `[[`,2)
-  # par2 <- sapply(betap, `[[`,3)
-  #
-  # priordist_beta <- sapply(priordist, function(x){switch(x,
-  #                                             "normal" = 0,
-  #                                             "cauchy" = 1)}
-  #                          )
+  betap <- try(lapply(e$prior_specs$coef, read_prior), silent = T)
+  if(is.na(betap[2])) betap <- c("normal", "0", "1")
+
+  priordist <- sapply(betap, `[[`, 1)
+  par1 <- sapply(betap, `[[`,2)
+  par2 <- sapply(betap, `[[`,3)
+
+  priordist_beta <- sapply(priordist, function(x){switch(x,
+                                              "normal" = 0,
+                                              "cauchy" = 1)}
+                           )
   # ## Recycling the prior specs
-  # e$priordist_beta <- array(priordist_beta, dim = q)
-  # e$par1_beta <- array(as.numeric(par1), dim = q)
-  # e$par2_beta <- array(as.numeric(par2), dim = q)
+  e$priordist_beta <- array(priordist_beta, dim = 1)
+  e$par1_beta <- array(as.numeric(par1), dim = 1)
+  e$par2_beta <- array(as.numeric(par2), dim = 1)
 }
 
 ## --------------- Extra args error handling ---------------
@@ -52,14 +53,6 @@ handler2 <- function(){
     if (any(aux == 0))
       stop(gettextf("Argument %s not matched", names(e$stanArgs)[aux==0]))
   }
-}
-
-read_prior <- function(prior){
-  aux <- unlist(strsplit(prior, "\\("))
-  dist <- aux[1]
-  aux2 <- unlist(strsplit(aux[2], "\\)"))[1]
-  val <- unlist(strsplit(aux2, "\\,"))
-  return(c(dist, val))
 }
 
 ## --------------- Initial values handling ---------------
@@ -83,7 +76,7 @@ handler3 <- function(missing_signals){
     }
 
     for(k in 1:e$K){
-        aux[e$B[[k]], k] <- runif(e$K, 0.5, 2) * e$signals[[k]]
+        aux[e$B[[k]], k] <- runif(lengths(e$B)[k], 0.5, 2) * e$signals[[k]]
       }
       aux[-unlist(e$B),] <- runif(e$K, 0.5, 2) * e$signals[[k]]
     }

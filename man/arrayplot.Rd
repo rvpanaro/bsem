@@ -15,19 +15,28 @@ arrayplot(
 )
 }
 \arguments{
-\item{mini, maxi}{color range.}
+\item{y}{a numerical data.frame or matrix object}
 
-\item{colors}{1 = blue/red, 0 = white/black.}
+\item{mini, }{maximum color range (might cause blank spots if mispecified)}
 
-\item{matrix}{a numerical data.frame or matrix object.}
+\item{colors}{1 = blue/red, 0 = white/black}
+
+\item{ylab}{y axis label passed to \code{lattice::levelplot}  function}
+
+\item{xlab}{x axis label passed to \code{lattice::levelplot} function}
+
+\item{main}{plot title passed to \code{lattice::levelplot} function}
 }
 \description{
-Graphical representation for matrix class objects using lattice package.
+Graphical representation for matrix class objects using lattice package
 }
 \examples{
 
-data(iris)
+data(set2)
 
-plotMatrix(iris[, c(1,2,3)])
-plotMatrix(iris[, c(1,2,3)], colors = 0)
+arrayplot(set2$real$alpha)
+arrayplot(set2$real$alpha, colors = 0)
+}
+\seealso{
+
 }
