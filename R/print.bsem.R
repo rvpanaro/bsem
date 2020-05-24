@@ -21,10 +21,9 @@
      invisible(capture.output(y <- summary(x, digits = digits)))
 
     cat("\n\n outer model loadings:\n")
-
     for(i in 1:length(x$blocks)){
       cat("\n", names(x$blocks)[i], "\n")
-      print(round(y$blocks[[i]][, c("mean", "se_mean", "sd", "2.5%", "97.5%", "n_eff", "Rhat")],
+      print(round(y$blocks[[i]][, c("mean", "50%", "sd", "2.5%", "97.5%", "n_eff", "Rhat")],
             digits = digits), digits = digits)
     }
 
@@ -32,7 +31,7 @@
        cat("\n---\n\n\n inner model regression coefficients:\n")
        for(i in 1:length(x$paths)){
          cat("\n", names(x$paths)[i], "\n")
-         print(round(y$paths[[i]][, c("mean", "se_mean", "sd", "2.5%", "97.5%", "n_eff", "Rhat")],
+         print(round(y$paths[[i]][, c("mean", "50%", "sd", "2.5%", "97.5%", "n_eff", "Rhat")],
                digits = digits), digits = digits)
        }
      }
@@ -68,15 +67,15 @@ summary.bsem <-
     for(i in 1:length(x$blocks)){
       cat("\n", names(x$blocks)[i], "\n")
       finder <- paste0("alpha[",
-                    which(rownames(x$mean_loadings) %in%  x$blocks[[i]]),",",
-                    which(rownames(x$mean_scores) == names(x$blocks)[i]),
+                    which(rownames(x$mean_alpha) %in%  x$blocks[[i]]),",",
+                    which(rownames(x$mean_lambda) == names(x$blocks)[i]),
                     "]" )
 
       aux_blocks[[i]] <- matrix(stats[rownames(stats) %in% finder, ], ncol = ncol(stats))
       colnames(aux_blocks[[i]]) <- colnames(stats)
-      rownames(aux_blocks[[i]]) <- rownames(x$mean_loadings)[rownames(x$mean_loadings) %in%  x$blocks[[i]]]
+      rownames(aux_blocks[[i]]) <- rownames(x$mean_alpha)[rownames(x$mean_alpha) %in%  x$blocks[[i]]]
 
-      print(round(aux_blocks[[i]][, c("mean", "se_mean", "sd", "2.5%", "97.5%", "n_eff", "Rhat")], digits), digits)
+      print(round(aux_blocks[[i]][, c("mean", "50%", "sd", "2.5%", "97.5%", "n_eff", "Rhat")], digits), digits)
 
       }
 
@@ -86,7 +85,7 @@ summary.bsem <-
       colnames(aux_var) <- colnames(stats)
       rownames(aux_var) <- paste0("var[", 1:nrow(aux_var), "]")
 
-      print(round(aux_var[, c("mean", "se_mean", "sd", "2.5%", "97.5%", "n_eff", "Rhat")], digits), digits)
+      print(round(aux_var[, c("mean", "50%", "sd", "2.5%", "97.5%", "n_eff", "Rhat")], digits), digits)
 
   if(x$model %in% c("semNA", "sem") ){
     cat("\n---\n\n inner model regression coefficients:\n")
@@ -105,7 +104,7 @@ summary.bsem <-
       colnames(aux_paths[[i]]) <- colnames(stats)
       rownames(aux_paths[[i]]) <- x$paths[[i]]
 
-      print(round(aux_paths[[i]][, c("mean", "se_mean", "sd", "2.5%", "97.5%", "n_eff", "Rhat")], digits), digits)
+      print(round(aux_paths[[i]][, c("mean", "50%", "sd", "2.5%", "97.5%", "n_eff", "Rhat")], digits), digits)
     }
     }
 
@@ -115,7 +114,7 @@ summary.bsem <-
       colnames(aux_Xna) <- colnames(stats)
       rownames(aux_Xna) <- paste0("Xna[", x$idna[,1], ",", x$idna[,2], "]")
 
-      print(round(aux_Xna[, c("mean", "se_mean", "sd", "2.5%", "97.5%", "n_eff", "Rhat")], digits), digits)
+      print(round(aux_Xna[, c("mean", "50%", "sd", "2.5%", "97.5%", "n_eff", "Rhat")], digits), digits)
     }
     cat("\n\n")
 

@@ -2,16 +2,21 @@
 title: "bsem"
 subtitle: "An R package for Bayesian structural equation modeling"
 author: 
-  - name          : "R.V. Panaro"
-    affiliation   : "Universidade de São Paulo - USP"
+  - name          : "Renato V. Panaro"
+    affiliation   : "Departamento de Estatística, IME, Universidade de São Paulo"
     corresponding : yes
-    address       : "São Paulo-SP, Brasil"
+    address       : "São Paulo-SP, Brazil"
     email         : "renatovp@ime.usp.br"
-  - name          : "V.D. Mayrink"
-    affiliation   : "Universidade de Federal de Minas Gerais - UFMG"
+  - name          : "Vinicius. D. Mayrink"
+    affiliation   : "Departamento de Estatística, ICEx, Universidade de Federal de Minas Gerais"
     corresponding : no
-    address       : "Belo Horizonte-MG, Brasil"
+    address       : "Belo Horizonte-MG, Brazil"
     email         : "vdinizm@gmail.com"
+  - name          : "Marcelo A. Costa"
+    affiliation   : "Departamento de Engenharia de Produção, Escola de Engenharia, Universidade de Federal de Minas Gerais"
+    corresponding : no
+    address       : "Belo Horizonte-MG, Brazil"
+    email         : "macosta.est@gmail.com"    
 
 keywords          : "structural equation model, factor analysis"
 date: "`r Sys.Date()`"
@@ -37,20 +42,21 @@ text-align: justify
 
 # Introduction
 
+This vignette provides some instructions on how to fit particular cases of structural equation models (SEMs) using the `bsem` package. Examples include confirmatory factor analysis (CFA) and confirmatory SEM. The flexible full SEM model (outer model + inner model), implemented here, enables the evaluation of user-defined constructs (latent variables) along with the analysis of established relationships among the latent scores (factors depending on other factors). Factor analysis (FA) is a powerful and flexible tool to investigate the multivariate dependence in a data set. The main aim is to reduce dimension, i.e., summarize the information expressed in multiple observed variables. The summarization process involves the construction of few unobserved latent factors representing the existing subjacent patterns in the data. The usual FA can be divided in two types: exploratory (EFA) and confirmatory (CFA). The EFA does not impose any restriction on the relationship between latent factors and observed variables (the model is free to establish such associations). The CFA accounts for the technical information regarding the connections between observed and latent variables; examples of applications involving the CFA can be found in [Brown](https://www.guilford.com/books/Confirmatory-Factor-Analysis-for-Applied-Research/Timothy-Brown/9781462515363) (2015). In this case the researcher must impose that a factor is exclusively explained by a group of observed variables. The CFA is widely used in the context of SEM, see the references  [Lee and Song](https://link.springer.com/article/10.1007/BF02296651) (2003), [Skrondal and Rabe-Hesketh](https://www.routledge.com/Generalized-Latent-Variable-Modeling-Multilevel-Longitudinal-and-Structural/Skrondal-Rabe-Hesketh/p/book/9781584880004) (2004), [Palomo, Dunson and Bollen](https://www.elsevier.com/books/handbook-of-latent-variable-and-related-models/lee/978-0-444-52044-9) (2007), [Hoyle](https://www.guilford.com/books/Handbook-of-Structural-Equation-Modeling/Rick-Hoyle/9781462516797) (2014) and [Keith](https://www.routledge.com/Multiple-Regression-and-Beyond-An-Introduction-to-Multiple-Regression/Keith/p/book/9781138061446)(2019). Besides the EFA and CFA, it is possible to work with an intermediate case combining these two types. This option can be seen as a semi-confirmatory FA and an example is described in [Mayrink and Lucas](https://projecteuclid.org/DPubS?service=UI&version=1.0&verb=Display&handle=euclid.aoas/1372338468) (2013) and [Mayrink and Lucas](https://projecteuclid.org/euclid.bjps/1414674773) (2015).
 
-This vignette describes the first instructions on how to fit the particular cases of structural equation models (SEMs) using the `bsem` package. Examples include confirmatory factor analysis (CFA) and confirmatory SEM. The flexible full SEM model (outer model + inner model), provided here, enables the evaluation of user-defined constructs (latent variables) along with the analysis of established relationships among the latent scores (estimates). In addition to this vignette, you can have access to Bayesian factor analysis instructions in [Mayrink and Lucas](https://projecteuclid.org/DPubS?service=UI&version=1.0&verb=Display&handle=euclid.aoas/1372338468) (2013) and [Mayrink and Lucas](https://projecteuclid.org/euclid.bjps/1414674773) (2015) .
+The structure of a SEM has two parts, one involving a CFA and another with multiple regression equations. For an overview about SEMs, it is recommended to read the work [Sanchez et al.](https://www.jstor.org/stable/27590684?seq=1) (2005), which is focused on applications in epidemiology. The studies [Anderson and Gerbing](https://psycnet.apa.org/doiLanding?doi=10.1037%2F0033-2909.103.3.411) (1988) and [MacCallum and Austin](https://doi.org/10.1146/annurev.psych.51.1.201) (2000) provide an overview about the use of SEM in psychology. Examples using SEMs in the context of Bayesian inference are discussed in [Palomo, Dunson and Bollen](https://www.elsevier.com/books/handbook-of-latent-variable-and-related-models/lee/978-0-444-52044-9) (2007). A clear advantage of using the Bayesian approach is the fact that asymptotic assumptions, required by frequentist maximum likelihood methods, may not be valid depending on the sample size. The reference [Lee and Song](https://link.springer.com/article/10.1007/BF02296651) (2003) highlights the good performance of the Bayesian SEM in a comparison with the frequentist version.
 
 Consider:
 
 - the outer model as:
 $$\boldsymbol{X_{p\times n}} = \boldsymbol{\alpha}_{p\times k}\boldsymbol{\lambda}_{k\times n} +\boldsymbol{\varepsilon}_{p\times n}$$
-where $\boldsymbol{X}$ is the standardized data matrix with the variables in the rows and observations in columns,  $\boldsymbol{\alpha}_{p\times j}$ is the column vector of constant effects (loadings) for the $j^{th}$ latent variable and $\boldsymbol{\lambda}_{j\times n}$ is the row vector of scores for the  $j^{th}$ unobserved variable$,~j =1,\dots,k$. Normality is assumed for the errors as $\boldsymbol{\varepsilon}_{p\times i}\sim N(\boldsymbol{0}, \boldsymbol{\Sigma}_{p\times p}), ~i = 1,\dots, n$, where the covariance is diagonal $\boldsymbol{\Sigma} = (\sigma_1^2, \sigma_2^2, \dots,\sigma_p^2)  \boldsymbol{I_p}$.
+where $\boldsymbol{X}$ is the data matrix with variables in the rows and sample elements in the columns,  $\boldsymbol{\alpha}_{p\times j}$ is the column vector of loadings for the $j^{th}$ latent variable and $\boldsymbol{\lambda}_{j\times n}$ is the row vector of scores for the  $j^{th}$ unobserved variable$,~j =1,\dots,k$. Normality is assumed for the errors as $\boldsymbol{\varepsilon}_{ij}\sim N(0, \sigma_{i}^2)$ for $i = 1,\dots, p$.
 
 - the inner model as:
 $$\boldsymbol{\lambda}_{j\times n} = \boldsymbol{\beta}^{\top} {\lambda^{(-j)}}  + \nu~$$
-where $\boldsymbol{\beta}$ is a column vector of constant coefficients, ${\lambda^{(-j)}}_{ k-1\times n}$ is the matrix of scores excluding the $j^{th}$ row scores and the error assumes $\nu\sim N(0,1)$.
+where $\boldsymbol{\beta}$ is a column vector of constant coefficients, ${\lambda^{(-j)}}_{ (k-1)\times n}$ is the matrix of scores excluding the $j^{th}$ row scores and the error assumes $\nu \sim N(0,1)$.
 
-The guidelines in this document were divided into 5 subsequent sections: [installation](#installation), [description](#description), [usage](#usage), [graphical analysis](#graphical-analysis), and [remarks](#remarks).
+The guidelines in this document were divided into 6 subsequent sections: [installation](#installation), [description](#description), [usage](#examples), [graphical analysis](#graphical-posterior-analysis), [descriptives](#descriptives) and [remarks](#remarks).
 
 # Installation
 
@@ -181,8 +187,8 @@ plot(unifact)
 Moreover, we can compare the posterior factor loadings and the scores with the true values using the `bsem::arrayplot` function. For example:
 
 ```{r}
-gridExtra::grid.arrange(bsem::arrayplot(lambda, main = "scores (lambda)", -4,4),
-                        bsem::arrayplot(unifact$mean_scores, main = "scores estimate", -4,4),
+gridExtra::grid.arrange(bsem::arrayplot(as.matrix(lambda), main = "scores (lambda)", -4,4),
+                        bsem::arrayplot(as.matrix(unifact$mean_scores), main = "scores estimate", -4,4),
                         bsem::arrayplot(alpha, main = "loadings (alpha)", -4,4),
                         bsem::arrayplot(unifact$mean_loadings, main = "loadings estimate", -4,4),
                         layout_matrix = matrix(c(1,1,3,3,2,2,4,4), ncol= 2))
@@ -191,55 +197,6 @@ gridExtra::grid.arrange(bsem::arrayplot(lambda, main = "scores (lambda)", -4,4),
 
 The ``bsem::arrayplot`` graphs show that the loadings and scores pattern were captured by the model. In order to intensify the contrast between the estimates it may be necessary to increase the number of iterations or the warmup period since this is a model with many parameters. Remember each chains runs in a separate thread, thus, it is recommended specifying a number of cores at least equal to the number of chains. Indeed, from our experience, an increase in the number of iterations raises the runtime but considerably improves the interval and point estimates.  
 
-## Bi-factor CFA
-
-The data generated for the uni-factor example, is also used here. This example refers to an application of the bi-factor model ( [Jennrich and Bentler](https://link.springer.com/article/10.1007/s11336-011-9218-4), 2011; [Gibbons and Hedeker](https://link.springer.com/article/10.1007/s11336-011-9218-4), 1992). The ideia behind this application is to show how flexible is SEM. From our generated data we have that variables should manifest only the latent variable `F1`. 
-
-- The list object `B` represents each block, indicating which manifest variables are related to each construct. `B` and, consequently, `signals` are modified for a bi-factor analysis.
-
-```{r}
-B$G1 <- 1:3 
-B$G2 <- 4:6
-B$G3 <- 7:8
-
-B
-```
-
-```{r}
-signals$G1 <- rep(1,3) 
-signals$G2 <- rep(1,3)
-signals$G3 <- rep(1,2)
-
-signals
-```
-
-
-Simply use the data argument and the blocks argument to specify the bi-factor model above:
-
-```{r, results = F}
-bifact <- bsem::sem(X, blocks = B, signals = signals, chains = 1)
-```
-
-Descriptive statistics for the posterior factor loadings are showed in the result in `rstan` fashion:
-
-The structural model is displayed using `bsem::plot`:
-
-```{r}
-plot(bifact, layout = 'nicely')
-```
-
-Compare the posterior factor loadings and the scores with the true values using the `bsem::arrayplot` function:
-
-```{r}
-gridExtra::grid.arrange(bsem::arrayplot(lambda, main = "scores (lambda)", -4,4),
-                        bsem::arrayplot(bifact$mean_scores, main = "scores estimate", -4,4),
-                        bsem::arrayplot(alpha, main = "loadings (alpha)", -4,4),
-                        bsem::arrayplot(bifact$mean_loadings, main = "loadings estimate", -4,4),
-                        layout_matrix = matrix(c(1,1,3,3,2,2,4,4), ncol= 2))
-```
-
-The ``bsem::arrayplot`` graphs show that the loadings and scores pattern were captured by the model. An increase in the number of iterations or the warmup period may improve the point estimates. As expected, the outcome estimates evidance a one-factor model, which means other latent variables would not be helpful in explaining this data (as we know from the generation). This conclusion can also be achieved looking at the diagram.`
-  
 ## Multi-factor CFA (uncorrelated)
 
 Artificial data sets are part of the package content as *.rdata* files. Therefore, they can be retrieved using the specific  "character" name within the ``data()`` argument. The `set1` and` set2` examples were generated using routines similar to those shown in the uni-factor example.
@@ -321,6 +278,55 @@ Again, we found that the estimates pattern are tighly close to the true values o
 ```{r}
 pander::pander(cbind(sem$coef, set2$real$beta))
 ```
+
+## Model Misspecification
+
+The data generated for the uni-factor example, is also used here. This example refers to an application of the bi-factor model ( [Jennrich and Bentler](https://link.springer.com/article/10.1007/s11336-011-9218-4), 2011; [Gibbons and Hedeker](https://link.springer.com/article/10.1007/s11336-011-9218-4), 1992). The ideia behind this application is to show how flexible is SEM. From our generated data we have that variables should manifest only the latent variable `F1`. 
+
+- The list object `B` represents each block, indicating which manifest variables are related to each construct. `B` and, consequently, `signals` are modified for a bi-factor analysis.
+
+```{r}
+B$F2 <- 1:3 
+B$F3 <- 4:6
+B$F4 <- 7:8
+
+B
+```
+
+```{r}
+signals$F2 <- rep(1,3) 
+signals$F3 <- rep(1,3)
+signals$F4 <- rep(1,2)
+
+signals
+```
+
+
+Simply use the data argument and the blocks argument to specify the bi-factor model above:
+
+```{r, results = F}
+bifact <- bsem::sem(X, blocks = B, signals = signals, chains = 1)
+```
+
+Descriptive statistics for the posterior factor loadings are showed in the result in `rstan` fashion:
+
+The structural model is displayed using `bsem::plot`:
+
+```{r}
+plot(bifact, layout = 'nicely')
+```
+
+Compare the posterior factor loadings and the scores with the true values using the `bsem::arrayplot` function:
+
+```{r}
+gridExtra::grid.arrange(bsem::arrayplot(t(lambda), main = "scores (lambda)", -4,4),
+                        bsem::arrayplot(bifact$mean_scores, main = "scores estimate", -4,4),
+                        bsem::arrayplot(alpha, main = "loadings (alpha)", -4,4),
+                        bsem::arrayplot(bifact$mean_loadings, main = "loadings estimate", -4,4),
+                        layout_matrix = matrix(c(1,1,3,3,2,2,4,4), ncol= 2))
+```
+
+The ``bsem::arrayplot`` graphs show that the loadings and scores pattern were captured by the model. An increase in the number of iterations or the warmup period may improve the point estimates. As expected, the outcome estimates evidance a one-factor model, which means other latent variables would not be helpful in explaining this data (as we know from the generation). This conclusion can also be achieved looking at the diagram.`
 
 # Graphical posterior analysis 
 
@@ -444,6 +450,5 @@ for the main statistical study in the field of latent variable analysis.
 
 # Remarks
 
-The routines presented above are unprecedented. This document is part of the content submitted to [CRAN](https://cran.r-project.org/). The package is also in public use and is available at
-the github development platform, the link is: https://github.com/rvpanaro/bsem.
+The routines presented above are unprecedented. This document is part of the content submitted to [CRAN](https://cran.r-project.org/). The package is also in public use and available at https://github.com/rvpanaro/bsem.
 

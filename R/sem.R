@@ -13,22 +13,22 @@
 #' @param cores  number of core threads to be used
 #' @param iter  number of iterations
 #' @param chains  number of posterior chains
-#' @param scaled  logical; indicates whether to center and scale the data
+#' @param scaled  logical; indicates whether to center and scale the data; default FALSE
 #' @param ...  further arguments passed to or from other methods
 #' @export sem
 #' @rdname sem
 #' @importFrom rstan stan sampling
 #' @importFrom loo waic loo
-#' @importFrom coda  HPDinterval mcmc
+#' @importFrom coda  HPDinterval mcmcid
 #' @importFrom stats .getXlevels as.formula contrasts dbeta density dist formula median model.extract pbeta pchisq printCoefmat qnorm rlogis rnorm rweibull sd terms
 #' @return  An object of class \code{sem}; a list of 14 to 16:
 #' \describe{
 #'    \item{stanfit}{S4 object of class stanfit}
 #'    \item{posterior}{the list of posterior draws separate by chains}
 #'    \item{model}{character; pointer to pre-defined stan model}
-#'    \item{mean_loadings}{matrix of factor loadings posterior means}
-#'    \item{mean_scores}{matrix of factor scores posterior means}
-#'    \item{mean_var}{vector of error variances posterior means}
+#'    \item{mean_alpha}{matrix of factor loadings posterior means}
+#'    \item{mean_lambda}{matrix of factor scores posterior means}
+#'    \item{mean_sigma2}{vector of error variances posterior means}
 #'    \item{coef}{vector of regression coefficients posterior means}
 #'    \item{stats}{posterior descriptives statistics}
 #'    \item{blocks}{list of blocks}
@@ -60,6 +60,7 @@ sem <-
   function(data,
            paths,
            blocks,
+           exogenous,
            signals,
            row_names = rownames(data),
            prior_specs = list(coef = c("normal(0,1)"),
@@ -68,13 +69,14 @@ sem <-
            pars = c("alpha", "lambda", "sigma2", "Xna"),
            iter = 2000,
            chains = 4,
-           scaled = TRUE,
+           scaled = FALSE,
            ...){
 
     ifelse(scaled, X <- t(scale(data)), X <- t(data)) # format: lines = R-space (variables) and columns= Q-space (observations)
     if(is.null(row_names)){row_names <- paste0('obs',1:nrow(data))}
-    if(is.null(colnames(data))){colnames(data) <- paste0('var',1:ncol(data))}
-    if(is.null(names(blocks))){names(blocks) <- paste0('latent', 1:length(blocks))}
+    if(is.null(colnames(data))){colnames(data) <- paste0('V',1:ncol(data))}
+    if(is.null(names(blocks))){names(blocks) <- paste0('F', 1:length(blocks))}
+    if(missing(signals)) warning("signals not specified, initial values for alpha randomly assigned")
 
     # missing data
     idob = which(is.na(X) == FALSE, arr.ind = TRUE)
@@ -211,9 +213,9 @@ sem <-
     output <- list(stanfit = stanfit,
                    posterior = samples,
                    model = stanfit@model_name,
-                   mean_loadings = matrix(stats[startsWith(rownames(stats), "alpha"),"mean"], ncol = K),
-                   mean_scores =  matrix(stats[startsWith(rownames(stats), "lambda"),"mean"], nrow = K),
-                   mean_var = stats[startsWith(rownames(stats), "sigma2"),"mean"],
+                   mean_alpha = matrix(stats[startsWith(rownames(stats), "alpha"),"mean"], ncol = K),
+                   mean_lambda =  matrix(stats[startsWith(rownames(stats), "lambda"),"mean"], nrow = K),
+                   mean_sigma2 = stats[startsWith(rownames(stats), "sigma2"),"mean"],
                    stats = stats
                    )
 
@@ -232,20 +234,20 @@ sem <-
     if(stanfit@model_name %in% c("sem", "semNA")){output$credint$coef <- t(apply(samples$coef, 3, function(x)HPDinterval(mcmc(as.vector(x)))))}
 
      # output$credint <- credint
-     output$h <- diag(output$mean_loadings %*% t(output$mean_loadings)) ## comunalities
-     output$PVTE =  100 * output$h / (output$h + output$mean_var) ## proportion of total variability
+     output$h <- diag(output$mean_alpha %*% t(output$mean_alpha)) ## comunalities
+     output$PVTE =  100 * output$h / (output$h + output$mean_sigma2) ## proportion of total variability
 
-     output$SQE <- sum(((output$mean_loadings %*% output$mean_scores))^2)
+     output$SQE <- sum(((output$mean_alpha %*% output$mean_lambda))^2)
      output$SQT <- sum((standata$X - mean(standata$X))^2)
      output$AFR2 <- 100 * (1 - output$SQE/output$SQT) # AFR2 = adapted to factor analisys R2
 
      if(Nna > 0){output$idna <- idna}
 
-     rownames(output$mean_loadings) <- colnames(data);
-     colnames(output$mean_loadings) <- names(blocks)
-     rownames(output$mean_scores) <- names(blocks);
-     colnames(output$mean_scores) <- row_names
-     names(output$mean_var) <- colnames(data)
+     rownames(output$mean_alpha) <- colnames(data);
+     colnames(output$mean_alpha) <- names(blocks)
+     rownames(output$mean_lambda) <- names(blocks);
+     colnames(output$mean_lambda) <- row_names
+     names(output$mean_sigma2) <- colnames(data)
      cat("\nDone!\n")
      class(output) <- "bsem"
 

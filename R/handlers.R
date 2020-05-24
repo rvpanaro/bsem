@@ -76,7 +76,7 @@ handler3 <- function(missing_signals){
     }
 
     for(k in 1:e$K){
-        aux[e$B[[k]], k] <- runif(lengths(e$B)[k], 0.5, 2) * e$signals[[k]]
+        aux[e$B[[k]], k] <- 2 * e$signals[[k]]
       }
       aux[-unlist(e$B),] <- runif(e$K, 0.5, 2) * e$signals[[k]]
     }
