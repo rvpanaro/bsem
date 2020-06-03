@@ -14,15 +14,20 @@ data{
   int<lower=1> idob[Nob,2];
   int<lower=1> idna[Nna,2];
   matrix[Nv,K] v;
-  real<lower=0> a;
-  real<lower=0> b;
-  real<lower=0> s;
+
+  real<lower=0> dsigma2 [Nv];
+  real<lower=0> a [Nv];
+  real<lower=0> b [Nv];
+
+  real<lower=0> dbeta [sum(nbeta)];
+  real<lower=0> m [sum(nbeta)];
+  real<lower=0> s [sum(nbeta)];
 }
 
 parameters{
   matrix[Nv,K] alpha;
   matrix[K,Ne] lambda;
-  vector[Nv] sigma2;
+  vector<lower=0> [Nv] sigma2;
   vector[Nna] Xna;
 
   row_vector[sum(nbeta)] beta;
@@ -48,15 +53,33 @@ model{
   // lambda prior
   to_vector(lambda[idyi,]) ~ normal(0, 1);
 
-  // sigma2 prior
-  sigma2 ~ inv_gamma(a, b);
-
-  // coefficients and regressors priors
-  beta ~ normal(0, sqrt(s));
-
   // missing data prior
   for(i in 1:Nna){
     Xna[i] ~ normal(alpha[idna[i,1],] * lambda[,idna[i,2]], sqrt(sigma2[idna[i,1]]));
+  }
+
+
+  for(i in 1:Nv){
+    // sigma2 prior
+    if(dsigma2[i] == 0){
+      sigma2[i] ~ gamma(a[i], b[i]);
+    }
+    else if (dsigma2[i] == 1){
+      sigma2[i] ~ inv_gamma(a[i], b[i]);
+    }
+    else{
+      sigma2[i] ~ lognormal(a[i], b[i]);
+    }
+  }
+
+  for(i in 1:sum(nbeta)){
+    // coefficients prior and regression
+    if(dbeta[i] == 0){
+      beta[i] ~ normal(m[i], sqrt(s[i]));
+    }
+    else{
+      beta[i] ~ cauchy(m[i], sqrt(s[i]));
+    }
   }
 }
 //empty line avoids crash

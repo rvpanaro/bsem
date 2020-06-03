@@ -11,16 +11,20 @@ data{
   int<lower=1> idlamb [sum(nbeta)]; // scores identifier
   matrix[Nv,Ne] X;
   matrix[Nv,K] v;
-  real<lower=0> a;
-  real<lower=0> b;
-  real<lower=0> s;
-  //////////////////
+
+  real<lower=0> dsigma2 [Nv];
+  real<lower=0> a [Nv];
+  real<lower=0> b [Nv];
+
+  real<lower=0> dbeta [sum(nbeta)];
+  real<lower=0> m [sum(nbeta)];
+  real<lower=0> s [sum(nbeta)];
 }
 
 parameters{
   matrix[Nv,K] alpha;
   matrix[K, Ne] lambda;
-  vector[Nv] sigma2;
+  vector<lower=0> [Nv] sigma2;
 
   row_vector[sum(nbeta)] beta;
 }
@@ -45,11 +49,28 @@ model{
   // independent scores prior
   to_vector(lambda[idyi,]) ~ normal(0, 1);
 
-  // sigma2 prior
-  sigma2 ~ inv_gamma(a, b);
+  for(i in 1:Nv){
+    // sigma2 prior
+    if(dsigma2[i] == 0){
+      sigma2[i] ~ gamma(a[i], b[i]);
+    }
+    else if (dsigma2[i] == 1){
+      sigma2[i] ~ inv_gamma(a[i], b[i]);
+    }
+    else{
+      sigma2[i] ~ lognormal(a[i], b[i]);
+    }
+  }
 
-  // coefficients prior and regression
-  beta ~ normal(0, sqrt(s));
+  for(i in 1:sum(nbeta)){
+    // coefficients prior and regression
+    if(dbeta[i] == 0){
+      beta[i] ~ normal(m[i], sqrt(s[i]));
+    }
+    else{
+      beta[i] ~ cauchy(m[i], sqrt(s[i]));
+    }
+  }
 }
 // empty line avoids crash
 

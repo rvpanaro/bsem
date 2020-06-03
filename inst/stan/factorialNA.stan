@@ -8,8 +8,10 @@ data{
   int<lower=1> idob[Nob,2];
   int<lower=1> idna[Nna,2];
   matrix<lower=0> [Nv,K] v;
-  real<lower=0> a;
-  real<lower=0> b;
+
+  real<lower=0> dsigma2 [Nv];
+  real<lower=0> a [Nv];
+  real<lower=0> b [Nv];
 }
 
 parameters{
@@ -32,14 +34,24 @@ model{
   // scores prior
   to_vector(lambda) ~ normal(0, 1);
 
-  // error variance prior
-  sigma2 ~ inv_gamma(a,b);
-
   // missing data prior
   for(i in 1:Nna){
     Xna[i] ~ normal(alpha[idna[i,1],] * lambda[,idna[i,2]], sqrt(sigma2[idna[i,1]]));
   }
 
+  // error variance prior
+  for(i in 1:Nv){
+    // sigma2 prior
+    if(dsigma2[i] == 0){
+      sigma2[i] ~ gamma(a[i], b[i]);
+    }
+    else if (dsigma2[i] == 1){
+      sigma2[i] ~ inv_gamma(a[i], b[i]);
+    }
+    else{
+      sigma2[i] ~ lognormal(a[i], b[i]);
+    }
+  }
 }
 // empty last line to avoid messages
 

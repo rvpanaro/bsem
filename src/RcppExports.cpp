@@ -8,15 +8,23 @@ using namespace Rcpp;
 
 
 RcppExport SEXP _rcpp_module_boot_stan_fit4factorial_mod();
+RcppExport SEXP _rcpp_module_boot_stan_fit4factorialEX_mod();
 RcppExport SEXP _rcpp_module_boot_stan_fit4factorialNA_mod();
+RcppExport SEXP _rcpp_module_boot_stan_fit4factorialNAEX_mod();
 RcppExport SEXP _rcpp_module_boot_stan_fit4sem_mod();
+RcppExport SEXP _rcpp_module_boot_stan_fit4semEX_mod();
 RcppExport SEXP _rcpp_module_boot_stan_fit4semNA_mod();
+RcppExport SEXP _rcpp_module_boot_stan_fit4semNAEX_mod();
 
 static const R_CallMethodDef CallEntries[] = {
     {"_rcpp_module_boot_stan_fit4factorial_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4factorial_mod, 0},
+    {"_rcpp_module_boot_stan_fit4factorialEX_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4factorialEX_mod, 0},
     {"_rcpp_module_boot_stan_fit4factorialNA_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4factorialNA_mod, 0},
+    {"_rcpp_module_boot_stan_fit4factorialNAEX_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4factorialNAEX_mod, 0},
     {"_rcpp_module_boot_stan_fit4sem_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4sem_mod, 0},
+    {"_rcpp_module_boot_stan_fit4semEX_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4semEX_mod, 0},
     {"_rcpp_module_boot_stan_fit4semNA_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4semNA_mod, 0},
+    {"_rcpp_module_boot_stan_fit4semNAEX_mod", (DL_FUNC) &_rcpp_module_boot_stan_fit4semNAEX_mod, 0},
     {NULL, NULL, 0}
 };
 

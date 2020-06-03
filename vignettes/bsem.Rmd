@@ -97,18 +97,21 @@ The data and additional commands are passed through the ``bsem::sem`` function a
 
 ```{r, eval = F}
 bsem::sem(data,
-           paths,
-           blocks,
-           signals,
-           row_names = rownames(data),
-           prior_specs = list(coef = c("normal(0,1)"),
-                         error_var = c("inv_gamma(2.1, 1.1)")),
-           cores =  parallel::detectCores(),
-           pars = c("alpha", "lambda", "sigma2", "Xna"),
-           iter = 2000,
-           chains = 4,
-           scaled = TRUE,
-          ...)
+  paths,
+  blocks,
+  signals,
+  row_names = rownames(data),
+  prior_specs = list(
+    coef = c("normal(0,1)"),
+    error_var = c("inv_gamma(2.1, 1.1)")
+  ),
+  cores = parallel::detectCores(),
+  pars = c("alpha", "lambda", "sigma2", "Xna"),
+  iter = 2000,
+  chains = 4,
+  scaled = TRUE,
+  ...
+)
 ```
 
 The above function automatically selects the appropriate routine according to the specified arguments, examples are given in the next section. One can reproduce the examples bellow by copying and pasting the following code to the ``R`` console.  For these examples, simulated artificial data was created so that we can verify that the estimates are close enough to the true parameter values used to generate the data.
@@ -128,34 +131,41 @@ This example is based on the uni-factor model ( [Reckase](https://journals.sagep
 - The number of variables (columns), observations (rows) and latent variables to be simulated are defined:
 
 ```{r}
-Nv <- 8; Ne <- 30; K <- 1 
+Nv <- 8
+Ne <- 30
+K <- 1
 ```
  
 - A list object `B` is necessary to represent each block that indicates which manifest variables are related to each construct:
  
 ```{r}
- B <- list(F1 = 1:Nv); B
+B <- list(F1 = 1:Nv)
+B
 ```
 
 - Artificial variances are used to generate errors of a normal distribution with 0 mean:
 
 ```{r}
- sigma2 <- runif(Nv, 0.1, 0.9)
+sigma2 <- runif(Nv, 0.1, 0.9)
 
- # errors matrix
- errors <- array(0, c(Nv, Ne)) 
- for(i in 1:Nv){errors[i,] <- rnorm(Ne, 0, sqrt(sigma2[i]))}
+# errors matrix
+errors <- array(0, c(Nv, Ne))
+for (i in 1:Nv) {
+  errors[i, ] <- rnorm(Ne, 0, sqrt(sigma2[i]))
+}
 ```
 
 - Factor scores (lambda) are generated from a standard normal distribution and the factor loadings (alpha) from a uniform distribution with support ranging from 0.5 to 2. The factor loading direction is generated using signals simulated from the `sample` function.
 
 ```{r}
-lambda <- array(rnorm(K*Ne), c(K, Ne)) # Factor scores matrix
- 
+lambda <- array(rnorm(K * Ne), c(K, Ne)) # Factor scores matrix
+
 # Factor loadings matrix
 alpha <- array(0, c(Nv, K))
 
-for(k in 1:K){alpha[B[[k]],k] = runif(lengths(B)[k], 0.5, 2) * sample(c(-1,1), lengths(B)[k], replace = T)}
+for (k in 1:K) {
+  alpha[B[[k]], k] <- runif(lengths(B)[k], 0.5, 2) * sample(c(-1, 1), lengths(B)[k], replace = T)
+}
 
 signals <- list(F1 = array(sign(alpha)))
 ```
@@ -163,7 +173,7 @@ signals <- list(F1 = array(sign(alpha)))
 - Finally, a new artificial data set is produced with the matrix product below:
 
 ```{r}
- X = t(alpha %*% lambda + errors)
+X <- t(alpha %*% lambda + errors)
 ```
 
 Given that the data set was generated synthetically, we can run `bsem::sem` to check if they retrieve the true values of the parameters used in the generation of the database. We simply use the data argument and the blocks argument to specify the one-factor model:
@@ -187,12 +197,12 @@ plot(unifact)
 Moreover, we can compare the posterior factor loadings and the scores with the true values using the `bsem::arrayplot` function. For example:
 
 ```{r}
-gridExtra::grid.arrange(bsem::arrayplot(as.matrix(lambda), main = "scores (lambda)", -4,4),
-                        bsem::arrayplot(as.matrix(unifact$mean_scores), main = "scores estimate", -4,4),
-                        bsem::arrayplot(alpha, main = "loadings (alpha)", -4,4),
-                        bsem::arrayplot(unifact$mean_loadings, main = "loadings estimate", -4,4),
-                        layout_matrix = matrix(c(1,1,3,3,2,2,4,4), ncol= 2))
-
+gridExtra::grid.arrange(bsem::arrayplot(as.matrix(lambda), main = "scores (lambda)", -4, 4),
+  bsem::arrayplot(as.matrix(unifact$mean_scores), main = "scores estimate", -4, 4),
+  bsem::arrayplot(alpha, main = "loadings (alpha)", -4, 4),
+  bsem::arrayplot(unifact$mean_loadings, main = "loadings estimate", -4, 4),
+  layout_matrix = matrix(c(1, 1, 3, 3, 2, 2, 4, 4), ncol = 2)
+)
 ```
 
 The ``bsem::arrayplot`` graphs show that the loadings and scores pattern were captured by the model. In order to intensify the contrast between the estimates it may be necessary to increase the number of iterations or the warmup period since this is a model with many parameters. Remember each chains runs in a separate thread, thus, it is recommended specifying a number of cores at least equal to the number of chains. Indeed, from our experience, an increase in the number of iterations raises the runtime but considerably improves the interval and point estimates.  
@@ -202,7 +212,7 @@ The ``bsem::arrayplot`` graphs show that the loadings and scores pattern were ca
 Artificial data sets are part of the package content as *.rdata* files. Therefore, they can be retrieved using the specific  "character" name within the ``data()`` argument. The `set1` and` set2` examples were generated using routines similar to those shown in the uni-factor example.
 
 ```{r, results = F, message=F}
-library('bsem')
+library("bsem")
 ```
 
 ```{r}
@@ -231,12 +241,15 @@ plot(multifact)
 
 ```{r}
 gridExtra::grid.arrange(
-  bsem::arrayplot(multifact$mean_scores, main = 'estimates',  mini = -2, maxi = 2),
-  bsem::arrayplot(set1$real$lambda, main = 'lambda (scores)', mini = -2, maxi = 2),
-  bsem::arrayplot(multifact$mean_loadings, main = 'estimates', 
-                  mini = -2, maxi = 2),
-  bsem::arrayplot(set1$real$alpha, main = 'alpha (loadings)',  mini = -2, maxi = 2),
-  layout_matrix= matrix(c(1,1,3,3,2,2,4,4), ncol = 2))
+  bsem::arrayplot(multifact$mean_scores, main = "estimates", mini = -2, maxi = 2),
+  bsem::arrayplot(set1$real$lambda, main = "lambda (scores)", mini = -2, maxi = 2),
+  bsem::arrayplot(multifact$mean_loadings,
+    main = "estimates",
+    mini = -2, maxi = 2
+  ),
+  bsem::arrayplot(set1$real$alpha, main = "alpha (loadings)", mini = -2, maxi = 2),
+  layout_matrix = matrix(c(1, 1, 3, 3, 2, 2, 4, 4), ncol = 2)
+)
 ```
 
 The state-of-art ``bsem`` package only provides estimates for uncorrelated SEMs.  The recursive arrows indicate the estimate for each error variance. From this example, we found that the estimates pattern are tighly close to the true values of the parameters even when the signals are not passed. Also, we have observed that the part of the analysis is intended to confirm the predefined constructs CFA (first loadings matrix lines) and the other is intended to express which variable can compose a later full CFA.
@@ -247,7 +260,7 @@ In the last example, not all variables were used in the formulation of predefine
 we can also verify linear relationships between latent variables. The blocks can be passed as named lists and the database with colnames and rownames. For example, for set2 we have:
 
 ```{r}
-library('bsem')
+library("bsem")
 data("set2")
 ```
 
@@ -256,9 +269,11 @@ It is worth mentioning that the paths are named with block names. There are two 
 The data argument, the blocks and the paths arguments should specify ta full uncorrelated SEM model. The blocks represent the manifest variables that form each construct while the paths represent the linear relationships between the latent variables:
 
 ```{r, results = F}
-sem <- bsem::sem(data = set2$set, blocks = set2$blocks,
-                     paths = set2$paths, signals = set2$signals,
-                 chains =4, scaled = F)
+sem <- bsem::sem(
+  data = set2$set, blocks = set2$blocks,
+  paths = set2$paths, signals = set2$signals,
+  chains = 4, scaled = F
+)
 ```
 
 ````{r}
@@ -266,11 +281,12 @@ plot(sem)
 ```
 
 ```{r}
-gridExtra::grid.arrange(bsem::arrayplot(sem$mean_scores, main = 'estimates', mini = -4, maxi = 4), 
-                      bsem::arrayplot(set2$real$lambda, main = 'lambda (scores)', mini = -4, maxi = 4),
-                      bsem::arrayplot(sem$mean_loadings, main = 'estimates', mini = -4, maxi = 4),
-                      bsem::arrayplot(set2$real$alpha, main = 'alpha (loadings)', mini = -4, maxi = 4),
-                      layout_matrix = matrix(c(1,1,3,3,2,2,4,4), ncol = 2))
+gridExtra::grid.arrange(bsem::arrayplot(sem$mean_scores, main = "estimates", mini = -4, maxi = 4),
+  bsem::arrayplot(set2$real$lambda, main = "lambda (scores)", mini = -4, maxi = 4),
+  bsem::arrayplot(sem$mean_loadings, main = "estimates", mini = -4, maxi = 4),
+  bsem::arrayplot(set2$real$alpha, main = "alpha (loadings)", mini = -4, maxi = 4),
+  layout_matrix = matrix(c(1, 1, 3, 3, 2, 2, 4, 4), ncol = 2)
+)
 ```
 
 Again, we found that the estimates pattern are tighly close to the true values of the parameters. This examples highlights a complete confirmatory SEM analysis. The regression coefficients estimates are:
@@ -286,7 +302,7 @@ The data generated for the uni-factor example, is also used here. This example r
 - The list object `B` represents each block, indicating which manifest variables are related to each construct. `B` and, consequently, `signals` are modified for a bi-factor analysis.
 
 ```{r}
-B$F2 <- 1:3 
+B$F2 <- 1:3
 B$F3 <- 4:6
 B$F4 <- 7:8
 
@@ -294,9 +310,9 @@ B
 ```
 
 ```{r}
-signals$F2 <- rep(1,3) 
-signals$F3 <- rep(1,3)
-signals$F4 <- rep(1,2)
+signals$F2 <- rep(1, 3)
+signals$F3 <- rep(1, 3)
+signals$F4 <- rep(1, 2)
 
 signals
 ```
@@ -313,17 +329,18 @@ Descriptive statistics for the posterior factor loadings are showed in the resul
 The structural model is displayed using `bsem::plot`:
 
 ```{r}
-plot(bifact, layout = 'nicely')
+plot(bifact, layout = "nicely")
 ```
 
 Compare the posterior factor loadings and the scores with the true values using the `bsem::arrayplot` function:
 
 ```{r}
-gridExtra::grid.arrange(bsem::arrayplot(t(lambda), main = "scores (lambda)", -4,4),
-                        bsem::arrayplot(bifact$mean_scores, main = "scores estimate", -4,4),
-                        bsem::arrayplot(alpha, main = "loadings (alpha)", -4,4),
-                        bsem::arrayplot(bifact$mean_loadings, main = "loadings estimate", -4,4),
-                        layout_matrix = matrix(c(1,1,3,3,2,2,4,4), ncol= 2))
+gridExtra::grid.arrange(bsem::arrayplot(t(lambda), main = "scores (lambda)", -4, 4),
+  bsem::arrayplot(bifact$mean_scores, main = "scores estimate", -4, 4),
+  bsem::arrayplot(alpha, main = "loadings (alpha)", -4, 4),
+  bsem::arrayplot(bifact$mean_loadings, main = "loadings estimate", -4, 4),
+  layout_matrix = matrix(c(1, 1, 3, 3, 2, 2, 4, 4), ncol = 2)
+)
 ```
 
 The ``bsem::arrayplot`` graphs show that the loadings and scores pattern were captured by the model. An increase in the number of iterations or the warmup period may improve the point estimates. As expected, the outcome estimates evidance a one-factor model, which means other latent variables would not be helpful in explaining this data (as we know from the generation). This conclusion can also be achieved looking at the diagram.`
@@ -353,15 +370,17 @@ library("tidybayes")
 - `dt` data.frame object has the mean loadings and the HPD interval lower and upper limits (`ll` and `lu`):
 
 ```{r}
-dt <- data.frame(li = sem$credint$loadings[,1],
-                 lu = sem$credint$loadings[,2],
-                 m = c(sem$mean_loadings))
+dt <- data.frame(
+  li = sem$credint$loadings[, 1],
+  lu = sem$credint$loadings[, 2],
+  m = c(sem$mean_loadings)
+)
 ```
 
 - `lnames` and `snames` are used to find the loadings of the conceptual model (those that might not equal zero).
 
 ```{r}
-lnames <-rownames(sem$mean_loadings)
+lnames <- rownames(sem$mean_loadings)
 snames <- rownames(sem$mean_scores)
 ```
 
@@ -370,16 +389,19 @@ snames <- rownames(sem$mean_scores)
 ```{r}
 find <- paste0("alpha[", which(lnames %in% unlist(sem$blocks)), ",", rep(1:length(sem$blocks), lengths(sem$blocks)), "]")
 
-dt <- dt[find,]
+dt <- dt[find, ]
 ```
 
 - One of the options to plot the loadings HPD intervals chart is:
 ```{r}
 ggplot(aes(y = find, x = m, xmin = li, xmax = lu), data = dt) +
-  geom_pointintervalh() + theme_classic() +
-  labs(title = paste("Latent variable", colnames(sem$mean_loadings)[3]),
-       x = "Highest posterior density interval",
-       y = "variable")
+  geom_pointintervalh() +
+  theme_classic() +
+  labs(
+    title = paste("Latent variable", colnames(sem$mean_loadings)[3]),
+    x = "Highest posterior density interval",
+    y = "variable"
+  )
 ```
 
 In the SEM example above, all intervals regarding the loading estimates from the  conceptual relationships do not include zero. 
@@ -397,15 +419,16 @@ library("bayesplot")
 ```{r, eval =F}
 find <- paste0("alpha[", which(lnames %in% unlist(sem$blocks)), ",", rep(1:length(sem$blocks), lengths(sem$blocks)), "]")
 
-dt <- dt[find,]
+dt <- dt[find, ]
 ```
 
 - The equal tails intervals are:
 
 ````{r, warning = F}
-gridExtra::grid.arrange(mcmc_areas(sem$posterior$alpha[,,find]),
-                        mcmc_intervals(sem$posterior$alpha[,,find]),
-                        layout_matrix = matrix(c(1,1,2,2), ncol = 2))
+gridExtra::grid.arrange(mcmc_areas(sem$posterior$alpha[, , find]),
+  mcmc_intervals(sem$posterior$alpha[, , find]),
+  layout_matrix = matrix(c(1, 1, 2, 2), ncol = 2)
+)
 ````
 
 In addition to the possibilities for intervals, other `mcmc_.` type graphs are highly recommended, several options include histograms, violin plots, pair plots and others.
@@ -423,7 +446,7 @@ The effective sample size  ``n_eff`` gives an estimate of the independent draws 
 - It is worth noting that, one can have acces to all the information provided by the ``Stan`` output object using the ``.$stanfit`` command:
 
 ```{r}
-class(sem$stanfit) 
+class(sem$stanfit)
 ```
 
 In particular, one can have access to built-in plot functions and even to a ``shiny`` app (details in [https://shiny.rstudio.com/](https://shiny.rstudio.com/) developed by ``Stan`` developer's team
@@ -439,7 +462,7 @@ A crucial difference in obtaining the same statistics printed by the `bsem::summ
 - The monitoring result is returned with `.$` : 
 
 ```{r}
-head(sem$stats, 2) 
+head(sem$stats, 2)
 ```
 
 
@@ -451,4 +474,3 @@ for the main statistical study in the field of latent variable analysis.
 # Remarks
 
 The routines presented above are unprecedented. This document is part of the content submitted to [CRAN](https://cran.r-project.org/). The package is also in public use and available at https://github.com/rvpanaro/bsem.
-

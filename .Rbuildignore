@@ -1,9 +1,2 @@
-^bsem\.Rproj$
+^.*\.Rproj$
 ^\.Rproj\.user$
-^_pkgdown\.yml$
-^codecov\.yml$
-^\.travis\.yml$
-^_config\.yml$
-^cran-comments\.md$
-^inst/dev\.R$
-^inst/load\.R$

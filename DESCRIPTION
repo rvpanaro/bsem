@@ -19,9 +19,8 @@ License: GPL-3
 Biarch: true
 Depends: 
     R (>= 3.5.0),
-    loo (>= 2.1.0),
     coda (>= 0.19-3),
-    MASS (>= 7.3-51.4)				
+    lattice (>= 0.20-38)				
 Imports: 
     methods,
     Rcpp (>= 0.12.0),

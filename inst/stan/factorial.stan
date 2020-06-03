@@ -6,8 +6,10 @@ data{
   int<lower=1> idob[Nob,2];
   matrix[Nv,Ne] X;
   matrix<lower=0> [Nv,K] v;
-  real<lower=0> a;
-  real<lower=0> b;
+
+  real<lower=0> dsigma2 [Nv];
+  real<lower=0> a [Nv];
+  real<lower=0> b [Nv];
 
 }
 
@@ -33,8 +35,18 @@ model{
   to_vector(lambda) ~ normal(0, 1);
 
   // error variance prior
-  sigma2 ~ inv_gamma(a, b);
-
+  for(i in 1:Nv){
+    // sigma2 prior
+    if(dsigma2[i] == 0){
+      sigma2[i] ~ gamma(a[i], b[i]);
+    }
+    else if (dsigma2[i] == 1){
+      sigma2[i] ~ inv_gamma(a[i], b[i]);
+    }
+    else{
+      sigma2[i] ~ lognormal(a[i], b[i]);
+    }
+  }
 }
 
 
