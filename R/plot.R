@@ -23,70 +23,157 @@
 #'
 
 plot.bsem <-
-  function(x, digits = 2, fontsize = 15, width = 2, size = 10, ...){
+  function(x, digits = 2, fontsize = 15, width = 2, size = 10, ...) {
     invisible(capture.output(y <- summary(x, digits = digits)))
 
     blocks <- y[["blocks"]]
     var <- y[["var"]]
-    lvl <- unique(c(unlist(x$blocks), names(x$blocks)))
 
-    if(x$model %in% c("sem", "semNA")){
-      paths  <- y[["paths"]]
-
-      from <- na.omit(factor(c(unlist(x$blocks), unlist(x$paths),
-                       names(x$mean_var)),
-                     levels = lvl))
-      to   <- na.omit(factor(c(rep(names(x$blocks), lengths(x$blocks)),
-                       rep(names(x$paths), lengths(x$paths)),
-                       names(x$mean_var)),
-                     levels = lvl))
-      lbl <- c(format(round(unlist(sapply(1:length(blocks), function(x)blocks[[x]][,"mean"])), digits),digits = digits),
-               format(round(unlist(sapply(1:length(paths), function(x)paths[[x]][,"mean"])), digits),digits = digits),
-               format(round(x$mean_var[names(x$mean_var) %in% lvl], digits), digits = digits))
-
-      dashes <- c(rep(c(F, T), c(sum(lengths(x$blocks)), sum(length(x$blocks)))),  !names(x$mean_var) %in% lvl)
+    if(x$model %in% c("factorialEX", "factorialNAEX", "semEX", "semNAEX")){
+      lvl <- unique(c(unlist(x$blocks), names(x$blocks), names(x$exogenous)))
     }
     else{
+      lvl <- unique(c(unlist(x$blocks), names(x$blocks)))
+    }
 
-      from <- na.omit(factor(c(unlist(x$blocks),
-                       names(x$mean_var)),
-                     levels = lvl))
-      to   <- na.omit(factor(c(rep(names(x$blocks), lengths(x$blocks)),
-                       names(x$mean_var)),
-                     levels = lvl))
-      lbl <- c(format(round(unlist(sapply(1:length(blocks), function(x)blocks[[x]][,"mean"])), digits), digits = digits),
-               format(round(x$mean_var[names(x$mean_var) %in% lvl], digits), digits = digits))
+
+    if (x$model %in% c("semEX", "semNAEX")) {
+      exogenous <- y[["exogenous"]]
+
+      from <- na.omit(factor(c(
+        unlist(x$blocks), unlist(x$paths), unlist(x$exogenous),
+        names(x$mean_sigma2), names(x$mean_tau2)
+      ),
+      levels = lvl
+      ))
+      to <- na.omit(factor(c(
+        rep(names(x$blocks), lengths(x$blocks)),
+        rep(names(x$paths), lengths(x$paths)),
+        rep(names(x$exogenous), lengths(x$exogenous)),
+        names(x$mean_sigma2), names(x$mean_tau2)
+      ),
+      levels = lvl
+      ))
+
+      lbl <- c(
+        format(round(unlist(sapply(1:length(blocks), function(x) blocks[[x]][, "mean"])), digits), digits = digits),
+        format(round(unlist(sapply(1:length(paths), function(x) paths[[x]][, "mean"])), digits), digits = digits),
+        format(round(unlist(sapply(1:length(exogenous), function(y) exogenous[[y]][-c(1, lengths(x$exogenous)[y]+2), "mean"])), digits), digits = digits),
+        format(round(x$mean_sigma2[names(x$mean_sigma2) %in% lvl], digits), digits = digits),
+        format(round(x$mean_tau2[names(x$mean_tau2) %in% lvl], digits), digits = digits)
+      )
+
+      dashes <- c(rep(c(F, T), c(sum(lengths(x$blocks)), sum(length(x$blocks)))), !names(x$mean_sigma2) %in% lvl, !names(x$mean_tau2) %in% lvl)
+    }
+    else if (x$model %in% c("sem", "semNA")) {
+      paths <- y[["paths"]]
+
+      from <- na.omit(factor(c(
+        unlist(x$blocks), unlist(x$paths),
+        names(x$mean_sigma2)
+      ),
+      levels = lvl
+      ))
+      to <- na.omit(factor(c(
+        rep(names(x$blocks), lengths(x$blocks)),
+        rep(names(x$paths), lengths(x$paths)),
+        names(x$mean_sigma2)
+      ),
+      levels = lvl
+      ))
+      lbl <- c(
+        format(round(unlist(sapply(1:length(blocks), function(x) blocks[[x]][, "mean"])), digits), digits = digits),
+        format(round(unlist(sapply(1:length(paths), function(x) paths[[x]][, "mean"])), digits), digits = digits),
+        format(round(x$mean_sigma2[names(x$mean_sigma2) %in% lvl], digits), digits = digits)
+      )
+
+      dashes <- c(rep(c(F, T), c(sum(lengths(x$blocks)), sum(length(x$blocks)))), !names(x$mean_sigma2) %in% lvl)
+    }
+    else if (x$model %in% c("factorialEX", "factorialNAEX")) {
+      exogenous <- y[["exogenous"]]
+
+      from <- na.omit(factor(c(
+        unlist(x$blocks), unlist(x$exogenous),
+        names(x$mean_sigma2), names(x$mean_tau2)
+      ),
+      levels = lvl
+      ))
+      to <- na.omit(factor(c(
+        rep(names(x$blocks), lengths(x$blocks)),
+        rep(names(x$exogenous), lengths(x$exogenous)),
+        names(x$mean_sigma2), names(x$mean_tau2)
+      ),
+      levels = lvl
+      ))
+
+      lbl <- c(
+        format(round(unlist(sapply(1:length(blocks), function(x) blocks[[x]][, "mean"])), digits), digits = digits),
+        format(round(unlist(sapply(1:length(exogenous), function(y) exogenous[[y]][-c(1, lengths(x$exogenous)[y]+2), "mean"])), digits), digits = digits),
+        format(round(x$mean_sigma2[names(x$mean_sigma2) %in% lvl], digits), digits = digits),
+        format(round(x$mean_tau2[names(x$mean_tau2) %in% lvl], digits), digits = digits)
+      )
+
+      dashes <- c(rep(c(F, T), c(sum(lengths(x$blocks)), sum(length(x$blocks)))), !names(x$mean_sigma2) %in% lvl, !names(x$mean_tau2) %in% lvl)
+    }
+    else {
+      from <- na.omit(factor(c(
+        unlist(x$blocks),
+        names(x$mean_sigma2)
+      ),
+      levels = lvl
+      ))
+      to <- na.omit(factor(c(
+        rep(names(x$blocks), lengths(x$blocks)),
+        names(x$mean_sigma2)
+      ),
+      levels = lvl
+      ))
+      lbl <- c(
+        format(round(unlist(sapply(1:length(blocks), function(x) blocks[[x]][, "mean"])), digits), digits = digits),
+        format(round(x$mean_sigma2[names(x$mean_sigma2) %in% lvl], digits), digits = digits)
+      )
       dashes <- F
     }
 
-    edge <- DiagrammeR::create_edge_df(from = from,
-                     to = to,
-                     label = as.character(lbl),
-                     smooth= T,
-                     arrows = "to",
-                     dashes = dashes,
-                     width = abs(as.numeric(lbl)) * width,
-                     font.size = fontsize
-                     # ,dashes = dashes
-                     )
+    edge <- DiagrammeR::create_edge_df(
+      from = from,
+      to = to,
+      label = as.character(lbl),
+      smooth = T,
+      arrows = "to",
+      dashes = dashes,
+      width = abs(as.numeric(lbl)) * width,
+      font.size = fontsize
+    )
 
-  nn <-  c(length(unique(unlist(x$blocks))), sum(length(x$blocks)))
-  col <- factor(c(rep(names(x$blocks), lengths(x$blocks)), names(x$blocks)))
+    if (x$model %in% c("factorial", "factorialNA", "sem", "semNA")) {
+      nn <- c(length(unique(unlist(x$blocks))), length(x$blocks))
+      col <- factor(c(rep(names(x$blocks), lengths(x$blocks)), names(x$blocks)))
+      shp <- rep(c("box", "ellipse"), nn)
+    }
+    else {
+      nn <- c(length(unique(unlist(x$blocks))), length(x$blocks), length(x$exogenous))
+      col <- factor(c(rep(names(x$blocks), lengths(x$blocks)), names(x$blocks), names(x$exogenous)))
+      shp <- rep(c("box", "ellipse", "circle"), nn)
+    }
 
-
-  node <- DiagrammeR::create_node_df(n = sum(nn),
-                       nodes = lvl,
-                       label = lvl,
-                       shape = rep(c("box", "ellipse"), nn),
-                       color = viridis(length(levels(col))+1)[col[1:length(lvl)]],
-                       group = col[1:length(lvl)],
-                       style = "filled",
-                       fontname = "Roboto",
-                       fontcolor = 'white',
-                       shadow = T)
+    print((sum(nn)))
+    print(length(lvl))
+    node <- DiagrammeR::create_node_df(
+      n = sum(nn),
+      nodes = lvl,
+      label = lvl,
+      shape = shp,
+      color = viridis(length(levels(col)) + 1)[col[1:length(lvl)]],
+      group = col[1:length(lvl)],
+      style = "filled",
+      fontname = "Roboto",
+      fontcolor = "white",
+      shadow = T
+    )
 
     # We can plot the graph directly
       visNetwork::visNetwork(nodes = node, edges = edge, ...) %>%
       visNetwork::visOptions(highlightNearest = TRUE) %>%
-        visNetwork::visNodes(font = list(color = "white"), size = size)
+      visNetwork::visNodes(font = list(color = "white"), size = size)
   }

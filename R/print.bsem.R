@@ -197,13 +197,13 @@ summary.bsem <-
         colnames(aux_exogenous[[i]]) <- colnames(stats)
         rownames(aux_exogenous[[i]]) <- c("intercept", x$exogenous[[i]], paste0("tau2[", i,"]"))
 
-        aux[[i]] <- cbind(
+        aux_exogenous[[i]] <- cbind(
           aux_exogenous[[i]][, c("mean", "50%", "sd")],
           aux_credint[[i]],
           aux_exogenous[[i]][, c("n_eff", "Rhat")]
         )
-        colnames(aux[[i]]) <- c("mean", "50%", "sd", "HPD.l", "HPD.u", "n_eff", "Rhat")
-        print(round(aux[[i]], digits), digits)
+        colnames(aux_exogenous[[i]]) <- c("mean", "50%", "sd", "HPD.l", "HPD.u", "n_eff", "Rhat")
+        print(round(aux_exogenous[[i]], digits), digits)
       }
     }
       cat("\n\n")
@@ -231,6 +231,9 @@ summary.bsem <-
     }
     if(x$model %in% c("factorialNA", "semNA", "factorialNAEX", "semNAEX")){
       summ$Xna <- aux_Xna
+    }
+    if(x$model %in% c("factorialEX", "semEX", "factorialNAEX", "semNAEX")){
+      summ$exogenous <- aux_exogenous
     }
     cat("\n---\n")
 

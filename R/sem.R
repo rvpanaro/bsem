@@ -162,11 +162,11 @@ sem <-
       }
     }
 
-    if (!missing(exogenous)) {
-      v <- array(0.0001, c(Nv - length(exogenous), K))
+    if (missing(exogenous)) {
+      v <- array(0.0001, c(Nv, K))
     }
     else {
-      v <- array(0.0001, c(Nv, K))
+      v <- array(0.0001, c(Nv - length(exogenous), K))
     }
 
 
