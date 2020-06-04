@@ -5,25 +5,25 @@ handler1 <- function() {
   # ----
   ## array of priors for beta
 
-    betap <- try(lapply(e$prior_specs$beta, read_prior), silent = T)
-    if (is.null(betap[2]) || length(betap) == 0) betap <- lapply("normal(0,4)", read_prior)
+  betap <- try(lapply(e$prior_specs$beta, read_prior), silent = T)
+  if (is.null(betap[2]) || length(betap) == 0) betap <- lapply("normal(0,1)", read_prior)
 
-    priordist <- sapply(betap, `[[`, 1)
-    par1 <- sapply(betap, `[[`, 2)
-    par2 <- sapply(betap, `[[`, 3)
+  priordist <- sapply(betap, `[[`, 1)
+  par1 <- sapply(betap, `[[`, 2)
+  par2 <- sapply(betap, `[[`, 3)
 
-    priordist_beta <- sapply(priordist, function(x) {
-      switch(x,
-        "normal" = 0,
-        "cauchy" = 1
-      )
-    })
+  priordist_beta <- sapply(priordist, function(x) {
+    switch(x,
+      "normal" = 0,
+      "cauchy" = 1
+    )
+  })
 
-    if(is.null(priordist_beta)){
-      stop("prior_specs misspecification;
+  if (is.null(priordist_beta)) {
+    stop("prior_specs misspecification;
            'beta prior should be normal or cauchy,
            try prior_specs = list(beta = normal(...,...), ...) instead'")
-    }
+  }
 
   if (exists("paths", envir = e, mode = "list")) {
     # ## Recycling the prior specs
@@ -31,7 +31,7 @@ handler1 <- function() {
     e$par1_beta <- array(as.numeric(par1), dim = sum(lengths(e$paths)))
     e$par2_beta <- array(as.numeric(par2), dim = sum(lengths(e$paths)))
   }
-  else{
+  else {
     e$priordist_beta <- array(priordist_beta, dim = 1)
     e$par1_beta <- array(as.numeric(par1), dim = 1)
     e$par2_beta <- array(as.numeric(par2), dim = 1)
@@ -57,7 +57,7 @@ handler1 <- function() {
     }
   )
 
-  if(is.null(priordist_sigma2)){
+  if (is.null(priordist_sigma2)) {
     stop("prior_specs misspecification;
          'sigma2 prior should be gamma, inv_gamma or lognormal,
          try prior_specs = list(sigma2 = inv_gamma(...,...), ...) instead'")
@@ -79,109 +79,109 @@ handler1 <- function() {
 
 
 
-    ## array of priors for gamma
-    gammap <- try(lapply(e$prior_specs$gamma, read_prior), silent = T)
-    if (is.na(gammap[2]) || length(gammap) == 0) gammap <- lapply("normal(0,4)", read_prior)
+  ## array of priors for gamma
+  gammap <- try(lapply(e$prior_specs$gamma, read_prior), silent = T)
+  if (is.na(gammap[2]) || length(gammap) == 0) gammap <- lapply("normal(0,1)", read_prior)
 
-    priordist <- sapply(gammap, `[[`, 1)
-    par1 <- sapply(gammap, `[[`, 2)
-    par2 <- sapply(gammap, `[[`, 3)
+  priordist <- sapply(gammap, `[[`, 1)
+  par1 <- sapply(gammap, `[[`, 2)
+  par2 <- sapply(gammap, `[[`, 3)
 
-    priordist_gamma <- sapply(priordist, function(x) {
-      switch(x,
-        "normal" = 0,
-        "cauchy" = 1
-      )
-    })
+  priordist_gamma <- sapply(priordist, function(x) {
+    switch(x,
+      "normal" = 0,
+      "cauchy" = 1
+    )
+  })
 
-    if(is.null(priordist_gamma)){
-      stop("prior_specs misspecification;
+  if (is.null(priordist_gamma)) {
+    stop("prior_specs misspecification;
            'gamma prior should be normal or cauchy,
            try prior_specs = list(gamma = normal(...,...), ...) instead'")
-    }
+  }
 
-      # ## Recycling the prior specs
-    if (exists("exogenous", envir = e, mode = "list")) {
-      e$priordist_gamma <- array(priordist_gamma, dim = sum(lengths(e$exogenous)))
-      e$par1_gamma <- array(as.numeric(par1), dim = sum(lengths(e$exogenous)))
-      e$par2_gamma <- array(as.numeric(par2), dim = sum(lengths(e$exogenous)))
-    }
-    else{
-      e$priordist_gamma <- array(priordist_gamma, dim = 1)
-      e$par1_gamma <- array(as.numeric(par1), dim = 1)
-      e$par2_gamma <- array(as.numeric(par2), dim = 1)
-    }
-      ## array of priors for gamma
-      gamma0p <- try(lapply(e$prior_specs$gamma0, read_prior), silent = T)
+  # ## Recycling the prior specs
+  if (exists("exogenous", envir = e, mode = "list")) {
+    e$priordist_gamma <- array(priordist_gamma, dim = sum(lengths(e$exogenous)))
+    e$par1_gamma <- array(as.numeric(par1), dim = sum(lengths(e$exogenous)))
+    e$par2_gamma <- array(as.numeric(par2), dim = sum(lengths(e$exogenous)))
+  }
+  else {
+    e$priordist_gamma <- array(priordist_gamma, dim = 1)
+    e$par1_gamma <- array(as.numeric(par1), dim = 1)
+    e$par2_gamma <- array(as.numeric(par2), dim = 1)
+  }
+  ## array of priors for gamma
+  gamma0p <- try(lapply(e$prior_specs$gamma0, read_prior), silent = T)
 
-      if (is.na(gamma0p[2]) || length(gamma0p) == 0) gamma0p <- lapply("normal(0,4)", read_prior)
+  if (is.na(gamma0p[2]) || length(gamma0p) == 0) gamma0p <- lapply("normal(0,1)", read_prior)
 
-      priordist <- sapply(gamma0p, `[[`, 1)
-      par1 <- sapply(gamma0p, `[[`, 2)
-      par2 <- sapply(gamma0p, `[[`, 3)
+  priordist <- sapply(gamma0p, `[[`, 1)
+  par1 <- sapply(gamma0p, `[[`, 2)
+  par2 <- sapply(gamma0p, `[[`, 3)
 
-      priordist_gamma0 <- sapply(priordist, function(x) {
-        switch(x,
-               "normal" = 0,
-               "cauchy" = 1
-        )
-      })
+  priordist_gamma0 <- sapply(priordist, function(x) {
+    switch(x,
+      "normal" = 0,
+      "cauchy" = 1
+    )
+  })
 
-      if(is.null(priordist_gamma0)){
-        stop("prior_specs misspecification;
+  if (is.null(priordist_gamma0)) {
+    stop("prior_specs misspecification;
            'gamma0 prior should be normal or cauchy,
            try prior_specs = list(gamma0 = normal(...,...), ...) instead'")
-      }
+  }
 
-      # ## Recycling the prior specs
-    if (exists("exogenous", envir = e, mode = "list")) {
-      e$priordist_gamma0 <- array(priordist_gamma0, dim = length(e$exogenous))
-      e$par1_gamma0 <- array(as.numeric(par1), dim = length(e$exogenous))
-      e$par2_gamma0 <- array(as.numeric(par2), dim = length(e$exogenous))
-    }
-    else{
-      e$priordist_gamma0 <- array(priordist_gamma0, dim = 1)
-      e$par1_gamma0 <- array(as.numeric(par1), dim = 1)
-      e$par2_gamma0 <- array(as.numeric(par2), dim = 1)
-      }
+  # ## Recycling the prior specs
+  if (exists("exogenous", envir = e, mode = "list")) {
+    e$priordist_gamma0 <- array(priordist_gamma0, dim = length(e$exogenous))
+    e$par1_gamma0 <- array(as.numeric(par1), dim = length(e$exogenous))
+    e$par2_gamma0 <- array(as.numeric(par2), dim = length(e$exogenous))
+  }
+  else {
+    e$priordist_gamma0 <- array(priordist_gamma0, dim = 1)
+    e$par1_gamma0 <- array(as.numeric(par1), dim = 1)
+    e$par2_gamma0 <- array(as.numeric(par2), dim = 1)
+  }
 
   # ----
   ## array of priors for tau2
-    tau2p <- try(lapply(e$prior_specs$tau2, read_prior), silent = T)
-    if (is.na(tau2p[2]) || length(tau2p) == 0) tau2p <- lapply("inv_gamma(2.1,1.1)", read_prior)
+  tau2p <- try(lapply(e$prior_specs$tau2, read_prior), silent = T)
+  if (is.na(tau2p[2]) || length(tau2p) == 0) tau2p <- lapply("inv_gamma(2.1,1.1)", read_prior)
 
-    priordist <- sapply(tau2p, `[[`, 1)
-    par1 <- sapply(tau2p, `[[`, 2)
-    par2 <- sapply(tau2p, `[[`, 3)
+  priordist <- sapply(tau2p, `[[`, 1)
+  par1 <- sapply(tau2p, `[[`, 2)
+  par2 <- sapply(tau2p, `[[`, 3)
 
-    priordist_tau2 <- sapply(
-      priordist,
-      function(x) {
-        switch(x,
-          "gamma" = 0,
-          "inv_gamma" = 1,
-          "lognormal" = 2
-        )
-      }
-    )
+  priordist_tau2 <- sapply(
+    priordist,
+    function(x) {
+      switch(x,
+        "gamma" = 0,
+        "inv_gamma" = 1,
+        "lognormal" = 2
+      )
+    }
+  )
 
-    if(is.null(priordist_tau2)){
-      stop("prior_specs misspecification;
+  if (is.null(priordist_tau2)) {
+    stop("prior_specs misspecification;
            'tau2 prior should be gamma, inv_gamma or lognormal,
            try prior_specs = list(tau2 = inv_gamma(...,...), ...) instead'")
-    }
+  }
 
-    if (exists("exogenous", envir = e, mode = "list")) {
-      ## Recycling the prior specs
-      e$priordist_tau2 <- array(priordist_tau2, dim = length(e$exogenous))
-      e$par1_tau2 <- array(as.numeric(par1), dim = length(e$exogenous))
-      e$par2_tau2 <- array(as.numeric(par2), dim = length(e$exogenous))
-    }
-    else{
-      e$priordist_tau2 <- array(priordist_tau2, dim = length(e$exogenous))
-      e$par1_tau2 <- array(as.numeric(par1), dim = length(e$exogenous))
-      e$par2_tau2 <- array(as.numeric(par2), dim = length(e$exogenous))
-    }
+  if (exists("exogenous", envir = e, mode = "list")) {
+    ## Recycling the prior specs
+    e$priordist_tau2 <- array(priordist_tau2, dim = length(e$exogenous))
+    e$par1_tau2 <- array(as.numeric(par1), dim = length(e$exogenous))
+    e$par2_tau2 <- array(as.numeric(par2), dim = length(e$exogenous))
+  }
+  else {
+    e$priordist_tau2 <- array(priordist_tau2, dim = length(e$exogenous))
+    e$par1_tau2 <- array(as.numeric(par1), dim = length(e$exogenous))
+    e$par2_tau2 <- array(as.numeric(par2), dim = length(e$exogenous))
+  }
 }
 
 ## --------------- Extra args error handling ---------------

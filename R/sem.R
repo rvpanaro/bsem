@@ -57,6 +57,7 @@
 #' summary(fit2)
 #' }
 #'
+
 sem <-
   function(data,
            paths,
@@ -65,10 +66,10 @@ sem <-
            signals,
            row_names = rownames(data),
            prior_specs = list(
-             beta = c("normal(0,4)"),
+             beta = c("normal(0,1)"),
              sigma2 = c("inv_gamma(2.1, 1.1)"),
-             gamma0 = c("normal(0,4)"),
-             gamma = c("normal(0,4)"),
+             gamma0 = c("normal(0,1)"),
+             gamma = c("normal(0,1)"),
              tau2 = c("inv_gamma(2.1, 1.1)")
            ),
            cores = parallel::detectCores(),
@@ -77,7 +78,6 @@ sem <-
            chains = 4,
            scaled = FALSE,
            ...) {
-
     ifelse(scaled, X <-
       t(scale(data)), X <-
       t(data)) # format: lines = R-space (variables) and columns= Q-space (observations)
@@ -126,9 +126,11 @@ sem <-
         aux <- as.numeric(unlist(blocks) %in% colnames(data))
 
         if (any(aux == 0)) {
-          stop(gettextf("argument misspecification;
+          stop(gettextf(
+            "argument misspecification;
                         argument %s not matched",
-                        unlist(blocks)[aux == 0]))
+            unlist(blocks)[aux == 0]
+          ))
         }
 
         B[[i]] <-
@@ -564,6 +566,7 @@ sem <-
     rownames(output$mean_lambda) <- names(blocks)
 
     colnames(output$mean_lambda) <- row_names
+
     ifelse(missing(exogenous),
       names(output$mean_sigma2) <- colnames(data),
       names(output$mean_sigma2) <- colnames(data)[-standata$idex]
