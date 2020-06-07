@@ -1,0 +1,335 @@
+---
+title: "Exploring bsem class"
+subtitle: "How to get information from the bsem package outcomes"
+author: 
+  - name          : "Renato Panaro"
+keywords          : "sem, posterior, diagram, summary, plot"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    theme: flatly
+    toc: true
+    toc_float:
+      collapsed: true
+      smooth_scroll: true
+      toc_number: true
+vignette: >
+  %\VignetteIndexEntry{Exploring bsem class}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+<style>
+body {
+text-align: justify
+</style>
+
+# Examples
+
+This vignette describes how the package can be used to estimate artificial parameters. This is a former analysis in light of other studies based on replication such as Monte Carlo simulation study methods. Basically, there are two ways to specify a ``sem`` model: 1) the blocks, paths, exogenous and the data set are not named by the user (internally named); 2) named list are passed to their respective arguments and consequently to the automated plot function.
+
+## Uni-factor CFA
+
+```{r, include = F}
+set.seed(2020)
+```
+
+The first example is based on the uni-factor model ( [Reckase](https://journals.sagepub.com/doi/abs/10.3102/10769986004003207), 1979). 
+
+- The number of variables (columns), observations (rows) and latent variables to be simulated are defined:
+
+```{r}
+Nv <- 8
+Ne <- 30
+K <- 1
+```
+ 
+- A list of blocks is always necessary to represent the manifest variables related to each construct of the outer model:
+ 
+```{r}
+B <- list(F1 = 1:Nv)
+B
+```
+
+The function `bsem::simdata` is used to generate simulated data. This routine internally produces artificial variances that are used to generate the normal distributed errors. Factor scores (lambda) are generated from a standard normal distribution and the factor loadings (alpha) from a uniform distribution with support ranging from 0.5 to 2. The factor loading direction is generated using signals simulated from the `sample` function. A new artificial data set is produced with the command below:
+
+```{r}
+dt1 <- bsem::simdata(
+  blocks = B,
+  paths = NULL,
+  exogenous = NULL
+)
+```
+
+The `paths` and` exogenous` arguments must be defined as `NULL` to obtain a data set suitable for factor analysis. Now we can run `bsem::sem` to check whether the `bsem::sem` retrieve estimates close to the real values of the parameters. We simply use the data argument and the blocks argument to specify the one-factor model:
+
+```{r, results = F, eval = F, echo = T}
+unifact <- bsem::sem(
+  data = dt1$data,
+  blocks = dt1$blocks,
+  chains = 4,
+  cores = 4
+)
+```
+
+```{r, results = F, echo = F}
+unifact <- bsem::sem(
+  data = dt1$data,
+  blocks = dt1$blocks,
+  chains = 4, cores = 1  
+)
+```
+
+
+A warning is displayed if the direction of the outer model loadings is not specified. In this case, random values are assigned.
+Descriptive statistics for the posterior factor loadings are showed in the R console inspired on the `rstan` fashion (based on ``rstan::monitor``). In general, the posterior mean is the Bayesian estimator first choice:
+
+```{r}
+unifact
+```
+
+The structural model can be easily viewed with the plotting routine `bsem::plot`:
+
+```{r}
+plot(unifact)
+```
+
+Moreover, we can compare the posterior factor loadings and the scores with the true values using the `bsem::arrayplot` function. For example:
+
+```{r}
+gridExtra::grid.arrange(bsem::arrayplot(dt1$real$lambda, main = "scores (lambda)", -4, 4),
+  bsem::arrayplot(unifact$mean_lambda, main = "scores estimate", -4, 4),
+  bsem::arrayplot(dt1$real$alpha, main = "loadings (alpha)", -4, 4),
+  bsem::arrayplot(unifact$mean_alpha, main = "loadings estimate", -4, 4),
+  layout_matrix = matrix(c(1, 1, 3, 3, 2, 2, 4, 4), ncol = 2)
+)
+
+```
+
+The ``bsem::arrayplot`` graphs show that the loadings and scores pattern were captured by the model. In order to get closer estimates it may be necessary to increase the number of iterations or the warmup period since this is a model with many parameters.
+
+```{r}
+loadings_names <- rownames(unifact$mean_alpha)
+find <- paste0("alpha[", which(loadings_names %in% unlist(unifact$blocks)), ",", rep(1:length(unifact$blocks), lengths(unifact$blocks)), "]")
+
+bayesplot::mcmc_trace(unifact$posterior$alpha[, , find])
+```
+
+Remember each chains runs in a separate thread, thus, it is recommended specifying a number of cores at least equal to the number of chains. Indeed, from our experience, an increase in the number of iterations raises the runtime but considerably improves the interval and point estimates. 
+
+## Bi-factor CFA
+
+The data generated for the uni-factor example, is also used here. This example refers to an application of the bi-factor model ( [Jennrich and Bentler](https://link.springer.com/article/10.1007/s11336-011-9218-4), 2011; [Gibbons and Hedeker](https://link.springer.com/article/10.1007/s11336-011-9218-4), 1992). The ideia behind this application is to show how flexible is SEM. From our generated data we have that variables should manifest only the latent variable `F1`. 
+
+- The list object `B` represents each block, indicating which manifest variables are related to each construct. `B` and, consequently, `signals` are modified for a bi-factor analysis.
+
+```{r}
+B$G1 <- 1:3
+B$G2 <- 4:6
+B$G3 <- 7:8
+
+B
+```
+
+```{r}
+dt2 <- bsem::simdata(
+  blocks = B,
+  paths = NULL,
+  exogenous = NULL
+)
+```
+
+Simply use the data argument and the blocks argument to specify the bi-factor model above:
+
+```{r, results = F, eval = F, echo = T}
+bifact <- bsem::sem(
+  data = dt2$data,
+  blocks = dt2$blocks,
+  chains = 4
+)
+```
+
+
+```{r, results = F, eval = T, echo = F}
+bifact <- bsem::sem(
+  data = dt2$data,
+  blocks = dt2$blocks,
+  chains = 4
+)
+```
+
+The structural model is displayed using `bsem::plot`:
+
+```{r, echo=F}
+plot(bifact)
+```
+
+Compare the posterior factor loadings and the scores with the true values using the `bsem::arrayplot` function:
+
+```{r,echo = F}
+gridExtra::grid.arrange(bsem::arrayplot(dt2$real$lambda, main = "scores (lambda)", -4, 4),
+  bsem::arrayplot(bifact$mean_lambda, main = "scores estimate", -4, 4),
+  bsem::arrayplot(dt2$real$alpha, main = "loadings (alpha)", -4, 4),
+  bsem::arrayplot(bifact$mean_alpha, main = "loadings estimate", -4, 4),
+  layout_matrix = matrix(c(1, 1, 3, 3, 2, 2, 4, 4), ncol = 2)
+)
+```
+
+The traceplot using `bayesplot::mcmc_trace`:
+
+```{r, echo = F}
+loadings_names <- rownames(bifact$mean_alpha)
+find <- paste0("alpha[", which(loadings_names %in% unlist(bifact$blocks)), ",", rep(1:length(bifact$blocks), lengths(bifact$blocks)), "]")
+
+bayesplot::mcmc_trace(bifact$posterior$alpha[, , find])
+```
+
+The ``bsem::arrayplot`` graphs show that the loadings and scores pattern were captured by the model. An increase in the number of iterations or the warmup period may improve the point estimates.
+  
+## Multi-factor CFA 
+
+The implemented routines allow partial and full confirmatory factor analysis (CFA). So, at least one variable must be chosen to express each construct before running into the analysis. In other words, the user needs to specify at least one manifest variable that lead each block. In this way, semi-confirmatory FA assists the researcher in evidencing the possible structures to be tested in a conceptual (full) CFA later on.
+
+```{r}
+dt3 <- bsem::simdata(paths = NULL, 
+                     exogenous = NULL)
+```
+
+- The list of blocks represent that indicates only the manifest variables related to each construct:
+
+```{r}
+dt3$blocks
+```
+
+- Descriptive statistics for the posterior factor loadings are showed in the result in `rstan` fashion (based on ``rstan::monitor``):
+
+```{r, results = F, echo = T, eval = F}
+multifact <- bsem::sem(data = dt3$data,
+                       blocks = dt3$blocks, 
+                       chains = 4
+                       )
+```
+
+```{r, results = F, echo = F, eval = T}
+multifact <- bsem::sem(data = dt3$data,
+                       blocks = dt3$blocks, 
+                       chains = 4
+                       )
+```
+
+- The structural model can be easily viewed with the plotting routine `bsem::plot`:
+
+```{r, echo = F}
+plot(multifact)
+```
+
+```{r, echo = F}
+gridExtra::grid.arrange(
+  bsem::arrayplot(multifact$mean_lambda, main = "estimates", -4, 4),
+  bsem::arrayplot(dt3$real$lambda, main = "lambda (scores)", -4, 4),
+  bsem::arrayplot(multifact$mean_alpha, main = "estimates", -4, 4),
+  bsem::arrayplot(dt3$real$alpha, main = "alpha (loadings)", -4, 4),
+  layout_matrix = matrix(c(1, 1, 3, 3, 2, 2, 4, 4), ncol = 2)
+)
+```
+
+```{r, echo = F}
+loadings_names <- rownames(multifact$mean_alpha)
+find <- paste0("alpha[", which(loadings_names %in% unlist(multifact$blocks)), ",", rep(1:length(multifact$blocks), lengths(multifact$blocks)), "]")
+
+bayesplot::mcmc_trace(multifact$posterior$alpha[, , find])
+```
+
+The recursive arrows indicate the estimate for each error variance. From this example, we found that the estimates pattern are tighly close to the true values of the parameters even when the signals are not passed. Also, we have observed that the part of the analysis is intended to confirm the predefined constructs CFA (first loadings matrix lines) and the other is intended to express which variable can compose a later full CFA.
+
+## SEM with exogenous variables. 
+
+
+
+# Graphical posterior analysis 
+
+The first thing to do is to check posterior statistics in order to assess whether the estimates are good to describe the proposed CFA or SEM model.
+
+## Interval estimate
+
+Two types of intervals can be obtained:  
+
+### HPD interval  
+- The narrowest (highest posterior density - HPD) credibility interval can be retrieved using `.$credint`. We have computed HPD intervals fo the factor loadings (alpha), scores (lambda), and regression coefficients (beta).
+
+```{r}
+names(multifact$credint)
+```
+
+- This data can be used to plot interval estimates using two packages, `ggplot2` and `tidybayes`:
+
+```{r, results = F, message = F, warning= F} 
+library("ggplot2")
+library("tidybayes")
+```
+
+- `dt` data.frame object has the mean loadings and the HPD interval lower and upper limits (`ll` and `lu`):
+
+```{r}
+dt <- data.frame(
+  li = multifact$credint$alpha[, 1],
+  lu = multifact$credint$alpha[, 2],
+  m = c(multifact$mean_alpha)
+)
+```
+
+- `lnames` and `snames` are used to find the loadings of the conceptual model (those that might not equal zero).
+
+```{r}
+lnames <- rownames(multifact$mean_alpha)
+snames <- rownames(multifact$mean_lambda)
+```
+
+- `find` help us finding these values:
+
+```{r}
+find <- paste0("alpha[", which(lnames %in% unlist(multifact$blocks)), ",", rep(1:length(multifact$blocks), lengths(multifact$blocks)), "]")
+
+dt <- dt[find, ]
+```
+
+- One of the options to plot the loadings HPD intervals chart is:
+```{r}
+ggplot(aes(y = find, x = m, xmin = li, xmax = lu), data = dt) +
+  geom_pointintervalh() +
+  theme_classic() +
+  labs(
+    title = paste("Latent variable", colnames(multifact$mean_alpha)[3]),
+    x = "Highest posterior density interval",
+    y = "variable"
+  )
+```
+
+In the SEM example above, all intervals regarding the loading estimates from the  conceptual relationships do not include zero. 
+
+### Equal tails interval
+
+Alternatively, it is possible to access equal tails credibility intevals using the `bayesplot` package:
+
+````{r, message = F, message = F}
+library("bayesplot")
+```
+
+- `find` help us finding the loading values that have been previously determined to estimate the latent scores:
+
+```{r, eval =F}
+find <- paste0("alpha[", which(lnames %in% unlist(multifact$blocks)), ",", rep(1:length(multifact$blocks), lengths(multifact$blocks)), "]")
+
+dt <- dt[find, ]
+```
+
+- The equal tails intervals are:
+
+````{r, warning = F}
+gridExtra::grid.arrange(mcmc_areas(multifact$posterior$alpha[, , find]),
+  mcmc_intervals(multifact$posterior$alpha[, , find]),
+  layout_matrix = matrix(c(1, 1, 2, 2), ncol = 2)
+)
+````
+
+In addition to the possibilities for intervals, other `mcmc_.` type graphs are highly recommended, several options include histograms, violin plots, pair plots and others.
