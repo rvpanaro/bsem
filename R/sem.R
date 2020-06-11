@@ -111,9 +111,25 @@ sem <-
            scaled = FALSE,
            ...) {
 
+    if(!class(data) %in%  c("matrix", "data.frame")){
+      stop("data misspecification: data should be matrix of numeric values")
+    }
+    else if(class(data) %in% "data.frame" ){
+      data <- as.data.frame.matrix(data)
+    }
+
+    if(all(!sapply(data, is.numeric))){
+      stop("data misspecification: at least one column must be numeric")
+    }
+    else{
+      data <- data[, sapply(data, is.numeric)]
+    }
+
     ifelse(scaled, X <-
       t(scale(data)), X <-
       t(data)) # format: lines = R-space (variables) and columns= Q-space (observations)
+
+
     if (is.null(row_names)) {
       row_names <- paste0("X", 1:nrow(data))
     }

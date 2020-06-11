@@ -166,7 +166,7 @@ plot.bsem <-
       smooth = T,
       arrows = "to",
       dashes = dashes,
-      width = abs(as.numeric(lbl)) * width,
+      width = min(abs(as.numeric(lbl)) * width, 5),
       font.size = fontsize
     )
 

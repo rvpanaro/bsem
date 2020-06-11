@@ -45,8 +45,8 @@
         print(round(y$exogenous[[i]],
                     digits = digits), digits = digits)
       }
-      cat("\n---\n")
     }
+    cat("\n---\n")
 }
 
 #' 'bsem' object summary
@@ -101,9 +101,9 @@ summary.bsem <-
       rownames(aux_blocks[[i]]) <- rownames(x$mean_alpha)[rownames(x$mean_alpha) %in%  x$blocks[[i]]]
 
       aux_blocks[[i]] <- cbind(
-        aux_blocks[[i]][, c("mean", "50%", "sd")],
-        aux_credint_blocks[[i]],
-        aux_blocks[[i]][, c("n_eff", "Rhat")]
+        matrix(aux_blocks[[i]][, c("mean", "50%", "sd")], ncol = 3),
+        matrix(aux_credint_blocks[[i]], ncol = 2),
+        matrix(aux_blocks[[i]][, c("n_eff", "Rhat")], ncol = 2)
       )
       colnames(aux_blocks[[i]]) <- c("mean", "50%", "sd", "HPD.l", "HPD.u", "n_eff", "Rhat")
       print(round(aux_blocks[[i]], digits), digits)
@@ -120,9 +120,9 @@ summary.bsem <-
       rownames(aux_var) <- paste0("sigma2[", 1:nrow(aux_var), "]")
 
       aux_var <- cbind(
-        aux_var[, c("mean", "50%", "sd")],
-        aux_credint_sigma2,
-        aux_var[, c("n_eff", "Rhat")]
+        matrix(aux_var[, c("mean", "50%", "sd")], ncol = 3),
+        matrix(aux_credint_sigma2, ncol = 2),
+        matrix(aux_var[, c("n_eff", "Rhat")], ncol = 2)
       )
       colnames(aux_var) <- c("mean", "50%", "sd", "HPD.l", "HPD.u", "n_eff", "Rhat")
       print(round(aux_var, digits), digits)
@@ -150,9 +150,9 @@ summary.bsem <-
       rownames(aux_paths[[i]]) <- x$paths[[i]]
 
       aux_paths[[i]] <- cbind(
-        aux_paths[[i]][, c("mean", "50%", "sd")],
-        aux_credint_paths[[i]],
-        aux_paths[[i]][, c("n_eff", "Rhat")]
+        matrix(aux_paths[[i]][, c("mean", "50%", "sd")], ncol = 3),
+        matrix(aux_credint_paths[[i]], ncol = 2),
+        matrix(aux_paths[[i]][, c("n_eff", "Rhat")], ncol = 2)
       )
       colnames(aux_paths[[i]]) <- c("mean", "50%", "sd", "HPD.l", "HPD.u", "n_eff", "Rhat")
       print(round(aux_paths[[i]], digits), digits)
@@ -212,9 +212,9 @@ summary.bsem <-
         rownames(aux_exogenous[[i]]) <- c("intercept", x$exogenous[[i]], paste0("tau2[", i,"]"))
 
         aux_exogenous[[i]] <- cbind(
-          aux_exogenous[[i]][, c("mean", "50%", "sd")],
-          aux_credint_exogenous[[i]],
-          aux_exogenous[[i]][, c("n_eff", "Rhat")]
+          matrix(aux_exogenous[[i]][, c("mean", "50%", "sd")], ncol = 3),
+          matrix(aux_credint_exogenous[[i]], ncol = 2),
+          matrix(aux_exogenous[[i]][, c("n_eff", "Rhat")], ncol = 2)
         )
         colnames(aux_exogenous[[i]]) <- c("mean", "50%", "sd", "HPD.l", "HPD.u", "n_eff", "Rhat")
         print(round(aux_exogenous[[i]], digits), digits)
