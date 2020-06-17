@@ -3,6 +3,7 @@ library(shinythemes)
 library(shinyjs)
 library(plotly)
 library(visNetwork)
+library(shinycssloaders)
 source("helpers.R")
 
 fluidPage(
@@ -55,7 +56,7 @@ fluidPage(
           numericInput(
             inputId = "K",
             "Number of latent variables (factors)",
-            value = 1,
+            value = 0,
             min = 1,
             max = 1,
             width = "auto"
@@ -130,53 +131,87 @@ fluidPage(
       navlistPanel(
         "Outcome",
         tabPanel(
-          "Diagram (mean)",
-          visNetworkOutput("network")
+          "Posterior mean diagram",
+          conditionalPanel(condition = "input.run1",
+          visNetworkOutput("network")%>% withSpinner(color = "#009933")
+          )
         ),
         tabPanel(
-          "Posterior mean",
+          "Posterior mean heatmap",
           tabsetPanel(
             type = "tabs",
-            tabPanel("Loadings", plotlyOutput("loadings")),
-            tabPanel("Scores", plotlyOutput("scores"))
+            tabPanel("Loadings",
+                     conditionalPanel(condition = "input.run1",
+                                                  plotlyOutput("loadings") %>% withSpinner(color = "#009933"))
+            ),
+
+            tabPanel("Scores",
+                     conditionalPanel(condition = "input.run1",
+                                                plotlyOutput("scores") %>% withSpinner(color = "#009933"))
+            )
           )
         ),
         tabPanel(
           "Traceplot",
           tabsetPanel(
             type = "tabs",
-            tabPanel("Loadings", plotlyOutput("trace_loadings")),
-            tabPanel("Scores", plotlyOutput("trace_scores"))
+            tabPanel(
+              "Loadings",
+              conditionalPanel(condition = "input.run1",
+              uiOutput("selectize_trace_loadings"),
+                plotlyOutput("trace_loadings") %>% withSpinner(color = "#009933"))
+            ),
+            tabPanel(
+              "Scores",
+              conditionalPanel(condition = "input.run1",
+              uiOutput("selectize_trace_scores"),
+                plotlyOutput("trace_scores") %>%   withSpinner(color = "#009933"))
+            )
           )
         ),
         tabPanel(
           "Posterior density",
           tabsetPanel(
             type = "tabs",
-            tabPanel("Loadings", plotlyOutput("dens_loadings")),
-            tabPanel("Scores", plotlyOutput("dens_scores"))
+            tabPanel(
+              "Loadings",
+              conditionalPanel(condition = "input.run1",
+              uiOutput("selectize_dens_loadings"),
+                plotlyOutput("dens_loadings") %>% withSpinner(color = "#009933")
+              )
+            ),
+            tabPanel(
+              "Scores",
+              conditionalPanel(condition = "input.run1",
+              uiOutput("selectize_dens_scores"),
+                plotlyOutput("dens_scores") %>% withSpinner(color = "#009933")
+              )
+            )
           )
         ),
         tabPanel(
           "Biplot",
+          conditionalPanel(condition = "input.run1",
           div(
             style = "display:flex; padding: 14 px",
             uiOutput("selectize_biplot1"),
             uiOutput("selectize_biplot2")
-          ), plotlyOutput("biplot")
+          ), plotlyOutput("biplot") %>% withSpinner(color = "#009933")
+        )
         ),
         tabPanel(
           "Radar plot",
+          conditionalPanel(condition = "input.run1",
           div(
             style = "display:flex; padding: 14 px",
             uiOutput("selectize_hex1"),
             uiOutput("selectize_hex2")
-          ), plotlyOutput("hex")
+          ), plotlyOutput("hex") %>% withSpinner(color = "#009933")
+        )
         ),
         tabPanel(
           a(img(src = "bsem.png", width = "70px"), href = "https://github.com/rvpanaro/bsem")
         )
-
       )
     )
   )

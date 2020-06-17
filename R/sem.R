@@ -122,7 +122,7 @@ sem <-
       stop("data misspecification: at least one column must be numeric")
     }
     else{
-      data <- data[, sapply(data, is.numeric)]
+      data <- data[, apply(data, 2,  is.numeric)]
     }
 
     ifelse(scaled, X <-

@@ -291,9 +291,13 @@ handler4 <- function() {
 
   e$standata$idy <- which(names(e$blocks) %in% names(e$paths))
   e$standata$idyi <- which(!(names(e$blocks) %in% names(e$paths)))
-
   e$standata$Ny <- length(e$paths)
   e$standata$nbeta <- lengths(e$paths)
+
+  e$standata$idy <- array(e$standata$idy)
+  e$standata$idyi <- array(e$standata$idyi)
+  e$standata$nbeta <- array(e$standata$nbeta)
+
 
   e$standata$idlamb <- unlist(sapply(1:e$standata$Ny, function(x) {
     which(names(e$blocks) %in% e$paths[[x]], arr.ind = T)
