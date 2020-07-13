@@ -86,11 +86,39 @@ shinyServer(
     })
 
     output$table <- renderDataTable({
-      filedata()
-    })
+      validate(
+        need(input$datafile, "Load your data!
+             Be aware that:
+                1) Only numeric variables are allowed.
+                2) All variables (columns) in the uploaded dataset are used to fit.
+                3) Rownames are considered if the first column is of 'character' type.
+             ")
+      )
+
+      if(input$std == "0"){
+        filedata()
+      }
+      else{
+        filedata() %>% scale
+      }
+      })
 
     output$hist <- renderPlotly({
-      aux <- filedata() %>%
+      validate(
+        need(input$datafile, "Please load your data in the 'Data loader' tab.")
+      )
+      validate(
+        need(input$invar_hist, "Please select some numeric variable(s).")
+      )
+
+      if(input$std == "0"){
+        aux2 <- filedata()
+      }
+      else{
+        aux2 <- filedata() %>% scale()
+      }
+
+      aux <-  aux2 %>%
         select(matches(gsub(" .*$", "", input$invar_hist))) %>%
         gather()
 
@@ -102,6 +130,14 @@ shinyServer(
     })
 
     output$boxp <- renderPlotly({
+      validate(
+        need(input$datafile, "Please load your data in the 'Data loader' tab.")
+      )
+
+      validate(
+        need(input$invar_hist, "Please select some numeric variable(s).")
+      )
+
       aux <- filedata() %>%
         select(matches(gsub(" .*$", "", input$invar_boxp))) %>%
         gather()
@@ -112,16 +148,31 @@ shinyServer(
     })
 
     output$dens <- renderPlot({
+      validate(
+        need(input$datafile, "Please load your data in the 'Data loader' tab.")
+      )
+
+      validate(
+        need(input$invar_hist, "Please select some numeric variable(s).")
+      )
+
       aux <- filedata() %>%
         select(matches(gsub(" .*$", "", input$invar_dens))) %>%
         gather()
 
       ggplot(aux, aes(x = value, y = key, fill = key)) +
         geom_density_ridges(alpha = 0.6)
-      # +    geom_histogram(aes(y = ..density..))
     })
 
     output$miss <- renderPlotly({
+      validate(
+        need(input$datafile, "Please load your data in the 'Data loader' tab.")
+      )
+
+      validate(
+        need(input$invar_hist, "Please select some variable(s).")
+      )
+
       aux <- filedata() %>%
         select(matches(gsub(" .*$", "", input$invar_miss)))
       p <- vis_miss(aux)
@@ -147,6 +198,10 @@ shinyServer(
 
     observeEvent(input$run1, {
       withBusyIndicatorServer("run1", {
+        validate(
+          need(input$datafile, "Please load your data in the 'Data' > 'Data loader' tab.")
+        )
+
         Sys.sleep(1)
         print(blocks())
         print(exogenous())
@@ -158,7 +213,6 @@ shinyServer(
         else if (exogenous() %>% unlist() %>% is.null() && paths() %>%
           unlist() %>%
           is.null()) {
-          print("model: fatorial")
 
           fit <- bsem::sem(data = numericdata(), blocks = blocks())
 
@@ -167,7 +221,6 @@ shinyServer(
           })
         }
         else if (paths() %>% unlist() %>% is.null()) {
-          print("model: fatorialEX")
 
           fit <- bsem::sem(data = numericdata(), blocks = blocks(), exogenous = exogenous())
 
@@ -176,7 +229,6 @@ shinyServer(
           })
         }
         else if (exogenous() %>% unlist() %>% is.null()) {
-          print("model: sem")
 
           fit <- bsem::sem(data = numericdata(), blocks = blocks(), paths = paths())
 
@@ -185,7 +237,6 @@ shinyServer(
           })
         }
         else {
-          print("model: semEX")
 
           fit <- bsem::sem(data = numericdata(), blocks = blocks(), paths = paths(), exogenous = exogenous())
           output$summary <- renderPrint({
@@ -427,7 +478,7 @@ shinyServer(
         lapply(1:input$J, function(i) {
           selectizeInput(
             inputId = paste0("invar_path", i),
-            paste("Reponse score in path", i),
+            paste("Response score in path", i),
             choices = names(blocks()),
             selected = names(blocks())[i],
             multiple = FALSE

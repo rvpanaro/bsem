@@ -6,6 +6,7 @@
 #' @param ... further arguments passed to or from print methods
 #' @method print bsem
 #' @return none
+#' @seealso \code{\link[bsem]{bsem::simdata}}, \code{\link[bsem]{bsem::arrayplot}}, \code{\link[bsem]{bsem::summary.sem}}, \code{\link[bsem]{bsem::sem}}, \code{\link[bsem]{bsem::runShiny}}
 #'
 
  print.bsem <-
@@ -98,7 +99,7 @@ summary.bsem <-
                                 ncol = 2)
 
       colnames(aux_blocks[[i]]) <- colnames(stats)
-      rownames(aux_blocks[[i]]) <- rownames(x$mean_alpha)[rownames(x$mean_alpha) %in%  x$blocks[[i]]]
+
 
       aux_blocks[[i]] <- cbind(
         matrix(aux_blocks[[i]][, c("mean", "50%", "sd")], ncol = 3),
@@ -106,6 +107,8 @@ summary.bsem <-
         matrix(aux_blocks[[i]][, c("n_eff", "Rhat")], ncol = 2)
       )
       colnames(aux_blocks[[i]]) <- c("mean", "50%", "sd", "HPD.l", "HPD.u", "n_eff", "Rhat")
+      rownames(aux_blocks[[i]]) <- rownames(x$mean_alpha)[rownames(x$mean_alpha) %in%  x$blocks[[i]]]
+
       print(round(aux_blocks[[i]], digits), digits)
     }
 
@@ -117,7 +120,6 @@ summary.bsem <-
                             ncol = 2)
 
       colnames(aux_var) <- colnames(stats)
-      rownames(aux_var) <- paste0("sigma2[", 1:nrow(aux_var), "]")
 
       aux_var <- cbind(
         matrix(aux_var[, c("mean", "50%", "sd")], ncol = 3),
@@ -125,6 +127,7 @@ summary.bsem <-
         matrix(aux_var[, c("n_eff", "Rhat")], ncol = 2)
       )
       colnames(aux_var) <- c("mean", "50%", "sd", "HPD.l", "HPD.u", "n_eff", "Rhat")
+      rownames(aux_var) <- paste0("sigma2[", 1:nrow(aux_var), "]")
       print(round(aux_var, digits), digits)
 
   if(x$model %in% c("semNA", "sem", "semNAEX", "semEX") ){
@@ -147,7 +150,6 @@ summary.bsem <-
                             ncol = 2)
 
       colnames(aux_paths[[i]]) <- colnames(stats)
-      rownames(aux_paths[[i]]) <- x$paths[[i]]
 
       aux_paths[[i]] <- cbind(
         matrix(aux_paths[[i]][, c("mean", "50%", "sd")], ncol = 3),
@@ -155,6 +157,7 @@ summary.bsem <-
         matrix(aux_paths[[i]][, c("n_eff", "Rhat")], ncol = 2)
       )
       colnames(aux_paths[[i]]) <- c("mean", "50%", "sd", "HPD.l", "HPD.u", "n_eff", "Rhat")
+      rownames(aux_paths[[i]]) <- x$paths[[i]]
       print(round(aux_paths[[i]], digits), digits)
     }
    }
@@ -209,7 +212,6 @@ summary.bsem <-
         )
 
         colnames(aux_exogenous[[i]]) <- colnames(stats)
-        rownames(aux_exogenous[[i]]) <- c("intercept", x$exogenous[[i]], paste0("tau2[", i,"]"))
 
         aux_exogenous[[i]] <- cbind(
           matrix(aux_exogenous[[i]][, c("mean", "50%", "sd")], ncol = 3),
@@ -217,6 +219,7 @@ summary.bsem <-
           matrix(aux_exogenous[[i]][, c("n_eff", "Rhat")], ncol = 2)
         )
         colnames(aux_exogenous[[i]]) <- c("mean", "50%", "sd", "HPD.l", "HPD.u", "n_eff", "Rhat")
+        rownames(aux_exogenous[[i]]) <- c("intercept", x$exogenous[[i]], paste0("tau2[", i,"]"))
         print(round(aux_exogenous[[i]], digits), digits)
       }
     }
@@ -231,10 +234,10 @@ summary.bsem <-
     cat("\nTail Rhat:\n")
     print(tail(sort(z, decreasing = T)), digits = digits)
 
-    cat("\nmedian PVTE: ", median(x$PVTE), "\n")
+    cat("\nmedian PTVE: ", median(x$PTVE), "\n")
 
     if(x$model %in% c("sem", "semNA", "semEX", "semNAEX")){
-      cat("AFR2:", paste0(round(x$AFR2,2), '%'), "\n")
+      cat("R2:", paste0(round(x$AFR2,2), '%'), "\n")
     }
     summ <-list(blocks = aux_blocks,
                 var = aux_var,

@@ -19,3 +19,6 @@ none
 \description{
 'bsem' object print
 }
+\seealso{
+\code{\link[bsem]{bsem::simdata}}, \code{\link[bsem]{bsem::arrayplot}}, \code{\link[bsem]{bsem::summary.sem}}, \code{\link[bsem]{bsem::sem}}, \code{\link[bsem]{bsem::runShiny}}
+}

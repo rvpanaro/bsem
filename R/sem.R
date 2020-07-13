@@ -7,7 +7,7 @@
 #' @param blocks a mandatory named list of colnames (or integers in 1:ncol(data)) indicating the manisfest variables correpoding to each block; generic names are assumed for latent variables internally if not defined
 #' @param paths  list referring to the inner model paths; a list of characters or integers referring to the scores relationship; the jth first latent variable are explained if names(paths) is NULL
 #' @param exogenous  list referring to the inner model exogenous; a list of characters or integers referring to relationship between exogenous and latent variables; the lth first columns are explained if names(exogenous) is NULL
-#' @param signals  list referring to the signals of the factor loadings initial values; must be true: (length(signals) == length(blocks)) && (lengths(signals) == lengths(blocks))
+#' @param signals  list referring to the signals of the factor loadings initial values; must be true: (length(signals) == length(blocks)) && (lengths(signals) == lengths(blocks)); (not allowed in runShiny)
 #' @param row_names  optional identifier for the observations (observation = row);
 #' @param prior_specs  prior settings for the Bayesian approach; only `normal` and `cauchy` for gamma0, gamma and beta; `gamma`, `lognormal` and `inv_gamma` for sigma2 and tau2 are available, those prior specifications are ignored if not needed (FA or SEM)
 #' @param pars  allows parameters to ommitted in the outcome; options are any subset of default c("alpha", "lambda", "sigma2")
@@ -24,7 +24,7 @@
 #' @return  An object of class \code{bsem}; a list of 14 to 19:
 #' \describe{
 #'    \item{stanfit}{S4 object of class stanfit}
-#'    \item{posterior}{the list of posterior draws separate by chains}
+#'    \item{posterior}{the list of posterior draws separated by chains}
 #'    \item{model}{character; pointer to pre-defined stan model}
 #'    \item{mean_alpha}{matrix of factor loadings posterior means}
 #'    \item{mean_lambda}{matrix of factor scores posterior means}
@@ -38,17 +38,17 @@
 #'    \item{paths}{list of paths}
 #'    \item{credint}{Highest posterior density intervals (HPD)}
 #'    \item{h}{vector of posterior communalities}
-#'    \item{PVTE}{vector of total variance proportions}
+#'    \item{PTVE}{vector of total variance proportions}
 #'    \item{AFR2}{adjusted coefficient of determination}
 #'    \item{SQE}{explained sums of squares}
 #'    \item{SQT}{total sums of squares}
 #' }
 #' @details
 #'
-#'Consider:
+#' Consider:
 #'
-#'- the outer model as:
-#'-- outter blocks:
+#' - the outer model as:
+#' -- outter blocks:
 #'
 #'  \deqn{X_{p x n} = \alpha_{p x k}\lambda_{k x n} + \epsilon_{p x n}}
 #'    where \eqn{X} is the data matrix with variables in the rows and sample elements in the columns,  \eqn{\alpha_{p x j}} is the column vector of loadings for the \eqn{jth} latent variable and \eqn{\lambda_{j x n}} is the row vector of scores for the  \eqn{jth} unobserved variable, \eqn{j =1,\dots,k}. Normality is assumed for the errors as \eqn{\epsilon_{ij}~ N(0, \sigma_i ^2)} for \eqn{i = 1,\dots, p}.
@@ -66,29 +66,30 @@
 #' @examples
 #' dt <- bsem::simdata()
 #' names(dt)
-#'
 #' \dontrun{
 #'
-#' semfit <- bsem::sem(data = dt$data,
-#'               blocks = dt$blocks,
-#'               paths = dt$paths,
-#'               exogenous = dt$exogenous,
-#'               signals = dt$signals,
-#'               iter = 2000,
-#'               warmup = 1000,
-#'               chains = 4)
+#' semfit <- bsem::sem(
+#'   data = dt$data,
+#'   blocks = dt$blocks,
+#'   paths = dt$paths,
+#'   exogenous = dt$exogenous,
+#'   signals = dt$signals,
+#'   iter = 2000,
+#'   warmup = 1000,
+#'   chains = 4
+#' )
 #' plot(semfit)
 #'
 #' gridExtra::grid.arrange(bsem::arrayplot(semfit$mean_lambda, main = "estimates", mini = -4, maxi = 4),
-#' bsem::arrayplot(dt$real$lambda, main = "lambda (scores)", mini = -4, maxi = 4),
-#' bsem::arrayplot(semfit$mean_alpha, main = "estimates", mini = -4, maxi = 4),
-#' bsem::arrayplot(dt$real$alpha, main = "alpha (loadings)", mini = -4, maxi = 4),
-#' layout_matrix = matrix(c(1, 1, 3, 3, 2, 2, 4, 4), ncol = 2)
+#'   bsem::arrayplot(dt$real$lambda, main = "lambda (scores)", mini = -4, maxi = 4),
+#'   bsem::arrayplot(semfit$mean_alpha, main = "estimates", mini = -4, maxi = 4),
+#'   bsem::arrayplot(dt$real$alpha, main = "alpha (loadings)", mini = -4, maxi = 4),
+#'   layout_matrix = matrix(c(1, 1, 3, 3, 2, 2, 4, 4), ncol = 2)
 #' )
 #' }
 #'
 #' @author Renato Panaro
-#' @seealso \code{\link[bsem]{bsem::simdata}}, \code{\link[bsem]{bsem::arrayplot}}, \code{\link[bsem]{bsem::summary.sem}}, \code{\link[bsem]{bsem::print.sem}}
+#' @seealso \code{\link[bsem]{plot.sem}}, \code{\link[bsem]{simdata}}, \code{\link[bsem]{arrayplot}}, \code{\link[bsem]{summary.sem}}, \code{\link[bsem]{print.sem}}
 
 sem <-
   function(data,
@@ -110,19 +111,18 @@ sem <-
            chains = 4,
            scaled = FALSE,
            ...) {
-
-    if(!class(data) %in%  c("matrix", "data.frame")){
+    if (!class(data) %in% c("matrix", "data.frame")) {
       stop("data misspecification: data should be matrix of numeric values")
     }
-    else if(class(data) %in% "data.frame" ){
+    else if (class(data) %in% "data.frame") {
       data <- as.data.frame.matrix(data)
     }
 
-    if(all(!sapply(data, is.numeric))){
+    if (all(!sapply(data, is.numeric))) {
       stop("data misspecification: at least one column must be numeric")
     }
-    else{
-      data <- data[, apply(data, 2,  is.numeric)]
+    else {
+      data <- data[, apply(data, 2, is.numeric)]
     }
 
     ifelse(scaled, X <-
@@ -179,10 +179,10 @@ sem <-
           ))
         }
 
-        if(missing(exogenous)){
+        if (missing(exogenous)) {
           B[[i]] <- which(colnames(data) %in% blocks[[i]]) # search by variable names
         }
-        else{
+        else {
           B[[i]] <- which(colnames(data)[!colnames(data) %in% names(exogenous)] %in% blocks[[i]]) # search by variable names
         }
       }
@@ -203,10 +203,10 @@ sem <-
 
         B[[i]] <- blocks[[i]]
 
-        if(missing(exogenous)){
+        if (missing(exogenous)) {
           blocks[[i]] <- colnames(data)[blocks[[i]]]
         }
-        else{
+        else {
           blocks[[i]] <- colnames(data)[!colnames(data) %in% names(exogenous)][blocks[[i]]] # search by variable names
         }
       }
@@ -521,7 +521,7 @@ sem <-
     )
 
     if (stanfit@model_name %in% c("factorialNA", "semNA", "factorialNAEX", "semNAEX")) {
-      output$Xna <- stats[startsWith(rownames(stats), "Xna"), "mean"]
+      output$mean_Xna <- stats[startsWith(rownames(stats), "Xna"), "mean"]
     }
     if (stanfit@model_name %in% c("sem", "semNA", "semEX", "semNAEX")) {
       output$mean_beta <- stats[startsWith(rownames(stats), "beta"), "mean"]
@@ -595,7 +595,7 @@ sem <-
     # output$credint <- credint
     output$h <-
       diag(output$mean_alpha %*% t(output$mean_alpha)) ## comunalities
-    output$PVTE <- 100 * output$h / (output$h + output$mean_sigma2) ## proportion of total variability
+    output$PTVE <- 100 * output$h / (output$h + output$mean_sigma2) ## proportion of total variability
 
     output$SQE <-
       sum(((
@@ -623,8 +623,9 @@ sem <-
       names(output$mean_sigma2) <- colnames(data),
       names(output$mean_sigma2) <- colnames(data)[-standata$idex]
     )
-    if(!missing(exogenous))
+    if (!missing(exogenous)) {
       names(output$mean_tau2) <- names(exogenous)
+    }
 
     cat("\nDone!\n")
     class(output) <- "bsem"

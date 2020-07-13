@@ -20,38 +20,44 @@
 #' @importFrom viridis viridis
 #' @importFrom visNetwork visNetwork visNodes visOptions
 #' @importFrom magrittr %>%
-#' @author Renato Panaro
+#' @author RVPanaro
+#' @seealso \code{\link[bsem]{sem}}, \code{\link[bsem]{simdata}}, \code{\link[bsem]{arrayplot}}, \code{\link[bsem]{summary.sem}}, \code{\link[bsem]{print.sem}}
 #' @examples
 #'
 #' dt <- bsem::simdata()
 #' names(dt)
-#'
 #' \dontrun{
 #'
-#' semfit <- bsem::sem(data = dt$data,
-#'               blocks = dt$blocks,
-#'               paths = dt$paths,
-#'               exogenous = dt$exogenous,
-#'               signals = dt$signals,
-#'               iter = 2000,
-#'               warmup = 1000,
-#'               chains = 4)
+#' semfit <- bsem::sem(
+#'   data = dt$data,
+#'   blocks = dt$blocks,
+#'   paths = dt$paths,
+#'   exogenous = dt$exogenous,
+#'   signals = dt$signals,
+#'   iter = 2000,
+#'   warmup = 1000,
+#'   chains = 4
+#' )
 #' plot(semfit)
-#'}
+#' }
 #'
-
 plot.bsem <-
-  function(x, digits = 2, fontsize = 15, width = 2, size = 10, ...) {
+  function(x,
+           digits = 2,
+           fontsize = 15,
+           width = 5,
+           size = 10,
+           ...) {
     invisible(capture.output(y <- summary(x, digits = digits)))
 
     # x <- fit
     blocks <- y[["blocks"]]
     var <- y[["var"]]
 
-    if(x$model %in% c("factorialEX", "factorialNAEX", "semEX", "semNAEX")){
+    if (x$model %in% c("factorialEX", "factorialNAEX", "semEX", "semNAEX")) {
       lvl <- unique(c(unlist(x$blocks), names(x$blocks), names(x$exogenous)))
     }
-    else{
+    else {
       lvl <- unique(c(unlist(x$blocks), names(x$blocks)))
     }
 
@@ -78,14 +84,17 @@ plot.bsem <-
       lbl <- c(
         format(round(unlist(sapply(1:length(blocks), function(x) blocks[[x]][, "mean"])), digits), digits = digits),
         format(round(unlist(sapply(1:length(paths), function(x) paths[[x]][, "mean"])), digits), digits = digits),
-        format(round(unlist(sapply(1:length(exogenous), function(y) exogenous[[y]][-c(1, lengths(x$exogenous)[y]+2), "mean"])), digits), digits = digits),
+        format(round(unlist(sapply(1:length(exogenous), function(y) exogenous[[y]][-c(1, lengths(x$exogenous)[y] + 2), "mean"])), digits), digits = digits),
         format(round(x$mean_sigma2[names(x$mean_sigma2) %in% lvl], digits), digits = digits),
         format(round(x$mean_tau2[names(x$mean_tau2) %in% lvl], digits), digits = digits)
       )
 
-      dashes <- c(rep(c(F, T, T), c(sum(lengths(x$blocks)), sum(length(x$blocks))), lengths(exogenous)),
-                  !names(x$mean_sigma2) %in% lvl,
-                  !names(x$mean_tau2) %in% lvl)
+      dashes <- c(
+        rep(c(F, T), c(sum(lengths(x$blocks)), sum(length(x$blocks)))),
+        rep(c(T), c(sum(length(x$blocks)))),
+        !names(x$mean_sigma2) %in% lvl,
+        !names(x$mean_tau2) %in% lvl
+      )
     }
     else if (x$model %in% c("sem", "semNA")) {
       paths <- y[["paths"]]
@@ -109,7 +118,10 @@ plot.bsem <-
         format(round(x$mean_sigma2[names(x$mean_sigma2) %in% lvl], digits), digits = digits)
       )
 
-      dashes <- c(rep(c(F, T), c(sum(lengths(x$blocks)), sum(length(x$blocks)))), !names(x$mean_sigma2) %in% lvl)
+      dashes <- c(
+        rep(c(F, T), c(sum(lengths(x$blocks)), sum(length(x$blocks)))),
+        !names(x$mean_sigma2) %in% lvl
+      )
     }
     else if (x$model %in% c("factorialEX", "factorialNAEX")) {
       exogenous <- y[["exogenous"]]
@@ -130,14 +142,16 @@ plot.bsem <-
 
       lbl <- c(
         format(round(unlist(sapply(1:length(blocks), function(x) blocks[[x]][, "mean"])), digits), digits = digits),
-        format(round(unlist(sapply(1:length(exogenous), function(y) exogenous[[y]][-c(1, lengths(x$exogenous)[y]+2), "mean"])), digits), digits = digits),
+        format(round(unlist(sapply(1:length(exogenous), function(y) exogenous[[y]][-c(1, lengths(x$exogenous)[y] + 2), "mean"])), digits), digits = digits),
         format(round(x$mean_sigma2[names(x$mean_sigma2) %in% lvl], digits), digits = digits),
         format(round(x$mean_tau2[names(x$mean_tau2) %in% lvl], digits), digits = digits)
       )
 
-      dashes <- c(rep(c(F, T, T), c(sum(lengths(x$blocks)), sum(length(x$blocks))), lengths(exogenous)),
-                  !names(x$mean_sigma2) %in% lvl,
-                  !names(x$mean_tau2) %in% lvl)
+      dashes <- c(
+        rep(c(F, T), c(sum(lengths(x$blocks)), sum(length(x$blocks)))),
+        !names(x$mean_sigma2) %in% lvl,
+        !names(x$mean_tau2) %in% lvl
+      )
     }
     else {
       from <- na.omit(factor(c(
@@ -195,7 +209,7 @@ plot.bsem <-
     )
 
     # We can plot the graph directly
-      visNetwork::visNetwork(nodes = node, edges = edge, ...) %>%
+    visNetwork::visNetwork(nodes = node, edges = edge, ...) %>%
       visNetwork::visOptions(highlightNearest = TRUE) %>%
       visNetwork::visNodes(font = list(color = "white"), size = size)
   }

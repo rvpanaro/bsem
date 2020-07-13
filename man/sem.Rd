@@ -30,7 +30,7 @@ sem(
 
 \item{exogenous}{list referring to the inner model exogenous; a list of characters or integers referring to relationship between exogenous and latent variables; the lth first columns are explained if names(exogenous) is NULL}
 
-\item{signals}{list referring to the signals of the factor loadings initial values; must be true: (length(signals) == length(blocks)) && (lengths(signals) == lengths(blocks))}
+\item{signals}{list referring to the signals of the factor loadings initial values; must be true: (length(signals) == length(blocks)) && (lengths(signals) == lengths(blocks)); (not allowed in runShiny)}
 
 \item{row_names}{optional identifier for the observations (observation = row);}
 
@@ -124,7 +124,7 @@ layout_matrix = matrix(c(1, 1, 3, 3, 2, 2, 4, 4), ncol = 2)
 
 }
 \seealso{
-\code{\link[bsem]{bsem::simdata}}, \code{\link[bsem]{bsem::arrayplot}}, \code{\link[bsem]{bsem::summary.sem}}, \code{\link[bsem]{bsem::print.sem}}
+\code{\link[bsem]{plot.sem}}, \code{\link[bsem]{simdata}}, \code{\link[bsem]{arrayplot}}, \code{\link[bsem]{summary.sem}}, \code{\link[bsem]{print.sem}}
 }
 \author{
 Renato Panaro

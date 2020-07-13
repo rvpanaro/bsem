@@ -8,8 +8,20 @@ source("helpers.R")
 
 fluidPage(
   theme = shinytheme("cosmo"),
+  tags$head(
+    tags$style(
+      HTML(".shiny-notification {
+             position:fixed;
+             top: calc(15%);
+             left: calc(85%);
+             }
+             "
+      )
+    )
+  ),
   navbarPage(
     "shiny-bsem",
+    id = "main",
     tabPanel(
       "Data",
       navlistPanel(
@@ -17,8 +29,11 @@ fluidPage(
         tabPanel(
           "Data loader",
           fileInput("datafile", "Choose CSV file",
-            accept = c("csv", "comma-separated-values", ".csv")
+              accept = c("csv", "comma-separated-values", ".csv")
           ),
+          radioButtons("std", label = "Standardize?",
+                      choices = list("No" = 0, "Yes" = 1),
+                                         selected = 0),
           dataTableOutput("table")
         ),
         "Descriptives",
@@ -28,14 +43,14 @@ fluidPage(
           plotlyOutput("hist")
         ),
         tabPanel(
-          "Boxplot",
-          uiOutput("selectize2"),
-          plotlyOutput("boxp")
-        ),
-        tabPanel(
           "Density",
           uiOutput("selectize3"),
           plotOutput("dens")
+        ),
+        tabPanel(
+          "Boxplot",
+          uiOutput("selectize2"),
+          plotlyOutput("boxp")
         ),
         tabPanel(
           "Missing",
@@ -57,8 +72,8 @@ fluidPage(
             inputId = "K",
             "Number of latent variables (factors)",
             value = 0,
-            min = 1,
-            max = 1,
+            min = 0,
+            max = 0,
             width = "auto"
           ),
           uiOutput("selectize_blocks")
@@ -107,7 +122,7 @@ fluidPage(
           withBusyIndicatorUI(
             actionButton(
               "run1",
-              "Process data",
+              "Fit model",
               class = "btn-primary", icon("play"),
               style = "color: #fff; background-color: #009933;"
             )
@@ -141,13 +156,10 @@ fluidPage(
           tabsetPanel(
             type = "tabs",
             tabPanel("Loadings",
-                     conditionalPanel(condition = "input.run1",
-                                                  plotlyOutput("loadings") %>% withSpinner(color = "#009933"))
+                     plotlyOutput("loadings") %>% withSpinner(color = "#009933")
             ),
-
             tabPanel("Scores",
-                     conditionalPanel(condition = "input.run1",
-                                                plotlyOutput("scores") %>% withSpinner(color = "#009933"))
+                     plotlyOutput("scores") %>% withSpinner(color = "#009933")
             )
           )
         ),
@@ -157,15 +169,13 @@ fluidPage(
             type = "tabs",
             tabPanel(
               "Loadings",
-              conditionalPanel(condition = "input.run1",
               uiOutput("selectize_trace_loadings"),
-                plotlyOutput("trace_loadings") %>% withSpinner(color = "#009933"))
+                plotlyOutput("trace_loadings") %>% withSpinner(color = "#009933")
             ),
             tabPanel(
               "Scores",
-              conditionalPanel(condition = "input.run1",
               uiOutput("selectize_trace_scores"),
-                plotlyOutput("trace_scores") %>%   withSpinner(color = "#009933"))
+                plotlyOutput("trace_scores") %>%   withSpinner(color = "#009933")
             )
           )
         ),
@@ -175,39 +185,31 @@ fluidPage(
             type = "tabs",
             tabPanel(
               "Loadings",
-              conditionalPanel(condition = "input.run1",
               uiOutput("selectize_dens_loadings"),
                 plotlyOutput("dens_loadings") %>% withSpinner(color = "#009933")
-              )
             ),
             tabPanel(
               "Scores",
-              conditionalPanel(condition = "input.run1",
               uiOutput("selectize_dens_scores"),
                 plotlyOutput("dens_scores") %>% withSpinner(color = "#009933")
-              )
             )
           )
         ),
         tabPanel(
           "Biplot",
-          conditionalPanel(condition = "input.run1",
           div(
             style = "display:flex; padding: 14 px",
             uiOutput("selectize_biplot1"),
             uiOutput("selectize_biplot2")
           ), plotlyOutput("biplot") %>% withSpinner(color = "#009933")
-        )
         ),
         tabPanel(
           "Radar plot",
-          conditionalPanel(condition = "input.run1",
           div(
             style = "display:flex; padding: 14 px",
             uiOutput("selectize_hex1"),
             uiOutput("selectize_hex2")
           ), plotlyOutput("hex") %>% withSpinner(color = "#009933")
-        )
         ),
         tabPanel(
           a(img(src = "bsem.png", width = "70px"), href = "https://github.com/rvpanaro/bsem")

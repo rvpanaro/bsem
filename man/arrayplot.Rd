@@ -33,12 +33,14 @@ arrayplot(
 Graphical representation for matrix class objects using lattice package
 }
 \examples{
-
 data(set2)
 
 arrayplot(set2$real$alpha)
 arrayplot(set2$real$alpha, colors = 0)
 }
 \seealso{
-
+\code{\link[bsem]{bsem::simdata}}, \code{\link[bsem]{bsem::summary.sem}}, \code{\link[bsem]{bsem::plot}}, \code{\link[bsem]{bsem::sem}}, \code{\link[bsem]{bsem::runShiny}}
+}
+\author{
+VD Mayrink
 }

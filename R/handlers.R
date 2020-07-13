@@ -391,8 +391,6 @@ handler5 <- function() {
 handler6 <- function() {
   e <- parent.frame()
   for (k in 1:e$K) {
-    # print("k")
-    # print(k)
 
     id_alp <- paste0("alpha[", e$B[[k]], ",", k, "]")
 
@@ -409,32 +407,23 @@ handler6 <- function() {
         for (i in which(startsWith(x = dimnames(e$samples$lambda)[3]$parameters, prefix = paste0("lambda[", k)))) {
           e$samples$lambda[, , i] <- e$samples$lambda[, , i] %*% -diag(2 * (c_means[, 1] > 0) - 1)
         }
-        # print("c_means")
-        # print(c_means)
-        if (e$stanfit@model_name %in% c("sem", "semNA")) {
+        if (e$stanfit@model_name %in% c("sem", "semNA", "semEX", "semNAEX")) {
           if (k %in% array(e$standata$idlamb)) {
-            # print('idlamb')
-            # print(array(e$standata$idlamb))
-            # print(which(array(e$standata$idlamb) == k))
             for (j in which(array(e$standata$idlamb) == k)) {
-              # print("before")
-              # print(colMeans(e$samples$beta[,,j]))
               e$samples$beta[, , j] <- e$samples$beta[, , j] %*% -diag(2 * (c_means[, 1] > 0) - 1)
-              # print("after")
-              # print(colMeans(e$samples$beta[,,j]))
             }
           }
-          # print('idy')
-          # print(k %in% 1:e$standata$Ny)
           if (k %in% 1:e$standata$Ny) {
             idx <- cbind(c(1, cumsum(e$standata$nbeta[-length(e$standata$nbeta)]) + 1), c(cumsum(e$standata$nbeta)))
             for (j in seq(idx[k, 1], idx[k, 2])) {
-              # print(seq(idx[k,1], idx[k,2]))
-              # print("before")
-              # print(colMeans(e$samples$beta[,,j]))
               e$samples$beta[, , j] <- e$samples$beta[, , j] %*% -diag(2 * (c_means[, 1] > 0) - 1)
-              # print("after")
-              # print(colMeans(e$samples$beta[,,j]))
+            }
+          }
+        }
+        if (e$stanfit@model_name %in% c("factorialNA", "factorialNAEX", "semNA", "semNAEX")) {
+          if (k %in% array(e$standata$idex)) {
+            for (j in which(array(e$standata$idex) == k)) {
+              e$samples$gamma[, , j] <- e$samples$gamma[, , j] %*% -diag(2 * (c_means[, 1] > 0) - 1)
             }
           }
         }
