@@ -1,4 +1,5 @@
 library(shiny)
+library(shinyjs)
 library(bsem)
 library(DT)
 library(tidyr)
@@ -105,7 +106,7 @@ shinyServer(
 
     output$hist <- renderPlotly({
       validate(
-        need(input$datafile, "Please load your data in the 'Data loader' tab.")
+        need(input$datafile, "Please load your data in the 'Data loader'.")
       )
       validate(
         need(input$invar_hist, "Please select some numeric variable(s).")
@@ -131,7 +132,7 @@ shinyServer(
 
     output$boxp <- renderPlotly({
       validate(
-        need(input$datafile, "Please load your data in the 'Data loader' tab.")
+        need(input$datafile, "Please load your data in the 'Data loader'.")
       )
 
       validate(
@@ -149,7 +150,7 @@ shinyServer(
 
     output$dens <- renderPlot({
       validate(
-        need(input$datafile, "Please load your data in the 'Data loader' tab.")
+        need(input$datafile, "Please load your data in the 'Data loader'.")
       )
 
       validate(
@@ -166,7 +167,7 @@ shinyServer(
 
     output$miss <- renderPlotly({
       validate(
-        need(input$datafile, "Please load your data in the 'Data loader' tab.")
+        need(input$datafile, "Please load your data in the 'Data loader'.")
       )
 
       validate(
@@ -201,8 +202,32 @@ shinyServer(
     observeEvent(input$run1, {
       withBusyIndicatorServer("run1", {
         validate(
-          need(input$datafile, "Please load your data in the 'Data' > 'Data loader' tab.")
+          need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
         )
+
+        if (input$K > 0) {
+          for (i in 1:input$K) {
+            validate(
+              need(length(input[[paste0("invar_block", i)]]) > 0, "At least one manifest varible must be selected in 'Factors'.")
+            )
+          }
+        }
+
+        if (input$J > 0) {
+          for (i in 1:input$J) {
+            validate(
+              need(length(input[[paste0("invar_idlamb", i)]]) > 0, "At least one common factor should explain the response factor in 'Paths'.")
+            )
+          }
+        }
+
+        if (input$L > 0) {
+          for (i in 1:input$L) {
+            validate(
+              need(length(input[[paste0("invar_idex", i)]]) > 0, "At least one common factor should explain each exogenous response in 'Exogenous'.")
+            )
+          }
+        }
 
         Sys.sleep(1)
         print(blocks())
@@ -213,265 +238,387 @@ shinyServer(
           stop("Please choose the desired variables for each block under 'Model' > 'Blocks'!")
         }
         else if (exogenous() %>% unlist() %>% is.null() && paths() %>% unlist() %>% is.null()) {
-          rv$fit <- bsem::sem(data = numericdata(), blocks = blocks())
+          fit <- bsem::sem(data = numericdata(), blocks = blocks())
         }
         else if (paths() %>% unlist() %>% is.null()) {
-          rv$fit <- bsem::sem(data = numericdata(), blocks = blocks(), exogenous = exogenous())
+          fit <- bsem::sem(data = numericdata(), blocks = blocks(), exogenous = exogenous())
         }
         else if (exogenous() %>% unlist() %>% is.null()) {
-          rv$fit <- bsem::sem(data = numericdata(), blocks = blocks(), paths = paths())
+          fit <- bsem::sem(data = numericdata(), blocks = blocks(), paths = paths())
         }
         else {
-          rv$fit <- bsem::sem(data = numericdata(), blocks = blocks(), paths = paths(), exogenous = exogenous())
+          fit <- bsem::sem(data = numericdata(), blocks = blocks(), paths = paths(), exogenous = exogenous())
         }
-      })
 
-      output$network <- renderVisNetwork({
-        validate(
-          need(input$datafile, "Please load your data in the 'Data' > 'Data loader' tab.")
-        )
+        rv$fit <- fit
 
-        validate(
-          need(length(rv$fit)>0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
-        )
-        print(plot(fit))
-      })
+        if (length(rv$fit) > 0) {
+          shinyjs::hide("downloadData")
+          shinyjs::hide("downloadFit")
+        }
+        else {
+          shinyjs::show("downloadData")
+          shinyjs::show("downloadFit")
+        }
 
-      output$scores <- renderPlotly({
-        fit$mean_lambda %>%
-          data.frame() %>%
-          mutate(fact = rownames(.)) %>%
-          gather(key = "key", value = "value", -fact) %>%
-          ggplot(aes(key, fact, fill = value)) +
-          geom_tile() +
-          scale_fill_gradient2(
-            limits = c(-max(abs(fit$mean_lambda)), max(abs(fit$mean_lambda))),
-            low = "blue", mid = "white", high = "red"
-          ) +
-          theme(axis.text.x = element_text(angle = 90, hjust = 1))
-      })
-
-      output$loadings <- renderPlotly({
-        fit$mean_alpha %>%
-          data.frame() %>%
-          mutate(var = rownames(.)) %>%
-          gather(key = "fact", value = "value", -var) %>%
-          ggplot(aes(fact, var, fill = value)) +
-          geom_tile() +
-          scale_fill_gradient2(
-            limits = c(-max(abs(fit$mean_alpha)), max(abs(fit$mean_alpha))),
-            low = "blue", mid = "white", high = "red"
+        output$selectize_dens_loadings <- renderUI({
+          selectizeInput(
+            inputId = "invar_dens_loadings",
+            "Select some loading",
+            choices = sprintf(
+              "alpha[%s,%s] (%s, %s)",
+              1:nrow(rv$fit$mean_alpha),
+              1:ncol(rv$fit$mean_alpha),
+              rownames(rv$fit$mean_alpha),
+              colnames(rv$fit$mean_alpha)
+            ),
+            multiple = FALSE
           )
-      })
+        })
 
-      output$selectize_dens_loadings <- renderUI({
-        selectizeInput(
-          inputId = "invar_dens_loadings",
-          "Select some loading",
-          choices = sprintf(
-            "alpha[%s,%s] (%s, %s)",
-            1:nrow(fit$mean_alpha),
-            1:ncol(fit$mean_alpha),
-            rownames(fit$mean_alpha),
-            colnames(fit$mean_alpha)
-          ),
-          multiple = FALSE
-        )
-      })
-
-      output$selectize_dens_scores <- renderUI({
-        selectizeInput(
-          inputId = "invar_dens_scores",
-          "Select some score",
-          choices = sprintf(
-            "lambda[%s,%s] (%s, %s)",
-            1:nrow(fit$mean_lambda),
-            1:ncol(fit$mean_lambda),
-            rownames(fit$mean_lambda),
-            colnames(fit$mean_lambda)
-          ),
-          multiple = FALSE
-        )
-      })
-
-      output$selectize_trace_loadings <- renderUI({
-        selectizeInput(
-          inputId = "invar_trace_loadings",
-          "Select some loading",
-          choices = sprintf(
-            "alpha[%s,%s] (%s, %s)",
-            1:nrow(fit$mean_alpha),
-            1:ncol(fit$mean_alpha),
-            rownames(fit$mean_alpha),
-            colnames(fit$mean_alpha)
-          ),
-          multiple = FALSE
-        )
-      })
-
-      output$selectize_trace_scores <- renderUI({
-        selectizeInput(
-          inputId = "invar_trace_scores",
-          "Select some score",
-          choices = sprintf(
-            "lambda[%s, %s] (%s, %s)",
-            1:nrow(fit$mean_lambda),
-            1:ncol(fit$mean_lambda),
-            rownames(fit$mean_lambda),
-            colnames(fit$mean_lambda)
-          ),
-          multiple = FALSE
-        )
-      })
-
-      output$trace_loadings <- renderPlotly({
-        p <- mcmc_trace(fit$posterior$alpha,
-          pars = gsub(" .*$", "", input$invar_trace_loadings)
-        ) +
-          theme(axis.text.x = element_blank()) +
-          labs(title = "alpha")
-
-        p %>%
-          ggplotly(
-            height = 400,
-            width = 600
+        output$selectize_dens_scores <- renderUI({
+          selectizeInput(
+            inputId = "invar_dens_scores",
+            "Select some score",
+            choices = sprintf(
+              "lambda[%s,%s] (%s, %s)",
+              1:nrow(rv$fit$mean_lambda),
+              1:ncol(rv$fit$mean_lambda),
+              rownames(rv$fit$mean_lambda),
+              colnames(rv$fit$mean_lambda)
+            ),
+            multiple = FALSE
           )
-      })
+        })
 
-      output$trace_scores <- renderPlotly({
-        p <- mcmc_trace(fit$posterior$lambda, pars = gsub(" .*$", "", input$invar_trace_scores)) +
-          theme(axis.text.x = element_blank()) +
-          labs(title = "lambda")
-
-        p %>%
-          ggplotly(
-            height = 400,
-            width = 600
+        output$selectize_trace_loadings <- renderUI({
+          selectizeInput(
+            inputId = "invar_trace_loadings",
+            "Select some loading",
+            choices = sprintf(
+              "alpha[%s,%s] (%s, %s)",
+              1:nrow(rv$fit$mean_alpha),
+              1:ncol(rv$fit$mean_alpha),
+              rownames(rv$fit$mean_alpha),
+              colnames(rv$fit$mean_alpha)
+            ),
+            multiple = FALSE
           )
-      })
+        })
 
-      output$dens_loadings <- renderPlotly({
-        p <- mcmc_dens(fit$posterior$alpha, pars = gsub(" .*$", "", input$invar_dens_loadings)) +
-          theme(axis.text.x = element_blank()) +
-          labs(title = "alpha")
-
-        p %>%
-          ggplotly(
-            height = 400,
-            width = 600
+        output$selectize_trace_scores <- renderUI({
+          selectizeInput(
+            inputId = "invar_trace_scores",
+            "Select some score",
+            choices = sprintf(
+              "lambda[%s, %s] (%s, %s)",
+              1:nrow(rv$fit$mean_lambda),
+              1:ncol(rv$fit$mean_lambda),
+              rownames(rv$fit$mean_lambda),
+              colnames(rv$fit$mean_lambda)
+            ),
+            multiple = FALSE
           )
-      })
+        })
 
-      output$dens_scores <- renderPlotly({
-        p <- mcmc_dens(fit$posterior$lambda, pars = gsub(" .*$", "", input$invar_dens_scores)) +
-          theme(axis.text.x = element_blank()) +
-          labs(title = "lambda")
-
-        p %>%
-          ggplotly(
-            height = 400,
-            width = 600
+        output$selectize_biplot1 <- renderUI({
+          selectizeInput(
+            inputId = "invar_y",
+            "y-axis",
+            choices = names(blocks()),
+            selected = names(blocks())[1],
+            multiple = FALSE
           )
-      })
+        })
 
-      output$biplot <- renderPlotly({
-        p <- ubiplot(
-          scores = t(rbind(
-            X = fit$mean_lambda[input$invar_x, ],
-            Y = fit$mean_lambda[input$invar_y, ]
-          )),
-          loadings = cbind(
-            X = fit$mean_alpha[, input$invar_x],
-            Y = fit$mean_alpha[, input$invar_y]
+        output$selectize_biplot2 <- renderUI({
+          selectizeInput(
+            inputId = "invar_x",
+            "x-axis",
+            choices = names(blocks()),
+            selected = names(blocks())[2],
+            multiple = FALSE
           )
-        )
-        ggplotly(p)
-      })
+        })
 
-      output$hex <- renderPlotly({
-        h1 <- input$invar_h1
-        h2 <- input$invar_h2
-        cnames <- fit$mean_lambda %>% colnames()
-
-        plot_ly(
-          type = "scatterpolar",
-          fill = "toself"
-        ) %>%
-          add_trace(
-            r = c(fit$mean_lambda[, cnames %in% h1], fit$mean_lambda[1, cnames %in% h1]),
-            theta = c(rownames(fit$mean_lambda), rownames(fit$mean_lambda)[1]),
-            name = input$invar_h1
-          ) %>%
-          add_trace(
-            r = c(fit$mean_lambda[, cnames %in% h2], fit$mean_lambda[1, cnames %in% h2]),
-            theta = c(rownames(fit$mean_lambda), rownames(fit$mean_lambda)[1]),
-            name = input$invar_h2
-          ) %>%
-          layout(
-            polar = list(
-              radialaxis = list(
-                visible = T,
-                range = c(min(
-                  c(fit$mean_lambda[, input$invar_h1], fit$mean_lambda[, input$invar_h2]),
-                  max(c(fit$mean_lambda[, input$invar_h1], fit$mean_lambda[, input$invar_h2]))
-                )),
-                showlegend = T
-              )
-            )
+        output$selectize_hex1 <- renderUI({
+          selectizeInput(
+            inputId = "invar_h1",
+            "Select the 1st observation",
+            choices = rownames(numericdata()),
+            selected = rownames(numericdata())[1],
+            multiple = FALSE
           )
+        })
+
+        output$selectize_hex2 <- renderUI({
+          selectizeInput(
+            inputId = "invar_h2",
+            "Select 2nd observation",
+            choices = rownames(numericdata()),
+            selected = rownames(numericdata())[2],
+            multiple = FALSE
+          )
+        })
       })
     })
 
 
-     output$text_blocks <- renderPrint({
+    output$network <- renderVisNetwork({
+      validate(
+        need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
+      )
+
+      validate(
+        need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
+      )
+
+      print(plot(rv$fit))
+    })
+
+    output$scores <- renderPlotly({
+      validate(
+        need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
+      )
+
+      validate(
+        need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
+      )
+
+
+      rv$fit$mean_lambda %>%
+        data.frame() %>%
+        mutate(fact = rownames(.)) %>%
+        gather(key = "key", value = "value", -fact) %>%
+        ggplot(aes(key, fact, fill = value)) +
+        geom_tile() +
+        scale_fill_gradient2(
+          limits = c(-max(abs(rv$fit$mean_lambda)), max(abs(rv$fit$mean_lambda))),
+          low = "blue", mid = "white", high = "red"
+        ) +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1))
+    })
+
+    output$loadings <- renderPlotly({
+      validate(
+        need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
+      )
+
+      validate(
+        need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
+      )
+
+      rv$fit$mean_alpha %>%
+        data.frame() %>%
+        mutate(var = rownames(.)) %>%
+        gather(key = "fact", value = "value", -var) %>%
+        ggplot(aes(fact, var, fill = value)) +
+        geom_tile() +
+        scale_fill_gradient2(
+          limits = c(-max(abs(rv$fit$mean_alpha)), max(abs(rv$fit$mean_alpha))),
+          low = "blue", mid = "white", high = "red"
+        )
+    })
+
+    output$trace_loadings <- renderPlotly({
+      validate(
+        need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
+      )
+
+      validate(
+        need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
+      )
+
+      p <- mcmc_trace(rv$fit$posterior$alpha,
+        pars = gsub(" .*$", "", input$invar_trace_loadings)
+      ) +
+        theme(axis.text.x = element_blank()) +
+        labs(title = "alpha")
+
+      p %>%
+        ggplotly(
+          height = 400,
+          width = 600
+        )
+    })
+
+    output$trace_scores <- renderPlotly({
+      validate(
+        need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
+      )
+
+      validate(
+        need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
+      )
+
+      p <- mcmc_trace(rv$fit$posterior$lambda, pars = gsub(" .*$", "", input$invar_trace_scores)) +
+        theme(axis.text.x = element_blank()) +
+        labs(title = "lambda")
+
+      p %>%
+        ggplotly(
+          height = 400,
+          width = 600
+        )
+    })
+
+    output$dens_loadings <- renderPlotly({
+      validate(
+        need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
+      )
+
+      validate(
+        need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
+      )
+
+      p <- mcmc_dens(rv$fit$posterior$alpha, pars = gsub(" .*$", "", input$invar_dens_loadings)) +
+        theme(axis.text.x = element_blank()) +
+        labs(title = "alpha")
+
+      p %>%
+        ggplotly(
+          height = 400,
+          width = 600
+        )
+    })
+
+    output$dens_scores <- renderPlotly({
+      validate(
+        need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
+      )
+
+      validate(
+        need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
+      )
+
+      p <- mcmc_dens(rv$fit$posterior$lambda, pars = gsub(" .*$", "", input$invar_dens_scores)) +
+        theme(axis.text.x = element_blank()) +
+        labs(title = "lambda")
+
+      p %>%
+        ggplotly(
+          height = 400,
+          width = 600
+        )
+    })
+
+    output$biplot <- renderPlotly({
+      validate(
+        need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
+      )
+
+      validate(
+        need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
+      )
+
+      p <- ubiplot(
+        scores = t(rbind(
+          X = rv$fit$mean_lambda[input$invar_x, ],
+          Y = rv$fit$mean_lambda[input$invar_y, ]
+        )),
+        loadings = cbind(
+          X = rv$fit$mean_alpha[, input$invar_x],
+          Y = rv$fit$mean_alpha[, input$invar_y]
+        )
+      )
+      ggplotly(p)
+    })
+
+    output$hex <- renderPlotly({
+      validate(
+        need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
+      )
+
+      validate(
+        need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
+      )
+
+      h1 <- input$invar_h1
+      h2 <- input$invar_h2
+      cnames <- rv$fit$mean_lambda %>% colnames()
+
+      plot_ly(
+        type = "scatterpolar",
+        fill = "toself"
+      ) %>%
+        add_trace(
+          r = c(rv$fit$mean_lambda[, cnames %in% h1], rv$fit$mean_lambda[1, cnames %in% h1]),
+          theta = c(rownames(rv$fit$mean_lambda), rownames(rv$fit$mean_lambda)[1]),
+          name = input$invar_h1
+        ) %>%
+        add_trace(
+          r = c(rv$fit$mean_lambda[, cnames %in% h2], rv$fit$mean_lambda[1, cnames %in% h2]),
+          theta = c(rownames(rv$fit$mean_lambda), rownames(rv$fit$mean_lambda)[1]),
+          name = input$invar_h2
+        ) %>%
+        layout(
+          polar = list(
+            radialaxis = list(
+              visible = T,
+              range = c(min(
+                c(rv$fit$mean_lambda[, input$invar_h1], rv$fit$mean_lambda[, input$invar_h2]),
+                max(c(rv$fit$mean_lambda[, input$invar_h1], rv$fit$mean_lambda[, input$invar_h2]))
+              )),
+              showlegend = T
+            )
+          )
+        )
+    })
+
+    output$text_blocks <- renderPrint({
+      validate(
+        need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
+      )
+
+      for (i in 1:input$K) {
         validate(
-          need(input$datafile, "Please load your data in the 'Data' > 'Data loader' tab.")
+          need(length(input[[paste0("invar_block", i)]]) > 0, "At least one manifest varible must be selected in each block.")
         )
+      }
+    })
 
-       for(i in 1:input$K){
+    output$text_paths <- renderPrint({
+      validate(
+        need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
+      )
+
+      validate(
+        need(input$J > 0, "The path modeling is optional, it distinguishes the SEM model from the factor analysis (particular case). The number of paths (if specified) must be lower than the number of blocks in 'Factors', otherwise it must be set to 0.")
+      )
+
+      for (i in 1:input$J) {
         validate(
-          need(length(input[[paste0("invar_block", i)]])>0, "At least one manifest varible must be selected in each block.")
+          need(length(input[[paste0("invar_idlamb", i)]]) > 0, "At least one common factor should explain the response factor in each path.")
         )
-       }
+      }
+    })
 
-      })
+    output$text_exogenous <- renderPrint({
+      validate(
+        need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
+      )
 
-      output$text_paths <- renderPrint({
+      validate(
+        need(input$L > 0, "Including exogenous variables is optional, set 0 to do not include any. The exogenous variables are explained by the common factors, they shoud not include any block variables previously defined in 'Factors'.")
+      )
+
+      for (i in 1:input$L) {
         validate(
-          need(input$datafile, "Please load your data in the 'Data' > 'Data loader' tab.")
+          need(length(input[[paste0("invar_idex", i)]]) > 0, "At least one common factor should explain each exogenous response.")
         )
+      }
+    })
 
-        validate(
-          need(input$J>0, "The number of paths must be lower than the number of blocks in 'Factors'.")
-        )
+    output$summary <- renderPrint({
+      validate(
+        need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
+      )
 
-       for(i in 1:input$J){
-        validate(
-          need(length(input[[paste0("invar_idlamb", i)]])>0, "At least one common factor should explain the response factor in each path.")
-        )
-       }
-      })
-
-      output$text_exogenous <- renderPrint({
-        validate(
-          need(input$datafile, "Please load your data in the 'Data' > 'Data loader' tab.")
-        )
-
-         validate(
-          need(input$J>0, "The number of paths must be lower than the number of blocks in 'Factors'.")
-        )
-      })
-
-      output$summary <- renderPrint({
-        validate(
-          need(input$datafile, "Please load your data in the 'Data' > 'Data loader' tab.")
-        )
-
-        validate(
-          need(length(rv$fit)>0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) the paths and the exogenous variables. Then run 'Fit model' above!")
-        )
-          summary(rv$fit)
-      })
+      validate(
+        need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) the paths and the exogenous variables. Then run 'Fit model' above!")
+      )
+      summary(rv$fit)
+    })
 
 
     observeEvent(
@@ -553,32 +700,31 @@ shinyServer(
       })
     })
 
-    isolate(
-      observeEvent(
-        {
-          if (input$L > 0) TRUE
-        },
-        {
-          updateNumericInput(session, "L", value = input$L, max = ncol(nonmissnumericdata()))
-        }
-      )
+
+    observeEvent(
+      {
+        if (input$L > 0) TRUE
+      },
+      {
+        updateNumericInput(session, "L", value = input$L, max = ncol(nonmissnumericdata()))
+      }
     )
 
-    isolate(
-      observe({
-        if (input$L > 0) {
-          for (i in 1:input$L) {
-            updateSelectizeInput(session,
-              inputId = paste0("invar_exo", i),
-              choices = c(
-                input[[paste0("invar_exo", i)]],
-                colnames(nonmissnumericdata())[(!colnames(nonmissnumericdata()) %in% c(unlist(blocks()), names(exogenous())))]
-              ), selected = input[[paste0("invar_exo", i)]]
-            )
-          }
+
+
+    observe({
+      if (input$L > 0) {
+        for (i in 1:input$L) {
+          updateSelectizeInput(session,
+            inputId = paste0("invar_exo", i),
+            choices = c(
+              input[[paste0("invar_exo", i)]],
+              colnames(nonmissnumericdata())[(!colnames(nonmissnumericdata()) %in% c(unlist(blocks()), names(exogenous())))]
+            ), selected = input[[paste0("invar_exo", i)]]
+          )
         }
-      })
-    )
+      }
+    })
 
     observeEvent(if (input$K > 0) TRUE, {
       updateNumericInput(session, "L", value = 0, min = 0, max = ncol(nonmissnumericdata()))
@@ -606,44 +752,33 @@ shinyServer(
       })
     })
 
-    output$selectize_biplot1 <- renderUI({
-      selectizeInput(
-        inputId = "invar_y",
-        "y-axis",
-        choices = names(blocks()),
-        selected = names(blocks())[1],
-        multiple = FALSE
-      )
-    })
+    output$downloadData <- downloadHandler(
+      filename = function() {
+        paste("data-bsem", Sys.Date(), ".csv", sep = "")
+      },
+      content = function(con) {
+        write.csv(data, con)
+      }
+    )
 
-    output$selectize_biplot2 <- renderUI({
-      selectizeInput(
-        inputId = "invar_x",
-        "x-axis",
-        choices = names(blocks()),
-        selected = names(blocks())[2],
-        multiple = FALSE
-      )
-    })
+    output$downloadFit <- downloadHandler(
+      filename = function() {
+        paste("fit-bsem", Sys.Date(), ".rda", sep = "")
+      },
+      content = function(con) {
+        write.csv(data, con)
+      }
+    )
 
-    output$selectize_hex1 <- renderUI({
-      selectizeInput(
-        inputId = "invar_h1",
-        "Select the 1st observation",
-        choices = rownames(numericdata()),
-        selected = rownames(numericdata())[1],
-        multiple = FALSE
-      )
-    })
-
-    output$selectize_hex2 <- renderUI({
-      selectizeInput(
-        inputId = "invar_h2",
-        "Select 2nd observation",
-        choices = rownames(numericdata()),
-        selected = rownames(numericdata())[2],
-        multiple = FALSE
-      )
+    observe({
+      if (length(rv$fit) > 0) {
+        show(id = "downloadData")
+        show(id = "downloadFit")
+      }
+      else {
+        hide(id = "downloadData")
+        hide(id = "downloadFit")
+      }
     })
 
     # -------------------------------------------------------------------------

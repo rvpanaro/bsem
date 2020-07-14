@@ -57,7 +57,7 @@
 #'
 #'    -- inner paths:
 #'      \deqn{\lambda_{j x n} = \beta \lambda^(-j)  + \nu}
-#'        where \eqn{\beta} is a column vector of constant coefficients, \eqn{\lambda^(-j)_{ (k-1) x n}} is the matrix of scores excluding the \eqn{jth} row scores and the error assumes \eqn{\nu_j ~ N(0,1)}.
+#'        where \eqn{\beta} is a column vector of constant coefficients and \eqn{\lambda^(-j)_{ (k-1) x n}} represents a subset of the matrix of scores, i.e. at least excluding the \eqn{jth} row scores. The error assumes \eqn{\nu_j ~ N(0,1)}.
 #'
 #'    -- inner exogenous:
 #'        \deqn{Y_{l x n} = \gamma_0 + \gamma \lambda  + \xi}
@@ -281,7 +281,6 @@ sem <-
                 stanmodels$factorial,
                 data = standata,
                 pars = pars,
-                verbose = FALSE,
                 init = init,
                 chains = chains,
                 iter = iter,
@@ -299,7 +298,6 @@ sem <-
                 stanmodels$factorialEX,
                 data = standata,
                 pars = pars,
-                verbose = FALSE,
                 init = init,
                 chains = chains,
                 iter = iter,
@@ -320,7 +318,6 @@ sem <-
               stanmodels$sem,
               data = standata,
               pars = pars,
-              verbose = FALSE,
               init = init,
               chains = chains,
               iter = iter,
@@ -338,7 +335,6 @@ sem <-
               stanmodels$semEX,
               data = standata,
               pars = pars,
-              verbose = FALSE,
               init = init,
               chains = chains,
               iter = iter,
@@ -366,7 +362,6 @@ sem <-
                 stanmodels$factorialNA,
                 data = standata,
                 pars = pars,
-                verbose = FALSE,
                 init = init,
                 chains = chains,
                 iter = iter,
@@ -384,7 +379,6 @@ sem <-
                 stanmodels$factorialNAEX,
                 data = standata,
                 pars = pars,
-                verbose = FALSE,
                 init = init,
                 chains = chains,
                 iter = iter,
@@ -405,7 +399,6 @@ sem <-
               stanmodels$semNA,
               data = standata,
               pars = pars,
-              verbose = FALSE,
               init = init,
               chains = chains,
               iter = iter,
@@ -422,7 +415,6 @@ sem <-
               stanmodels$semNAEX,
               data = standata,
               pars = pars,
-              verbose = FALSE,
               init = init,
               chains = chains,
               iter = iter,

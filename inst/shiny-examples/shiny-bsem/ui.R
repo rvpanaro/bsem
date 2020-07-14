@@ -15,8 +15,7 @@ fluidPage(
              top: calc(15%);
              left: calc(85%);
              }
-             "
-      )
+             ")
     )
   ),
   navbarPage(
@@ -29,11 +28,13 @@ fluidPage(
         tabPanel(
           "Data loader",
           fileInput("datafile", "Choose CSV file",
-              accept = c("csv", "comma-separated-values", ".csv")
+            accept = c("csv", "comma-separated-values", ".csv")
           ),
-          radioButtons("std", label = "Standardize?",
-                      choices = list("No" = 0, "Yes" = 1),
-                                         selected = 0),
+          radioButtons("std",
+            label = "Standardize?",
+            choices = list("No" = 0, "Yes" = 1),
+            selected = 0
+          ),
           dataTableOutput("table")
         ),
         "Descriptives",
@@ -134,6 +135,12 @@ fluidPage(
             )
           ),
           br(),
+          div(
+            downloadButton("downloadData", "Download result in .csv"),
+            downloadButton("downloadFit", "Download fit in .rda")
+          ),
+          br(),
+          br(),
           verbatimTextOutput("summary"),
         ),
         "Formulation",
@@ -153,19 +160,22 @@ fluidPage(
         "Outcome",
         tabPanel(
           "Posterior mean diagram",
-          conditionalPanel(condition = "input.run1",
-          visNetworkOutput("network")%>% withSpinner(color = "#009933")
+          conditionalPanel(
+            condition = "input.run1",
+            visNetworkOutput("network") %>% withSpinner(color = "#009933")
           )
         ),
         tabPanel(
           "Posterior mean heatmap",
           tabsetPanel(
             type = "tabs",
-            tabPanel("Loadings",
-                     plotlyOutput("loadings") %>% withSpinner(color = "#009933")
+            tabPanel(
+              "Loadings",
+              plotlyOutput("loadings") %>% withSpinner(color = "#009933")
             ),
-            tabPanel("Scores",
-                     plotlyOutput("scores") %>% withSpinner(color = "#009933")
+            tabPanel(
+              "Scores",
+              plotlyOutput("scores") %>% withSpinner(color = "#009933")
             )
           )
         ),
@@ -176,12 +186,12 @@ fluidPage(
             tabPanel(
               "Loadings",
               uiOutput("selectize_trace_loadings"),
-                plotlyOutput("trace_loadings") %>% withSpinner(color = "#009933")
+              plotlyOutput("trace_loadings") %>% withSpinner(color = "#009933")
             ),
             tabPanel(
               "Scores",
               uiOutput("selectize_trace_scores"),
-                plotlyOutput("trace_scores") %>%   withSpinner(color = "#009933")
+              plotlyOutput("trace_scores") %>% withSpinner(color = "#009933")
             )
           )
         ),
@@ -192,12 +202,12 @@ fluidPage(
             tabPanel(
               "Loadings",
               uiOutput("selectize_dens_loadings"),
-                plotlyOutput("dens_loadings") %>% withSpinner(color = "#009933")
+              plotlyOutput("dens_loadings") %>% withSpinner(color = "#009933")
             ),
             tabPanel(
               "Scores",
               uiOutput("selectize_dens_scores"),
-                plotlyOutput("dens_scores") %>% withSpinner(color = "#009933")
+              plotlyOutput("dens_scores") %>% withSpinner(color = "#009933")
             )
           )
         ),

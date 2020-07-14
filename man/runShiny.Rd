@@ -8,11 +8,18 @@ runShiny()
 }
 \description{
 An introduction to the bsem package
+ @details
+ \describe{
+   \item{signals}{this option is not allowed, it is only available in \code{\link[bsem]{sem}}}
+   \item{stanfit}{S4 object of class stanfit}
+ }
 }
 \examples{
 library("bsem")
 runShiny()
-
+}
+\seealso{
+\code{\link[bsem]{sem}}, \code{\link[bsem]{simdata}}, \code{\link[bsem]{arrayplot}}, \code{\link[bsem]{summary.sem}}, \code{\link[bsem]{print.sem}}
 }
 \author{
 RV Panaro

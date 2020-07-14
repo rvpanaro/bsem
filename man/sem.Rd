@@ -52,7 +52,7 @@ sem(
 An object of class \code{bsem}; a list of 14 to 19:
 \describe{
    \item{stanfit}{S4 object of class stanfit}
-   \item{posterior}{the list of posterior draws separate by chains}
+   \item{posterior}{the list of posterior draws separated by chains}
    \item{model}{character; pointer to pre-defined stan model}
    \item{mean_alpha}{matrix of factor loadings posterior means}
    \item{mean_lambda}{matrix of factor scores posterior means}
@@ -66,7 +66,7 @@ An object of class \code{bsem}; a list of 14 to 19:
    \item{paths}{list of paths}
    \item{credint}{Highest posterior density intervals (HPD)}
    \item{h}{vector of posterior communalities}
-   \item{PVTE}{vector of total variance proportions}
+   \item{PTVE}{vector of total variance proportions}
    \item{AFR2}{adjusted coefficient of determination}
    \item{SQE}{explained sums of squares}
    \item{SQT}{total sums of squares}
@@ -92,7 +92,7 @@ Consider:
 
    -- inner paths:
      \deqn{\lambda_{j x n} = \beta \lambda^(-j)  + \nu}
-       where \eqn{\beta} is a column vector of constant coefficients, \eqn{\lambda^(-j)_{ (k-1) x n}} is the matrix of scores excluding the \eqn{jth} row scores and the error assumes \eqn{\nu_j ~ N(0,1)}.
+       where \eqn{\beta} is a column vector of constant coefficients and \eqn{\lambda^(-j)_{ (k-1) x n}} represents a subset of the matrix of scores, i.e. at least excluding the \eqn{jth} row scores. The error assumes \eqn{\nu_j ~ N(0,1)}.
 
    -- inner exogenous:
        \deqn{Y_{l x n} = \gamma_0 + \gamma \lambda  + \xi}
@@ -101,24 +101,25 @@ Consider:
 \examples{
 dt <- bsem::simdata()
 names(dt)
-
 \dontrun{
 
-semfit <- bsem::sem(data = dt$data,
-              blocks = dt$blocks,
-              paths = dt$paths,
-              exogenous = dt$exogenous,
-              signals = dt$signals,
-              iter = 2000,
-              warmup = 1000,
-              chains = 4)
+semfit <- bsem::sem(
+  data = dt$data,
+  blocks = dt$blocks,
+  paths = dt$paths,
+  exogenous = dt$exogenous,
+  signals = dt$signals,
+  iter = 2000,
+  warmup = 1000,
+  chains = 4
+)
 plot(semfit)
 
 gridExtra::grid.arrange(bsem::arrayplot(semfit$mean_lambda, main = "estimates", mini = -4, maxi = 4),
-bsem::arrayplot(dt$real$lambda, main = "lambda (scores)", mini = -4, maxi = 4),
-bsem::arrayplot(semfit$mean_alpha, main = "estimates", mini = -4, maxi = 4),
-bsem::arrayplot(dt$real$alpha, main = "alpha (loadings)", mini = -4, maxi = 4),
-layout_matrix = matrix(c(1, 1, 3, 3, 2, 2, 4, 4), ncol = 2)
+  bsem::arrayplot(dt$real$lambda, main = "lambda (scores)", mini = -4, maxi = 4),
+  bsem::arrayplot(semfit$mean_alpha, main = "estimates", mini = -4, maxi = 4),
+  bsem::arrayplot(dt$real$alpha, main = "alpha (loadings)", mini = -4, maxi = 4),
+  layout_matrix = matrix(c(1, 1, 3, 3, 2, 2, 4, 4), ncol = 2)
 )
 }
 

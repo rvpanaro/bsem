@@ -4,7 +4,7 @@
 \alias{plot.bsem}
 \title{'bsem' object plot}
 \usage{
-\method{plot}{bsem}(x, digits = 2, fontsize = 15, width = 2, size = 10, ...)
+\method{plot}{bsem}(x, digits = 2, fontsize = 15, width = 5, size = 10, ...)
 }
 \arguments{
 \item{x}{an object of class bsem}
@@ -36,22 +36,25 @@ a visNetwork graph:
 
 dt <- bsem::simdata()
 names(dt)
-
 \dontrun{
 
-semfit <- bsem::sem(data = dt$data,
-              blocks = dt$blocks,
-              paths = dt$paths,
-              exogenous = dt$exogenous,
-              signals = dt$signals,
-              iter = 2000,
-              warmup = 1000,
-              chains = 4)
+semfit <- bsem::sem(
+  data = dt$data,
+  blocks = dt$blocks,
+  paths = dt$paths,
+  exogenous = dt$exogenous,
+  signals = dt$signals,
+  iter = 2000,
+  warmup = 1000,
+  chains = 4
+)
 plot(semfit)
 }
 
 }
+\seealso{
+\code{\link[bsem]{sem}}, \code{\link[bsem]{simdata}}, \code{\link[bsem]{arrayplot}}, \code{\link[bsem]{summary.sem}}, \code{\link[bsem]{print.sem}}
+}
 \author{
 RVPanaro
-#' @seealso \code{\link[bsem]{sem}}, \code{\link[bsem]{simdata}}, \code{\link[bsem]{arrayplot}}, \code{\link[bsem]{summary.sem}}, \code{\link[bsem]{print.sem}}
 }

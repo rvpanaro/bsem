@@ -45,7 +45,7 @@ set.seed(2020)
 
 # Introduction
 
-This vignette introduces the `bsem` package routines. This package was designed to allow particular cases of structural equation models (SEMs) in `R`. Examples include confirmatory factor analysis (CFA) and confirmatory SEM. The flexible full SEM model (outer model + inner model), implemented here, enables the evaluation of user-defined constructs (latent variables) along with the analysis of established relationships among the latent scores (factors depending on other factors) or exogenous variables (variables depending on factors).
+This vignette introduces the `bsem` package routines. This package was designed to allow particular cases of structural equation models (SEMs) in `R`. Examples include confirmatory factor analysis (CFA) and confirmatory SEM. The flexible full SEM model (outer model + inner model), implemented here, enables the evaluation of user-defined constructs (latent variables) along with the analysis of established relationships among the latent scores (factors depending on other factors) and/or exogenous variables (variables depending on factors).
 
 Factor analysis (FA) is a powerful and flexible tool to investigate the multivariate dependence in a data set. The main aim is to reduce dimension, i.e., summarize the information expressed in multiple observed variables. The summarization process involves the construction of a few unobserved latent factors representing the existing subjacent patterns in the data. The usual FA can be divided into two types: exploratory (EFA) and confirmatory (CFA). The EFA does not impose any restriction on the relationship between latent factors and observed variables (the model is free to establish such associations). The CFA accounts for the technical information regarding the connections between observed and latent variables; examples of applications involving the CFA can be found in [Brown](https://www.guilford.com/books/Confirmatory-Factor-Analysis-for-Applied-Research/Timothy-Brown/9781462515363) (2015). In this case, the researcher must impose that a factor is exclusively explained by a group of observed variables. The CFA is widely used in the context of SEM, see the references  [Lee and Song](https://link.springer.com/article/10.1007/BF02296651) (2003), [Skrondal and Rabe-Hesketh](https://www.routledge.com/Generalized-Latent-Variable-Modeling-Multilevel-Longitudinal-and-Structural/Skrondal-Rabe-Hesketh/p/book/9781584880004) (2004), [Palomo, Dunson, and Bollen](https://www.elsevier.com/books/handbook-of-latent-variable-and-related-models/lee/978-0-444-52044-9) (2007), [Hoyle](https://www.guilford.com/books/Handbook-of-Structural-Equation-Modeling/Rick-Hoyle/9781462516797) (2014) and [Keith](https://www.routledge.com/Multiple-Regression-and-Beyond-An-Introduction-to-Multiple-Regression/Keith/p/book/9781138061446)(2019). Besides the EFA and CFA, it is possible to work with an intermediate case combining these two types. This option can be seen as a semi-confirmatory FA and an example is described in [Mayrink and Lucas](https://projecteuclid.org/DPubS?service=UI&version=1.0&verb=Display&handle=euclid.aoas/1372338468) (2013) and [Mayrink and Lucas](https://projecteuclid.org/euclid.bjps/1414674773) (2015).
 
@@ -60,11 +60,11 @@ where $\boldsymbol{X}$ is the data matrix with variables in the rows and sample 
 - the inner model as:
   - paths:
 $$\boldsymbol{\lambda}_{j\times n} = \boldsymbol{\beta}^{\top} {\lambda^{(-j)}}  + \nu~$$
-where $\boldsymbol{\beta}$ is a column vector of constant coefficients, ${\lambda^{(-j)}}_{ (k-1)\times n}$ is the matrix of scores excluding the $j^{th}$ row scores and the error assumes $\nu_j \sim N(0,1)$.
+where $\boldsymbol{\beta}$ is a column vector of constant coefficients, ${\lambda^{(-j)}}_{ (k-1)\times n}$ represents a subset of the matrix of scores, i.e. at least excluding the $j^{th}$ row scores. The errors are independent and assume $\nu_j \sim N(0,1)$.
 
   - exogenous:
 $$\boldsymbol{Y}_{l\times n} = \boldsymbol{\gamma_0} + \boldsymbol{\gamma}^{\top} {\lambda}  + \xi~$$
-where $\boldsymbol{\gamma}$ is a column vector of constant coefficients and $\boldsymbol{\gamma_0}$ is the intercept. $\lambda_{k \times n}$ is the matrix of scores and the error assumes $\xi_l\sim N(0,\tau_l^2)$.
+where $\boldsymbol{\gamma}$ is a column vector of constant coefficients and $\boldsymbol{\gamma_0}$ is the intercept. $\lambda_{k \times n}$ is the matrix of scores. The errors are independent and assume $\xi_l\sim N(0,\tau_l^2)$.
 
 The guidelines in this document were divided into 4 sections: [installation](#installation), [description](#description), [usage](#usage), and [remarks](#remarks).
 
@@ -132,19 +132,19 @@ sem(
 )
 ```
 
-The above function automatically selects the appropriate routine according to the specified arguments, examples are given in the next section. One can reproduce the examples below by copying and pasting the following code to the ``R`` console.  For these examples, simulated artificial data was created so that we can verify that the estimates are close enough to the true parameter values used to generate the data.
+The above function automatically selects the appropriate routine according to the specified arguments, examples are given in the following vignette. [Exploring bsem class](exploring-bsem-class.html)  has details on how to simulate datasets considering the structures described. One can reproduce the examples below by copying and pasting the following code to the ``R`` console.  For these examples, simulated artificial data was created so that we can verify that the estimates are close enough to the true parameter values used to generate the data.
 
 # Usage
 
-We will use simulated data from so far considered full model which consists of the outer model and the two parts inner model (latent variable regression and exogenous variable regression) described in the introduction. In many applications, with the help of technical knowledge, it is possible to establish relationships between all variables in the data set and the latent variables (constructs) under study. This case characterizes the confirmatory factor analysis (CFA) in the outer part of the model. Besides that,
-we can also verify linear relationships between latent variables and/or exogenous and latent variables. The [simdata](simdata-explained.html) vignette has details on how to simulate datasets considering the structures described. 
+In this section, we will use simulated data from the full model described in the introduction. In many applications, with the help of technical knowledge, it is possible to establish relationships between all variables in the data set and the latent variables (constructs) studied, this characterizes the confirmatory factor analysis (CFA). Besides that,
+we can also verify linear relationships between observed, latent, and/or exogenous variables. The basic structure suitable to allow bsem usage is as follows:
 
 ```{r}
 dt <- bsem::simdata()
 names(dt)
 ```
 
-It is worth mentioning that the `paths` list is named with the ``block`` list names and the `exogenous` list with the data colnames. The idea behind these list structures is that each list object is a vector that describes which elements are correlated to some target. For example:
+In this example, `data` is a matrix, `real` is the set of parameters used to generate the simulated data as described in the intro. `blocks`, `signals`, `paths` and `exogenous` are lists that define the modeling. It is worth mentioning that all lists are named, either by the user or internally. The `paths` should be named after ``block`` names and the `exogenous` list after the colnames of the data, i.e. variable names. The idea behind the list structure consists of describing some relationships between variables and factors in each element. For example:
 
 ```{r}
 dt$exogenous
@@ -178,26 +178,27 @@ fit <- bsem::sem(
 )
 ```
 
-It is possible to obtain a ``visNetwork`` graph with:
+After fitting the model we can to obtain a ``visNetwork`` graph using:
 
 ````{r}
 plot(fit)
 ```
 
 
-The ellipsoidal nodes represent the latent variables, the boxes represent the manifest variables, the dashed lines represent the linear relations between latent scores or between latent scores, and exogenous variables and the solid lines represent the relationship between the manifest and latent variables. Finally, the recursive solid lines refer to the error variance estimate of each manifest or exogenous variable. 
+The ellipsoidal nodes represent the latent variables, the boxes represent the manifest variables, the dashed lines represent the linear relations among latent scores or between latent scores, and exogenous variables and the solid lines represent the relationship between the manifest and latent variables. Finally, the recursive solid lines refer to the error variance estimate of each manifest or exogenous variable. 
 
 Also, the scores and loadings used to generate the data can be visually compared to the estimates obtained using the ``lattice`` library routines imported in ``arrayplot`` function:
 
-```{r}
-gridExtra::grid.arrange(bsem::arrayplot(
-  fit$mean_lambda, main = "estimates", mini = -5, maxi = 5),
-  bsem::arrayplot(dt$real$lambda, main = "lambda (scores)", mini = -6, maxi = 6),
+```{r, echo = T}
+gridExtra::grid.arrange(
+  bsem::arrayplot(fit$mean_lambda, main = "estimates", mini = -5, maxi = 5),
+  bsem::arrayplot(dt$real$lambda, main = "lambda (scores)", mini = -6, maxi = 6)
+)  
+  
+gridExtra::grid.arrange(
   bsem::arrayplot(fit$mean_alpha, main = "estimates", mini = -6, maxi = 6),
   bsem::arrayplot(dt$real$alpha, main = "alpha (loadings)", mini = -6, maxi = 6),
-  bsem::arrayplot(fit$mean_sigma2, main = "estimates", mini = -6, maxi = 6),
-  bsem::arrayplot(dt$real$sigma2, main = "sigma2", mini = -6, maxi = 6),
-  layout_matrix = matrix(c(1, 1, 3, 3, 5, 5, 2, 2, 4, 4, 6, 6), ncol = 2)
+  layout_matrix = matrix(c(1,1,2,2), ncol  = 2)
 )
 ```
 
@@ -214,21 +215,20 @@ The `bsem::summary` routine prints descriptive statistics to the R console:
 summary(fit)
 ```
 
-The effective sample size  ``n_eff`` gives an estimate of the independent draws from the posterior distribution, and ``Rhat`` referred to as the potential scale reduction statistic,  is one of the useful ways to monitor whether a chain has converged to the equilibrium distribution. This statistic measures the ratio between the average variation of the samples within each chain and the variation of the combined samples in the chains; if the chains have not converged to a common region, this statistic will be greater than one. Along with the estimates and posterior descriptives, the ``summary`` also provides quantities for the diagnosis of the quality of fit of the factorial model: the percentage of the total variability (of variables in X) explained by factors (``PVTE``) and the $R^2$ statistics adapted for factor analysis (``AFR2``). 
+The effective sample size  ``n_eff`` gives an estimate of the independent draws from the posterior distribution, and ``Rhat`` referred to as the potential scale reduction statistic,  is one of the useful ways to monitor whether a chain has converged to the equilibrium distribution. This statistic measures the ratio between the average variation of the samples within each chain and the variation of the combined samples in the chains; if the chains have not converged to a common region, this statistic will be greater than one. Along with the estimates and posterior descriptives, the ``summary`` also provides quantities for the diagnosis of the quality of fit of the factorial model: the percentage of the total variability (of variables in X) explained by factors (``PVTE``) and the $R^2$ statistics adapted for factor analysis (``R2``). 
 
-A crucial difference in obtaining the same statistics printed by the `bsem::summary` function is the use of the ``signals``. The signal specification, (-1 or 1) for each of the factor loadings, forces the initial values of each chain to have the same direction, and, naturally, these chains converge to nearby regions. Otherwise, the loadings signals between chains is often opposite as a consequence of random initialization. In order to circumvent this issue, the package automatically transforms posterior chains using simple `for` loops and `if` statements to recalculate the descriptives using `rstan::monitor`.
+A crucial difference in obtaining the same statistics printed by the `bsem::summary` function is the use of the ``signals``. The signal specification, (-1 or 1) for each of the factor loadings, forces the initial values of each chain to have the same direction, and, naturally, these chains converge to nearby regions. Otherwise, the loadings signals between chains are often opposite as a consequence of random initialization. To circumvent this issue, the package automatically transforms posterior chains using simple `for` loops and `if` statements to recalculate the descriptives using `rstan::monitor`.
 
-This page was dedicated to illustrating the commands and outcomes of the proposed package. The closing remarks section highlights the most important aspects regarding user-defined modeling.
+This page was dedicated to illustrating the commands and outcomes of the proposed package. The closing remarks section highlights the most important aspects of user-defined modeling.
 
 # Remarks
 
 The content of this vignette introduces the ``bsem`` package. The current version is ready for the main statistical study in the field of latent variable analysis.
 
-It is noteworthy that the results obtained with this package vary according to the initial values set for sampling with ``NUTS``. In this sense, we provided user-defined initial values for reproducibility. In addition, the amount of chains, iterations and burn-in usually can have a great influence on the analysis. Moreover, ``NUTS`` includes tuning parameters that can control the sampler's behavior, see [documentation](https://mc-stan.org/users/documentation/). From our experience, using just one chain with more iterations can be helpful and convenient depending on the number of parameters adopted in the model specification. Also, highlight to the fact that the implemented routines do not support nonlinear or multilevel regression models for paths or exogenous variables. 
-
+The results obtained with this package vary according to the initial values set for sampling with ``NUTS``. In this sense, we provided user-defined initial values for reproducibility. Also, the number of chains, iterations, and burn-in usually can have a great influence on the analysis. Moreover, ``NUTS`` includes tuning parameters that can control the sampler's behavior, see [documentation](https://mc-stan.org/users/documentation/). From our experience, using just one chain with more iterations can be helpful and convenient depending on the number of parameters adopted in the model specification. Also, highlight the fact that the implemented routines do not support nonlinear or multilevel regression models for paths or exogenous variables.
 
 This document is part of the content submitted to [CRAN](https://cran.r-project.org/). The package is also in public use and is available at
 the GitHub development platform, the link is https://github.com/rvpanaro/bsem.
 
-[Exploring bsem class](exploring-bsem-class.html) vignette is also available as supplementary material.
+
 

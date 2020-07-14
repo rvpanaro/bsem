@@ -15,9 +15,8 @@
   *   paths: <br>
 
         **λ**<sub>j × • </sub> = **β**<sup>⊤</sup>**λ**<sup>( − j)</sup> + ν <br>
-        where **β** is a vector of constant coefficients,
-        **λ**<sup>( − j)</sup><sub>(k − 1) × n</sub> is the matrix
-        of scores excluding the j<sup>*t**h*</sup> row scores.<br>
+        where **β** is a vector of constant coefficients and
+        **λ**<sup>( − j)</sup><sub>(k − 1) × n</sub> represent a subset of the matrix of scores, i.e. at least excluding the j<sup>*t**h*</sup> row scores.<br>
         The error assumes standard normal distribution.
 
   *  exogenous: <br>
