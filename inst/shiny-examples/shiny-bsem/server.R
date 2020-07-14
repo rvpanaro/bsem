@@ -52,7 +52,7 @@ shinyServer(
     output$selectize1 <- renderUI({
       selectizeInput(
         inputId = "invar_hist",
-        "Select Input Variables",
+        "Select the input variables",
         choices = sprintf("%s (%s)", varnames(), vartypes()),
         multiple = TRUE
       )
@@ -61,7 +61,7 @@ shinyServer(
     output$selectize2 <- renderUI({
       selectizeInput(
         inputId = "invar_boxp",
-        "Select Input Variables",
+        "Select the input variables",
         choices = sprintf("%s (%s)", varnames(), vartypes()),
         multiple = TRUE
       )
@@ -79,7 +79,7 @@ shinyServer(
     output$selectize4 <- renderUI({
       selectizeInput(
         inputId = "invar_miss",
-        "Select Input Variables",
+        "Select input variables",
         choices = sprintf("%s (%s)", varnames(), vartypes()),
         multiple = TRUE
       )
@@ -95,13 +95,13 @@ shinyServer(
              ")
       )
 
-      if(input$std == "0"){
+      if (input$std == "0") {
         filedata()
       }
-      else{
-        filedata() %>% scale
+      else {
+        filedata() %>% scale()
       }
-      })
+    })
 
     output$hist <- renderPlotly({
       validate(
@@ -111,14 +111,14 @@ shinyServer(
         need(input$invar_hist, "Please select some numeric variable(s).")
       )
 
-      if(input$std == "0"){
+      if (input$std == "0") {
         aux2 <- filedata()
       }
-      else{
+      else {
         aux2 <- filedata() %>% scale()
       }
 
-      aux <-  aux2 %>%
+      aux <- aux2 %>%
         select(matches(gsub(" .*$", "", input$invar_hist))) %>%
         gather()
 
@@ -135,7 +135,7 @@ shinyServer(
       )
 
       validate(
-        need(input$invar_hist, "Please select some numeric variable(s).")
+        need(input$invar_boxp, "Please select some numeric variable(s).")
       )
 
       aux <- filedata() %>%
@@ -153,7 +153,7 @@ shinyServer(
       )
 
       validate(
-        need(input$invar_hist, "Please select some numeric variable(s).")
+        need(input$invar_dens, "Please select some numeric variable(s).")
       )
 
       aux <- filedata() %>%
@@ -170,7 +170,7 @@ shinyServer(
       )
 
       validate(
-        need(input$invar_hist, "Please select some variable(s).")
+        need(input$invar_miss, "Please select some variable(s).")
       )
 
       aux <- filedata() %>%
@@ -196,6 +196,8 @@ shinyServer(
         select_if(Negate(is.null))
     })
 
+    rv <- reactiveValues(fit = NULL)
+
     observeEvent(input$run1, {
       withBusyIndicatorServer("run1", {
         validate(
@@ -208,44 +210,30 @@ shinyServer(
         print(paths())
 
         if (blocks() %>% unlist() %>% is.null()) {
-          stop("load data and choose desired blocks!")
+          stop("Please choose the desired variables for each block under 'Model' > 'Blocks'!")
         }
-        else if (exogenous() %>% unlist() %>% is.null() && paths() %>%
-          unlist() %>%
-          is.null()) {
-
-          fit <- bsem::sem(data = numericdata(), blocks = blocks())
-
-          output$summary <- renderPrint({
-            summary(fit)
-          })
+        else if (exogenous() %>% unlist() %>% is.null() && paths() %>% unlist() %>% is.null()) {
+          rv$fit <- bsem::sem(data = numericdata(), blocks = blocks())
         }
         else if (paths() %>% unlist() %>% is.null()) {
-
-          fit <- bsem::sem(data = numericdata(), blocks = blocks(), exogenous = exogenous())
-
-          output$summary <- renderPrint({
-            summary(fit)
-          })
+          rv$fit <- bsem::sem(data = numericdata(), blocks = blocks(), exogenous = exogenous())
         }
         else if (exogenous() %>% unlist() %>% is.null()) {
-
-          fit <- bsem::sem(data = numericdata(), blocks = blocks(), paths = paths())
-
-          output$summary <- renderPrint({
-            summary(fit)
-          })
+          rv$fit <- bsem::sem(data = numericdata(), blocks = blocks(), paths = paths())
         }
         else {
-
-          fit <- bsem::sem(data = numericdata(), blocks = blocks(), paths = paths(), exogenous = exogenous())
-          output$summary <- renderPrint({
-            summary(fit)
-          })
+          rv$fit <- bsem::sem(data = numericdata(), blocks = blocks(), paths = paths(), exogenous = exogenous())
         }
       })
 
       output$network <- renderVisNetwork({
+        validate(
+          need(input$datafile, "Please load your data in the 'Data' > 'Data loader' tab.")
+        )
+
+        validate(
+          need(length(rv$fit)>0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
+        )
         print(plot(fit))
       })
 
@@ -279,7 +267,7 @@ shinyServer(
       output$selectize_dens_loadings <- renderUI({
         selectizeInput(
           inputId = "invar_dens_loadings",
-          "Select a loading",
+          "Select some loading",
           choices = sprintf(
             "alpha[%s,%s] (%s, %s)",
             1:nrow(fit$mean_alpha),
@@ -294,7 +282,7 @@ shinyServer(
       output$selectize_dens_scores <- renderUI({
         selectizeInput(
           inputId = "invar_dens_scores",
-          "Select a score",
+          "Select some score",
           choices = sprintf(
             "lambda[%s,%s] (%s, %s)",
             1:nrow(fit$mean_lambda),
@@ -309,7 +297,7 @@ shinyServer(
       output$selectize_trace_loadings <- renderUI({
         selectizeInput(
           inputId = "invar_trace_loadings",
-          "Select a loading",
+          "Select some loading",
           choices = sprintf(
             "alpha[%s,%s] (%s, %s)",
             1:nrow(fit$mean_alpha),
@@ -324,9 +312,9 @@ shinyServer(
       output$selectize_trace_scores <- renderUI({
         selectizeInput(
           inputId = "invar_trace_scores",
-          "Select a score",
+          "Select some score",
           choices = sprintf(
-            "lambda[%s,%s] (%s, %s)",
+            "lambda[%s, %s] (%s, %s)",
             1:nrow(fit$mean_lambda),
             1:ncol(fit$mean_lambda),
             rownames(fit$mean_lambda),
@@ -338,7 +326,8 @@ shinyServer(
 
       output$trace_loadings <- renderPlotly({
         p <- mcmc_trace(fit$posterior$alpha,
-                        pars = gsub(" .*$", "", input$invar_trace_loadings)) +
+          pars = gsub(" .*$", "", input$invar_trace_loadings)
+        ) +
           theme(axis.text.x = element_blank()) +
           labs(title = "alpha")
 
@@ -434,6 +423,57 @@ shinyServer(
     })
 
 
+     output$text_blocks <- renderPrint({
+        validate(
+          need(input$datafile, "Please load your data in the 'Data' > 'Data loader' tab.")
+        )
+
+       for(i in 1:input$K){
+        validate(
+          need(length(input[[paste0("invar_block", i)]])>0, "At least one manifest varible must be selected in each block.")
+        )
+       }
+
+      })
+
+      output$text_paths <- renderPrint({
+        validate(
+          need(input$datafile, "Please load your data in the 'Data' > 'Data loader' tab.")
+        )
+
+        validate(
+          need(input$J>0, "The number of paths must be lower than the number of blocks in 'Factors'.")
+        )
+
+       for(i in 1:input$J){
+        validate(
+          need(length(input[[paste0("invar_idlamb", i)]])>0, "At least one common factor should explain the response factor in each path.")
+        )
+       }
+      })
+
+      output$text_exogenous <- renderPrint({
+        validate(
+          need(input$datafile, "Please load your data in the 'Data' > 'Data loader' tab.")
+        )
+
+         validate(
+          need(input$J>0, "The number of paths must be lower than the number of blocks in 'Factors'.")
+        )
+      })
+
+      output$summary <- renderPrint({
+        validate(
+          need(input$datafile, "Please load your data in the 'Data' > 'Data loader' tab.")
+        )
+
+        validate(
+          need(length(rv$fit)>0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) the paths and the exogenous variables. Then run 'Fit model' above!")
+        )
+          summary(rv$fit)
+      })
+
+
     observeEvent(
       {
         if (any(unlist(lapply(1:input$K, function(i) {
@@ -463,7 +503,7 @@ shinyServer(
         lapply(1:input$K, function(i) {
           selectizeInput(
             inputId = paste0("invar_block", i),
-            paste("Select manifest variables in block", i),
+            paste("Select the manifest variables in block", i),
             choices = colnames(numericdata()),
             multiple = TRUE
           )
@@ -472,7 +512,7 @@ shinyServer(
     })
 
     observeEvent(input$K, {
-      updateNumericInput(session, "J", value = 0, min = 0, max = input$K-1)
+      updateNumericInput(session, "J", value = 0, min = 0, max = input$K - 1)
 
       output$selectize_paths <- renderUI({
         lapply(1:input$J, function(i) {
@@ -514,28 +554,33 @@ shinyServer(
     })
 
     isolate(
-      observeEvent({ if(input$L>0)TRUE},
-                   {        updateNumericInput(session, "L", value = input$L, max = ncol(nonmissnumericdata()))})
+      observeEvent(
+        {
+          if (input$L > 0) TRUE
+        },
+        {
+          updateNumericInput(session, "L", value = input$L, max = ncol(nonmissnumericdata()))
+        }
+      )
     )
 
     isolate(
-    observe({
-      if (input$L > 0) {
-
-        for (i in 1:input$L) {
-          updateSelectizeInput(session,
-            inputId = paste0("invar_exo", i),
-            choices = c(
-              input[[paste0("invar_exo", i)]],
-              colnames(nonmissnumericdata())[(!colnames(nonmissnumericdata()) %in% c(unlist(blocks()), names(exogenous())))]
-            ),selected = input[[paste0("invar_exo", i)]]
-          )
+      observe({
+        if (input$L > 0) {
+          for (i in 1:input$L) {
+            updateSelectizeInput(session,
+              inputId = paste0("invar_exo", i),
+              choices = c(
+                input[[paste0("invar_exo", i)]],
+                colnames(nonmissnumericdata())[(!colnames(nonmissnumericdata()) %in% c(unlist(blocks()), names(exogenous())))]
+              ), selected = input[[paste0("invar_exo", i)]]
+            )
+          }
         }
-      }
-    })
+      })
     )
 
-    observeEvent(if(input$K>0)TRUE, {
+    observeEvent(if (input$K > 0) TRUE, {
       updateNumericInput(session, "L", value = 0, min = 0, max = ncol(nonmissnumericdata()))
 
       output$selectize_exogenous <- renderUI({

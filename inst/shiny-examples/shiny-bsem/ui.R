@@ -58,7 +58,7 @@ fluidPage(
           plotlyOutput("miss")
         ),
         tabPanel(
-          a(img(src = "bsem.png", width = "70px"), href = "https://github.com/rvpanaro/bsem")
+          a(img(src = "bsem.png", width = "70px"), href = "https://cran.r-project.org/web/packages/bsem/index.html")
         )
       )
     ),
@@ -70,24 +70,28 @@ fluidPage(
           "Factors (blocks)",
           numericInput(
             inputId = "K",
-            "Number of latent variables (factors)",
+            "Choose the number of latent variables (factors)",
             value = 0,
             min = 0,
             max = 0,
-            width = "auto"
+            width = "70%"
           ),
+          br(),
+          verbatimTextOutput("text_blocks"),
           uiOutput("selectize_blocks")
         ),
         tabPanel(
           "Paths (paths)",
           numericInput(
             inputId = "J",
-            "Number of regressions between scores",
+            "Choose the number of regressions between scores",
             value = 0,
             min = 0,
             max = 0,
-            width = "auto"
+            width = "70%"
           ),
+          br(),
+          verbatimTextOutput("text_paths"),
           conditionalPanel(
             "input.J > 0",
             div(
@@ -101,12 +105,14 @@ fluidPage(
           "Exogenous variables (exogenous)",
           numericInput(
             inputId = "L",
-            "Number of regressions between exogenous variables and scores",
+            "Choose the number of regressions between exogenous variables and scores",
             value = 0,
             min = 0,
             max = 0,
-            width = "auto"
+            width = "70%"
           ),
+          br(),
+          verbatimTextOutput("text_exogenous"),
           conditionalPanel(
             "input.L > 0",
             div(
@@ -136,7 +142,7 @@ fluidPage(
           includeMarkdown("www/model.md")
         ),
         tabPanel(
-          a(img(src = "bsem.png", width = "70px"), href = "https://github.com/rvpanaro/bsem")
+          a(img(src = "bsem.png", width = "70px"), href = "https://cran.r-project.org/web/packages/bsem/index.html")
         )
       )
     ),
@@ -212,7 +218,7 @@ fluidPage(
           ), plotlyOutput("hex") %>% withSpinner(color = "#009933")
         ),
         tabPanel(
-          a(img(src = "bsem.png", width = "70px"), href = "https://github.com/rvpanaro/bsem")
+          a(img(src = "bsem.png", width = "70px"), href = "https://cran.r-project.org/web/packages/bsem/index.html")
         )
       )
     )
