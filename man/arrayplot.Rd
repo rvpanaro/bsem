@@ -17,9 +17,9 @@ arrayplot(
 \arguments{
 \item{y}{a numerical data.frame or matrix object}
 
-\item{mini, }{minimum color range (might cause blank spots if mispecified)}
+\item{mini, }{minimum color range (might cause blank spots if misspecified)}
 
-\item{maxi, }{maximum color range (might cause blank spots if mispecified)}
+\item{maxi, }{maximum color range (might cause blank spots if misspecified)}
 
 \item{colors}{1 = blue/red, 0 = white/black}
 
@@ -33,10 +33,11 @@ arrayplot(
 Graphical representation for matrix class objects using lattice package
 }
 \examples{
-data(set2)
+dt <- simdata()
 
-arrayplot(set2$real$alpha)
-arrayplot(set2$real$alpha, colors = 0)
+arrayplot(dt$real$alpha)
+arrayplot(dt$real$alpha, colors = 0)
+
 }
 \seealso{
 \code{\link[bsem]{bsem::simdata}}, \code{\link[bsem]{bsem::summary.sem}}, \code{\link[bsem]{bsem::plot}}, \code{\link[bsem]{bsem::sem}}, \code{\link[bsem]{bsem::runShiny}}

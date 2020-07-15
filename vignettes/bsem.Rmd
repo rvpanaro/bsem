@@ -53,7 +53,7 @@ The structure of an SEM has two parts, one involving a CFA and another with mult
 
 Consider:
 
-- the outter model (blocks) as:
+- the outer model (blocks) as:
 $$\boldsymbol{X_{p\times n}} = \boldsymbol{\alpha}_{p\times k}\boldsymbol{\lambda}_{k\times n} +\boldsymbol{\varepsilon}_{p\times n}$$
 where $\boldsymbol{X}$ is the data matrix with variables in the rows and sample elements in the columns,  $\boldsymbol{\alpha}_{p\times j}$ is the column vector of loadings for the $j^{th}$ latent variable and $\boldsymbol{\lambda}_{j\times n}$ is the row vector of scores for the  $j^{th}$ unobserved variable,$~j =1,\dots,k$. Normality is assumed for the errors as $\boldsymbol{\varepsilon}_{ij}\sim N(0, \sigma_{i}^2)$ for $i = 1,\dots, p$.
 
@@ -97,7 +97,7 @@ The data and additional commands are passed through the ``bsem::sem`` function:
 - ``paths``: list referring to the inner model paths; a list of characters or integers referring to the score's relationship; the jth first latent variable is explained if names(paths) is NULL
 - ``exogenous``:     
 list referring to the inner model exogenous; a list of characters or integers referring to the relationship between exogenous and latent variables; the lth first columns are explained if names(exogenous) is NULL
-- ``signals``: ist referring to the signals of the factor loadings initial values; must be true: (length(signals) == length(blocks)) && (lengths(signals) == lengths(blocks))
+- ``signals``: list referring to the signals of the factor loadings initial values; must be true: (length(signals) == length(blocks)) && (lengths(signals) == lengths(blocks))
 - ``row_names``: optional identifier for the observations (observation = row);
 - ``prior_specs``: prior settings for the Bayesian approach; only 'normal' and 'cauchy' for gamma0, gamma and beta; 'gamma', 'lognormal' and 'inv_gamma' for sigma2 and tau2 are available, those prior specifications are ignored if not needed (FA or SEM)
 - ``cores``: number of core threads to be used

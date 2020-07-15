@@ -23,11 +23,11 @@ simdata(
 \arguments{
 \item{paths}{list referring to the inner model paths; a list of integers referring to the scores relationship; the jth first latent variable are explained}
 
-\item{blocks}{list of integers in 1:ncol(data) indicating the manisfest variables correpoding to each block}
+\item{blocks}{list of integers in 1:ncol(data) indicating the manisfest variables corresponding to each block}
 
-\item{sigma2}{outter model error variances}
+\item{sigma2}{outer model error variances}
 
-\item{exogenous, }{minimum color range (might cause blank spots if mispecified)}
+\item{exogenous, }{minimum color range (might cause blank spots if misspecified)}
 
 \item{beta}{inner paths regression coefficients}
 
@@ -61,5 +61,5 @@ arrayplot(dt$real$alpha, -4, 4)
 
 }
 \seealso{
-
+\code{\link[bsem]{plot.sem}}, \code{\link[bsem]{sem}}, \code{\link[bsem]{arrayplot}}, \code{\link[bsem]{summary.sem}}, \code{\link[bsem]{print.sem}}
 }

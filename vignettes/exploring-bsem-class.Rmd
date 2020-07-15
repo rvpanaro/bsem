@@ -24,9 +24,7 @@ body {
 text-align: justify
 </style>
 
-# Examples
-
-This vignette describes how to explore the outcomes of estimates obtained with `bsem::sem`. In light of replication studies (e.g: Monte Carlo simulation study), we ran a former analysis to validate the proposed framework. We highly recommend the reader to take a look at [Get started](bsem.html) before reading this material as the general model described in the introduction vignette is presented next. 
+This vignette describes how to explore the estimates obtained with `bsem::sem`. In light of replication studies (e.g: Monte Carlo simulation study), we ran a former analysis to validate the proposed framework. We highly recommend the reader to take a look at [Get started](bsem.html) before reading this material as the general model described in the introduction of this vignette is presented next. 
   
 ## CFA
 
@@ -51,7 +49,7 @@ A data matrix and a list of blocks are the only mandatory arguments as they are 
 
 1. the blocks, paths and exogenous elements are integer vectors referring to the variable (column) position;
 
-2. named lists are defined by the user with the factor and variable names, that the automated print, summary, and plot functions will inherit.
+2. named lists defined by the user with the factor and variable names, such that the automated print, summary, and plot functions will inherit it.
 
 - In this example we go ahead with the first option, unnamed lists are internally named in both cases.
 
@@ -59,7 +57,7 @@ A data matrix and a list of blocks are the only mandatory arguments as they are 
 dt$blocks
 ```
 
-Note that the list is named with `c("F1", "F2", "F3", "F4", "F5")`, but the elements refer to column positioning, variable names would be internally converted into positioning if that was the case.
+Note that the list is named with `c("F1", "F2", "F3", "F4", "F5")`, but the elements refer to column positioning, variable names would be internally converted into positioning if we had the first case.
 
 - Descriptive statistics were based on ``rstan::monitor``:
 
@@ -68,9 +66,11 @@ cfa <- bsem::sem(
   data = dt$data,
   blocks = dt$blocks
 )
+
+cfa
 ```
 
-The descriptive statistics for the posterior factor loadings are shown in the R console inspired on the `rstan` fashion (based on ``rstan::monitor``). Besides, a warning is displayed to remind that the signals of the outer model loadings were not specified. Random initial values are assigned in this case.
+The descriptive statistics for the posterior factor loadings are shown in the R console inspired on the `rstan` fashion (based on ``rstan::monitor``). Besides, a warning is displayed to remind that the signals of the outer model loadings were not specified. Random initial values are assigned in this case. As a consequence, the direction of the loadings signals  might change, which means that the score rows and loading columns may vary. Remind that the real-valued product $\alpha \lambda$ can have more than one solution.
 
 - The structural model can be easily viewed with the plotting routine `bsem::plot`:
 
@@ -93,17 +93,17 @@ gridExtra::grid.arrange(
 )
 ```
 
-From this example, we found that the estimates pattern is tightly close to the true values of the parameters even when the signals are not passed. Also, we have observed that the part of the analysis is intended to confirm the predefined constructs CFA (first loadings matrix lines) and the other is intended to express which variable can compose a later full CFA.
+From this example, we found that the estimates pattern is tightly close to the one generated with the true value of the parameters even when the signals are not passed. 
 
-Remember each chain runs in a separate thread, thus, it is recommended specifying (default) the number of cores at least equal to the number of chains. Indeed, from our experience, an increase in the number of iterations raises the runtime but considerably improves the interval and point estimates. 
+Remember each chain runs in a separate thread, thus, it is recommended to specify (default) the number of cores at least equal to the number of chains. Indeed, from our experience, an increase in the number of iterations raises the runtime, but considerably improves the interval and point estimates. 
 
 ## SEM
 
-For the SEM we also consider paths and exogenous variables as we  will use the simulated data already described in the [Get started](bsem.html) vignette. This model includes two additional kinds of relationships between observed and latent variables.
+In addition to the CFA structure above, for the SEM we wil also consider paths and exogenous variables. The simulated data already described in the [Get started](bsem.html) vignette includes two additional kinds of relationships among observed and latent variables.
 
 1. Exogenous variable regression - variables that are explained by some common factors, those variables are referred to as the exogenous variables.
 
-2. Path modeling regression -  common factors that are explained by some other common factors form a path between two latent variables that we refer to.
+2. Path modeling regression -  common factors that are explained by some other common factors,  this we will refer to as  a path between two latent variables.
 
 Again, we can use the predefined routine `simdata`.
 
@@ -120,21 +120,22 @@ sem <- bsem::sem(
 )
 ```
 
-Similar outcomes can be also obtained for this model and we can one more time conclude that the model estimates well under normality assumption for the errors:
+Similar outcomes can be also obtained for this model and we can one more time conclude that the model estimates are adequate under normality assumption for the errors:
 
 ```{r, echo = F}
 gridExtra::grid.arrange(
-  bsem::arrayplot(sem$mean_lambda, main = "estimates", -4, 4),
-  bsem::arrayplot(dt$real$lambda, main = "lambda (scores)", -4, 4),
-  bsem::arrayplot(sem$mean_alpha, main = "estimates", -4, 4),
-  bsem::arrayplot(dt$real$alpha, main = "alpha (loadings)", -4, 4),
-  layout_matrix = matrix(c(1, 1, 3, 3, 2, 2, 4, 4), ncol = 2)
+  bsem::arrayplot(sem$mean_lambda, main = "estimates", -6, 6),
+  bsem::arrayplot(dt$real$lambda, main = "lambda (scores)", -6, 6)
+  )
+
+gridExtra::grid.arrange(
+  bsem::arrayplot(sem$mean_alpha, main = "estimates", -6, 6),
+  bsem::arrayplot(dt$real$alpha, main = "alpha (loadings)", -6, 6),
+  layout_matrix = matrix(c(1, 1, 2, 2), ncol = 2)
 )
 ```
 
-
-
-An analogous plot is retrieved but knows in addition to the ellipsoidal and the boxes we also have circles. The circles represent the exogenous variables, while the ellipses represent the common factors and the boxes the manifest variables. 
+An analogous plot can be retrieved, but in addition to the previous structure, we can observe ellipsoids, boxes and also a circle. The circle represent the exogenous variable, while the ellipses represent the common factors and the boxes the manifest variables. The dashed lines refers to the regression coefficients and the solid ones to the CFA loading.
 
 ```{r, echo = F}
 plot(sem)
@@ -142,53 +143,49 @@ plot(sem)
 
 That is not all, the first thing to do after fitting a Bayesian model is to check the posterior to assess whether the estimates are good to describe the proposed CFA or the SEM model.
 
-# Graphical posterior analysis 
+## Graphical posterior analysis 
 
-This section is an introduction on how to diagnose the adequacy of the estimates using the outputs of `cfa` and `semfit`.
+This section is an introduction on how to diagnose the adequacy of the estimates using the outputs of `cfa` and `semfit`. For example, we will analyze the CFA example.
 
-## Plots
+### Traceplots and density plots
 
-### Tracelots
+The posterior samples are returned with `cfa$posterior` and the posterior mean with `cfa$mean_alpha`. 
 
-```{r, echo = F}
-lnames <- rownames(sem$mean_alpha)
-
-lapply(seq(1,length(sem$blocks)), 
-       function(i) {
-  find <- paste0("alpha[", which(lnames %in% unlist(sem$blocks[i])), ",", 
-                 rep(i, lengths(sem$blocks)[i]), "]"
-                 )
-  bayesplot::mcmc_trace(sem$posterior$alpha[, , find],
-                        facet_args = list(nrow = 2)
-                        )
-  }
-)
+```{r}
+names(cfa$posterior)
+dim(cfa$posterior$alpha)
 ```
 
+The dimension indicates that we have got $1000$ after-warmup iterations, 4 chains and 105 loadings. We select one the ones that we previously considered as manifest variables in the CFA.
 
-### Density plots
+```{r}
+lnames <- rownames(cfa$mean_alpha)
 
-```{r, echo = F}
-lnames <- rownames(sem$mean_alpha)
-
-lapply(seq(1,length(sem$blocks)), 
-       function(i) {
-  find <- paste0("alpha[", which(lnames %in% unlist(sem$blocks[i])), ",", 
-                 rep(i, lengths(sem$blocks)[i]), "]"
+  find <- paste0("alpha[", which(lnames %in% unlist(cfa$blocks[1:length(cfa$blocks)])), ",", 
+                 rep(1:length(cfa$blocks), lengths(cfa$blocks)), "]"
                  )
-  bayesplot::mcmc_dens(sem$posterior$alpha[, , find],
-                        facet_args = list(nrow = 2)
+  bayesplot::mcmc_trace(cfa$posterior$alpha[, , find]
                         )
-  }
-)
 ```
+
+```{r}
+lnames <- rownames(cfa$mean_alpha)
+
+  find <- paste0("alpha[", which(lnames %in% unlist(cfa$blocks[1:length(cfa$blocks)])), ",", 
+                 rep(1:length(cfa$blocks), lengths(cfa$blocks)), "]"
+                 )
+  bayesplot::mcmc_dens(cfa$posterior$alpha[, , find]
+                        )
+```
+
+The plots reveal that the chains are unimodal and have good mixing. The signals between chains might change as mentioned before, while extracting the posterior samples the routine internally compares opposite signal chains and adjust the direction between chains.
 
 ## Interval estimate
 
 Two types of intervals can be obtained:  
 
 ### HPD interval  
-- The narrowest (highest posterior density - HPD) credibility interval can be retrieved using `.$credint`. We have computed HPD intervals fo the factor loadings (alpha), scores (lambda), and regression coefficients (beta).
+- The narrowest (highest posterior density - HPD) credibility interval can be retrieved using `.$credint`. We have computed HPD intervals for the factor loadings (alpha), scores (lambda), and regression coefficients (beta).
 
 ```{r}
 names(cfa$credint)
@@ -251,7 +248,8 @@ library("bayesplot")
 - `find` help us finding the loading values that have been previously determined to estimate the latent scores:
 
 ```{r, eval =F}
-find <- paste0("alpha[", which(lnames %in% unlist(cfa$blocks)), ",", rep(1:length(cfa$blocks), lengths(cfa$blocks)), "]")
+find <- paste0("alpha[", which(lnames %in% unlist(cfa$blocks)), ",",
+               rep(1:length(cfa$blocks), lengths(cfa$blocks)), "]")
 
 dt <- dt[find, ]
 ```
@@ -270,8 +268,7 @@ In addition to the possibilities for intervals, other `mcmc_.` graphs are recomm
 
 The data visualization tools have been covered in this document. More than the options covered here, there is also a `runshiny()` that can be useful to understand the model. The user can upload a .csv dataset and follow the proposed workflow. The code to launch the app is:
 
-```{r, echo = F}
+```{r, eval = F}
 bsem::runShiny()
-shinystan::launch_shinystan(semfit$stanfit)
 ```
 

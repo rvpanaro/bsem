@@ -5,16 +5,17 @@
 #' @export arrayplot
 #' @param y a numerical data.frame or matrix object
 #' @param colors 1 = blue/red, 0 = white/black
-#' @param mini, minimum color range (might cause blank spots if mispecified)
-#' @param maxi, maximum color range (might cause blank spots if mispecified)
+#' @param mini, minimum color range (might cause blank spots if misspecified)
+#' @param maxi, maximum color range (might cause blank spots if misspecified)
 #' @param ylab y axis label passed to \code{lattice::levelplot}  function
 #' @param xlab x axis label passed to \code{lattice::levelplot} function
 #' @param main plot title passed to \code{lattice::levelplot} function
 #' @examples
-#' data(set2)
+#' dt <- simdata()
 #'
-#' arrayplot(set2$real$alpha)
-#' arrayplot(set2$real$alpha, colors = 0)
+#' arrayplot(dt$real$alpha)
+#' arrayplot(dt$real$alpha, colors = 0)
+#'
 #' @importFrom lattice levelplot panel.levelplot
 #'
 #' @author VD Mayrink

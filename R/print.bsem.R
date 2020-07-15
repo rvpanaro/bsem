@@ -53,14 +53,14 @@
 #' 'bsem' object summary
 #'
 #' @export
-#' @param x an object of class spbp
+#' @param object an object of class spbp
 #' @param digits number of digits to display
 #' @param ... further arguments passed to or from summary methods
 #' @method summary bsem
 #' @return none
 
 summary.bsem <-
-  function(x,
+  function(object,
            digits = 4,
            ...){
 
@@ -69,16 +69,16 @@ summary.bsem <-
 
     on.exit(options(savedig))
 
-    stats <- x$stats
+    stats <- object$stats
 
-    cat("\n\n---\nbsem model: ", x$model, "\n")
-    cat("latent variables (outter model): ", length(x$blocks), "\n")
+    cat("\n\n---\nbsem model: ", object$model, "\n")
+    cat("latent variables (outter model): ", length(object$blocks), "\n")
 
-    if(x$model %in%  c("semNA", "sem", "semNAEX", "semEX")){
-      cat("regressions (inner model): ", length(x$paths), "\n")
+    if(object$model %in%  c("semNA", "sem", "semNAEX", "semEX")){
+      cat("regressions (inner model): ", length(object$paths), "\n")
       }
-    if(x$model %in%  c("semNA", "factorialNA", "semNAEX", "factorialNAEX")){
-      cat("missing: ", length(x$mean_Xna), "\n")
+    if(object$model %in%  c("semNA", "factorialNA", "semNAEX", "factorialNAEX")){
+      cat("missing: ", length(object$mean_Xna), "\n")
       }
 
     cat("\n\n outter model loadings (alpha):\n")
@@ -86,16 +86,16 @@ summary.bsem <-
     aux_blocks <- list()
     aux_credint_blocks <- list()
 
-    for(i in 1:length(x$blocks)){
-      cat("\n", names(x$blocks)[i], "\n")
+    for(i in 1:length(object$blocks)){
+      cat("\n", names(object$blocks)[i], "\n")
       finder <- paste0("alpha[",
-                    which(rownames(x$mean_alpha) %in%  x$blocks[[i]]),",",
-                    which(rownames(x$mean_lambda) == names(x$blocks)[i]),
+                    which(rownames(object$mean_alpha) %in%  object$blocks[[i]]),",",
+                    which(rownames(object$mean_lambda) == names(object$blocks)[i]),
                     "]" )
 
       aux_blocks[[i]] <- matrix(stats[rownames(stats) %in% finder, ],
                                 ncol = ncol(stats))
-      aux_credint_blocks[[i]] <- matrix(x$credint$alpha[rownames(x$credint$alpha) %in% finder, ],
+      aux_credint_blocks[[i]] <- matrix(object$credint$alpha[rownames(object$credint$alpha) %in% finder, ],
                                 ncol = 2)
 
       colnames(aux_blocks[[i]]) <- colnames(stats)
@@ -107,7 +107,7 @@ summary.bsem <-
         matrix(aux_blocks[[i]][, c("n_eff", "Rhat")], ncol = 2)
       )
       colnames(aux_blocks[[i]]) <- c("mean", "50%", "sd", "HPD.l", "HPD.u", "n_eff", "Rhat")
-      rownames(aux_blocks[[i]]) <- rownames(x$mean_alpha)[rownames(x$mean_alpha) %in%  x$blocks[[i]]]
+      rownames(aux_blocks[[i]]) <- rownames(object$mean_alpha)[rownames(object$mean_alpha) %in%  object$blocks[[i]]]
 
       print(round(aux_blocks[[i]], digits), digits)
     }
@@ -116,7 +116,7 @@ summary.bsem <-
       aux_credint_sigma2 <- list()
       aux_var <- matrix(stats[startsWith(rownames(stats), "sigma2"), ],
                         ncol = ncol(stats))
-      aux_credint_sigma2 <- matrix(x$credint$sigma2,
+      aux_credint_sigma2 <- matrix(object$credint$sigma2,
                             ncol = 2)
 
       colnames(aux_var) <- colnames(stats)
@@ -130,23 +130,23 @@ summary.bsem <-
       rownames(aux_var) <- paste0("sigma2[", 1:nrow(aux_var), "]")
       print(round(aux_var, digits), digits)
 
-  if(x$model %in% c("semNA", "sem", "semNAEX", "semEX") ){
+  if(object$model %in% c("semNA", "sem", "semNAEX", "semEX") ){
     cat("\n---\n\n inner model regression coefficients (beta):\n")
 
     aux_paths <- list()
     aux_credint_paths <- list()
 
-    for(i in 1:length(x$paths)){
-      cat("\n", names(x$paths)[i], "\n")
+    for(i in 1:length(object$paths)){
+      cat("\n", names(object$paths)[i], "\n")
 
-      idx <- c(0,cumsum(lengths(x$paths)))
+      idx <- c(0,cumsum(lengths(object$paths)))
       finder <- paste0("beta[",
                        (idx[i]+1):idx[i+1],
                        "]")
 
       aux_paths[[i]] <- matrix(stats[rownames(stats) %in% finder, ],
                                ncol = ncol(stats))
-      aux_credint_paths[[i]] <- matrix(x$credint$beta[rownames(x$credint$beta) %in% finder, ],
+      aux_credint_paths[[i]] <- matrix(object$credint$beta[rownames(object$credint$beta) %in% finder, ],
                             ncol = 2)
 
       colnames(aux_paths[[i]]) <- colnames(stats)
@@ -157,18 +157,18 @@ summary.bsem <-
         matrix(aux_paths[[i]][, c("n_eff", "Rhat")], ncol = 2)
       )
       colnames(aux_paths[[i]]) <- c("mean", "50%", "sd", "HPD.l", "HPD.u", "n_eff", "Rhat")
-      rownames(aux_paths[[i]]) <- x$paths[[i]]
+      rownames(aux_paths[[i]]) <- object$paths[[i]]
       print(round(aux_paths[[i]], digits), digits)
     }
    }
 
-    if(x$model %in%  c("factorialNA", "semNA", "factorialNAEX", "semNAEX")){
+    if(object$model %in%  c("factorialNA", "semNA", "factorialNAEX", "semNAEX")){
       cat("\n---\n\n  missing observations (Xna): \n")
       aux_Xna <- matrix(stats[startsWith(rownames(stats), "Xna"), ],
                         ncol = ncol(stats))
       colnames(aux_Xna) <- colnames(stats)
 
-      aux_credint_Xna <- matrix(x$credint$Xna,
+      aux_credint_Xna <- matrix(object$credint$Xna,
                            ncol = 2)
 
       aux <- NULL
@@ -180,21 +180,21 @@ summary.bsem <-
       )
 
       colnames(aux) <- c("mean", "50%", "sd", "HPD.l", "HPD.u", "n_eff", "Rhat")
-      rownames(aux) <- paste0("Xna[", x$idna[,1], ",", x$idna[,2], "]")
+      rownames(aux) <- paste0("Xna[", object$idna[,1], ",", object$idna[,2], "]")
       print(round(aux, digits), digits)
     }
 
-    if(x$model %in% c("factorialEX", "factorialNAEX", "semEX", "semNAEX") ){
+    if(object$model %in% c("factorialEX", "factorialNAEX", "semEX", "semNAEX") ){
       cat("\n---\n\n exogenous regression coefficients (gamma0, gamma, tau2): \n")
 
       aux_exogenous <- list()
       aux_credint_exogenous <- list()
       aux <- list()
 
-      for(i in 1:length(x$exogenous)){
-        cat("\n", names(x$exogenous)[i], "\n")
+      for(i in 1:length(object$exogenous)){
+        cat("\n", names(object$exogenous)[i], "\n")
 
-        idx <- c(0,cumsum(lengths(x$exogenous)))
+        idx <- c(0,cumsum(lengths(object$exogenous)))
         finder <- c(paste0("gamma0[",i,"]"),
                     paste0("gamma[",(idx[i]+1):idx[i+1],"]"),
                     paste0("tau2[",i,"]")
@@ -203,11 +203,11 @@ summary.bsem <-
         aux_exogenous[[i]] <- matrix(stats[rownames(stats) %in% finder, ],
                                  ncol = ncol(stats)
                                  )
-        aux_credint_exogenous[[i]] <- rbind(matrix(x$credint$gamma0[rownames(x$credint$gamma0) %in% finder, ],
+        aux_credint_exogenous[[i]] <- rbind(matrix(object$credint$gamma0[rownames(object$credint$gamma0) %in% finder, ],
                                          ncol = 2),
-                                  matrix(x$credint$gamma[rownames(x$credint$gamma) %in% finder, ],
+                                  matrix(object$credint$gamma[rownames(object$credint$gamma) %in% finder, ],
                                    ncol = 2),
-                                  matrix(x$credint$tau2[rownames(x$credint$tau2) %in% finder, ],
+                                  matrix(object$credint$tau2[rownames(object$credint$tau2) %in% finder, ],
                                          ncol = 2)
         )
 
@@ -219,7 +219,7 @@ summary.bsem <-
           matrix(aux_exogenous[[i]][, c("n_eff", "Rhat")], ncol = 2)
         )
         colnames(aux_exogenous[[i]]) <- c("mean", "50%", "sd", "HPD.l", "HPD.u", "n_eff", "Rhat")
-        rownames(aux_exogenous[[i]]) <- c("intercept", x$exogenous[[i]], paste0("tau2[", i,"]"))
+        rownames(aux_exogenous[[i]]) <- c("intercept", object$exogenous[[i]], paste0("tau2[", i,"]"))
         print(round(aux_exogenous[[i]], digits), digits)
       }
     }
@@ -234,22 +234,22 @@ summary.bsem <-
     cat("\nTail Rhat:\n")
     print(tail(sort(z, decreasing = T)), digits = digits)
 
-    cat("\nmedian PTVE: ", median(x$PTVE), "\n")
+    cat("\nmedian PTVE: ", median(object$PTVE), "\n")
 
-    if(x$model %in% c("sem", "semNA", "semEX", "semNAEX")){
-      cat("R2:", paste0(round(x$AFR2,2), '%'), "\n")
+    if(object$model %in% c("sem", "semNA", "semEX", "semNAEX")){
+      cat("R2:", paste0(round(object$AFR2,2), '%'), "\n")
     }
     summ <-list(blocks = aux_blocks,
                 var = aux_var,
                 stats = stats)
 
-    if(x$model %in% c("sem", "semNA", "semEX", "semNAEX")){
+    if(object$model %in% c("sem", "semNA", "semEX", "semNAEX")){
       summ$paths <- aux_paths
     }
-    if(x$model %in% c("factorialNA", "semNA", "factorialNAEX", "semNAEX")){
+    if(object$model %in% c("factorialNA", "semNA", "factorialNAEX", "semNAEX")){
       summ$Xna <- aux_Xna
     }
-    if(x$model %in% c("factorialEX", "semEX", "factorialNAEX", "semNAEX")){
+    if(object$model %in% c("factorialEX", "semEX", "factorialNAEX", "semNAEX")){
       summ$exogenous <- aux_exogenous
     }
     cat("\n---\n")

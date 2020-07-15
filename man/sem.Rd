@@ -24,7 +24,7 @@ sem(
 \arguments{
 \item{data}{a mandatory 'matrix' object where the columns are variables and the rows are observations}
 
-\item{blocks}{a mandatory named list of colnames (or integers in 1:ncol(data)) indicating the manisfest variables correpoding to each block; generic names are assumed for latent variables internally if not defined}
+\item{blocks}{a mandatory named list of colnames (or integers in 1:ncol(data)) indicating the manisfest variables corresponding to each block; generic names are assumed for latent variables internally if not defined}
 
 \item{paths}{list referring to the inner model paths; a list of characters or integers referring to the scores relationship; the jth first latent variable are explained if names(paths) is NULL}
 
@@ -38,7 +38,7 @@ sem(
 
 \item{cores}{number of core threads to be used}
 
-\item{pars}{allows parameters to ommitted in the outcome; options are any subset of default c("alpha", "lambda", "sigma2")}
+\item{pars}{allows parameters to omitted in the outcome; options are any subset of default c("alpha", "lambda", "sigma2")}
 
 \item{iter}{number of iterations}
 
@@ -46,7 +46,7 @@ sem(
 
 \item{scaled}{logical; indicates whether to center and scale the data; default FALSE}
 
-\item{...}{further arguments passed to Stan such as warmup, adapt_delta and others, see \code{\link[rstan]{rstan::sampling}}.}
+\item{...}{further arguments passed to Stan such as warmup, adapt_delta and others, see \code{\link[rstan]{sampling}}.}
 }
 \value{
 An object of class \code{bsem}; a list of 14 to 19:
@@ -83,7 +83,7 @@ Fits the SEM to specific data
 Consider:
 
 - the outer model as:
--- outter blocks:
+-- outer blocks:
 
  \deqn{X_{p x n} = \alpha_{p x k}\lambda_{k x n} + \epsilon_{p x n}}
    where \eqn{X} is the data matrix with variables in the rows and sample elements in the columns,  \eqn{\alpha_{p x j}} is the column vector of loadings for the \eqn{jth} latent variable and \eqn{\lambda_{j x n}} is the row vector of scores for the  \eqn{jth} unobserved variable, \eqn{j =1,\dots,k}. Normality is assumed for the errors as \eqn{\epsilon_{ij}~ N(0, \sigma_i ^2)} for \eqn{i = 1,\dots, p}.

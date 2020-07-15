@@ -4,18 +4,18 @@
 #'
 #' @title sem: The SEM Function
 #' @param data  a mandatory 'matrix' object where the columns are variables and the rows are observations
-#' @param blocks a mandatory named list of colnames (or integers in 1:ncol(data)) indicating the manisfest variables correpoding to each block; generic names are assumed for latent variables internally if not defined
+#' @param blocks a mandatory named list of colnames (or integers in 1:ncol(data)) indicating the manisfest variables corresponding to each block; generic names are assumed for latent variables internally if not defined
 #' @param paths  list referring to the inner model paths; a list of characters or integers referring to the scores relationship; the jth first latent variable are explained if names(paths) is NULL
 #' @param exogenous  list referring to the inner model exogenous; a list of characters or integers referring to relationship between exogenous and latent variables; the lth first columns are explained if names(exogenous) is NULL
 #' @param signals  list referring to the signals of the factor loadings initial values; must be true: (length(signals) == length(blocks)) && (lengths(signals) == lengths(blocks)); (not allowed in runShiny)
 #' @param row_names  optional identifier for the observations (observation = row);
 #' @param prior_specs  prior settings for the Bayesian approach; only `normal` and `cauchy` for gamma0, gamma and beta; `gamma`, `lognormal` and `inv_gamma` for sigma2 and tau2 are available, those prior specifications are ignored if not needed (FA or SEM)
-#' @param pars  allows parameters to ommitted in the outcome; options are any subset of default c("alpha", "lambda", "sigma2")
+#' @param pars  allows parameters to omitted in the outcome; options are any subset of default c("alpha", "lambda", "sigma2")
 #' @param cores  number of core threads to be used
 #' @param iter  number of iterations
 #' @param chains  number of chains
 #' @param scaled  logical; indicates whether to center and scale the data; default FALSE
-#' @param ...  further arguments passed to Stan such as warmup, adapt_delta and others, see \code{\link[rstan]{rstan::sampling}}.
+#' @param ...  further arguments passed to Stan such as warmup, adapt_delta and others, see \code{\link[rstan]{sampling}}.
 #' @export sem
 #' @rdname sem
 #' @importFrom rstan stan sampling
@@ -48,7 +48,7 @@
 #' Consider:
 #'
 #' - the outer model as:
-#' -- outter blocks:
+#' -- outer blocks:
 #'
 #'  \deqn{X_{p x n} = \alpha_{p x k}\lambda_{k x n} + \epsilon_{p x n}}
 #'    where \eqn{X} is the data matrix with variables in the rows and sample elements in the columns,  \eqn{\alpha_{p x j}} is the column vector of loadings for the \eqn{jth} latent variable and \eqn{\lambda_{j x n}} is the row vector of scores for the  \eqn{jth} unobserved variable, \eqn{j =1,\dots,k}. Normality is assumed for the errors as \eqn{\epsilon_{ij}~ N(0, \sigma_i ^2)} for \eqn{i = 1,\dots, p}.

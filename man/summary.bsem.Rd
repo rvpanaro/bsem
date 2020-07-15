@@ -4,10 +4,10 @@
 \alias{summary.bsem}
 \title{'bsem' object summary}
 \usage{
-\method{summary}{bsem}(x, digits = 4, ...)
+\method{summary}{bsem}(object, digits = 4, ...)
 }
 \arguments{
-\item{x}{an object of class spbp}
+\item{object}{an object of class spbp}
 
 \item{digits}{number of digits to display}
 

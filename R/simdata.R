@@ -4,13 +4,13 @@
 #'
 #' @export simdata
 #' @param paths list referring to the inner model paths; a list of integers referring to the scores relationship; the jth first latent variable are explained
-#' @param blocks list of integers in 1:ncol(data) indicating the manisfest variables correpoding to each block
-#' @param exogenous, minimum color range (might cause blank spots if mispecified)
+#' @param blocks list of integers in 1:ncol(data) indicating the manisfest variables corresponding to each block
+#' @param exogenous, minimum color range (might cause blank spots if misspecified)
 #' @param Nv number of endogenous variables in the database (default = 21)
 #' @param Ne number of sample elements in the database (default = 30)
 #' @param Nna number of missing observations in each database (default = 0)
 #' @param save logical (default = FALSE); whether to save in the local filepath
-#' @param sigma2 outter model error variances
+#' @param sigma2 outer model error variances
 #' @param beta inner paths regression coefficients
 #' @param gamma0 inner exogenous intercept
 #' @param gamma inner exogenous regression coefficients
@@ -28,7 +28,7 @@
 #' @importFrom lattice levelplot panel.levelplot
 #'
 #'
-#' @seealso
+#' @seealso \code{\link[bsem]{plot.sem}}, \code{\link[bsem]{sem}}, \code{\link[bsem]{arrayplot}}, \code{\link[bsem]{summary.sem}}, \code{\link[bsem]{print.sem}}
 
 simdata <-
   function(paths = list(3:4, 4:5),
