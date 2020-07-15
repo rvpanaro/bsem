@@ -13,7 +13,7 @@ usethis::use_build_ignore("cran-comments.md")
 usethis::use_build_ignore("inst/dev.R")
 usethis::use_build_ignore("inst/load.R")
 
-devtools::build_vignettes()
+# devtools::build_vignettes()
 devtools::check()
 devtools::check_man()
 devtools::missing_s3()

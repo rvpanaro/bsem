@@ -2,8 +2,6 @@ library(bsem)
 library(magrittr)
 library(testthat)
 
-bsem::runShiny()
-
 ## factorial
 dt <- simdata(exogenous = NULL, paths = NULL)
 fit <- bsem::sem(data = dt$data, blocks = dt$blocks, signals = dt$signals, iter = 100, chains = 4)

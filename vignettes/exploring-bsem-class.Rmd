@@ -219,7 +219,7 @@ snames <- rownames(cfa$mean_lambda)
 ```
 
 - `find` help us finding these values:
-
+  
 ```{r}
 find <- paste0("alpha[", which(lnames %in% unlist(cfa$blocks)), ",", rep(1:length(cfa$blocks), lengths(cfa$blocks)), "]")
 
