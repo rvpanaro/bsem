@@ -9,9 +9,13 @@
 #'
 #' @seealso \code{\link[bsem]{sem}}, \code{\link[bsem]{simdata}}, \code{\link[bsem]{arrayplot}}, \code{\link[bsem]{summary.sem}}, \code{\link[bsem]{print.sem}}
 #' @examples
+#'
+#' \dontrun{
 #' library("bsem")
 #' runShiny()
+#' }
 #' @author RV Panaro
+#'
 #' @export runShiny
 #'
 runShiny <- function() {

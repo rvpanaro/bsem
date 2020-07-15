@@ -12,7 +12,13 @@ Authors@R:
            family = "Mayrink",
            role = "aut",
            email = "vdinizm@gmail.com",
-           comment = c(ORCID = "0000-0002-5683-8326", URL= "http://www.est.ufmg.br/~vdinizm/")))
+           comment = c(ORCID = "0000-0002-5683-8326", URL= "http://www.est.ufmg.br/~vdinizm/")),
+  	person(given = "Marcelo",
+           family = "Costa",
+           role = "aut",
+           email = "macosta.est@gmail.com",
+           comment = c(URL= "http://somos.ufmg.br/professor/marcelo-azevedo-costa"))
+           )         
 Maintainer: Renato Panaro <renatovp@ime.usp.br>
 Description: Flexible routines to allow Structural Equation modeling particular cases using rstan integration. 'bsem' includes Bayesian Exploratory Analysis, Bayesian Confirmatory Analysis, Factor Analysis and Structural Equation Models. RV Panaro (2020).
 License: GPL-3
@@ -52,5 +58,5 @@ LazyData: true
 SystemRequirements: GNU make
 BugReports: https://github.com/rvpanaro/bsem/issues
 VignetteBuilder: knitr
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
 URL: https://github.com/rvpanaro/bsem

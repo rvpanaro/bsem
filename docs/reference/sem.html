@@ -182,7 +182,7 @@
     </tr>
     <tr>
       <th>signals</th>
-      <td><p>list referring to the signals of the factor loadings initial values; must be true: (length(signals) == length(blocks)) &amp;&amp; (lengths(signals) == lengths(blocks))</p></td>
+      <td><p>list referring to the signals of the factor loadings initial values; must be true: (length(signals) == length(blocks)) &amp;&amp; (lengths(signals) == lengths(blocks)); (not allowed in runShiny)</p></td>
     </tr>
     <tr>
       <th>row_names</th>
@@ -222,7 +222,7 @@
 
     <p>An object of class <code>bsem</code>; a list of 14 to 19:</p><dl'>
    <dt>stanfit</dt><dd><p>S4 object of class stanfit</p></dd>
-   <dt>posterior</dt><dd><p>the list of posterior draws separate by chains</p></dd>
+   <dt>posterior</dt><dd><p>the list of posterior draws separated by chains</p></dd>
    <dt>model</dt><dd><p>character; pointer to pre-defined stan model</p></dd>
    <dt>mean_alpha</dt><dd><p>matrix of factor loadings posterior means</p></dd>
    <dt>mean_lambda</dt><dd><p>matrix of factor scores posterior means</p></dd>
@@ -236,7 +236,7 @@
    <dt>paths</dt><dd><p>list of paths</p></dd>
    <dt>credint</dt><dd><p>Highest posterior density intervals (HPD)</p></dd>
    <dt>h</dt><dd><p>vector of posterior communalities</p></dd>
-   <dt>PVTE</dt><dd><p>vector of total variance proportions</p></dd>
+   <dt>PTVE</dt><dd><p>vector of total variance proportions</p></dd>
    <dt>AFR2</dt><dd><p>adjusted coefficient of determination</p></dd>
    <dt>SQE</dt><dd><p>explained sums of squares</p></dd>
    <dt>SQT</dt><dd><p>total sums of squares</p></dd>
@@ -256,34 +256,35 @@
 <p>- the inner model as:</p>
 <p>-- inner paths:
      $$\lambda_{j x n} = \beta \lambda^(-j)  + \nu$$
-       where \(\beta\) is a column vector of constant coefficients, \(\lambda^(-j)_{ (k-1) x n}\) is the matrix of scores excluding the \(jth\) row scores and the error assumes \(\nu_j ~ N(0,1)\).</p>
+       where \(\beta\) is a column vector of constant coefficients and \(\lambda^(-j)_{ (k-1) x n}\) represents a subset of the matrix of scores, i.e. at least excluding the \(jth\) row scores. The error assumes \(\nu_j ~ N(0,1)\).</p>
 <p>-- inner exogenous:
        $$Y_{l x n} = \gamma_0 + \gamma \lambda  + \xi$$
          where \(\gamma\) is a column vector of constant coefficients and \(\gamma_0\) is the intercept. \(\lambda_{k x n}\) is the matrix of scores and the error assumes \(\xi_l~ N(0,\tau_l^2)\).</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code><a href='simdata.html'>bsem::simdata</a></code>, <code><a href='arrayplot.html'>bsem::arrayplot</a></code>, <code>bsem::summary.sem</code>, <code>bsem::print.sem</code></p></div>
+    <div class='dont-index'><p><code>plot.sem</code>, <code><a href='simdata.html'>simdata</a></code>, <code><a href='arrayplot.html'>arrayplot</a></code>, <code>summary.sem</code>, <code>print.sem</code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='no'>dt</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>bsem</span><span class='kw ns'>::</span><span class='fu'><a href='simdata.html'>simdata</a></span>()
-<span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span>(<span class='no'>dt</span>)</div><div class='output co'>#&gt; [1] "data"      "real"      "blocks"    "signals"   "paths"     "exogenous"</div><div class='input'>
-<span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+<span class='fu'><a href='https://rdrr.io/r/base/names.html'>names</a></span>(<span class='no'>dt</span>)</div><div class='output co'>#&gt; [1] "data"      "real"      "blocks"    "signals"   "paths"     "exogenous"</div><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
 
-<span class='no'>semfit</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>bsem</span><span class='kw ns'>::</span><span class='fu'>sem</span>(<span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>dt</span>$<span class='no'>data</span>,
-              <span class='kw'>blocks</span> <span class='kw'>=</span> <span class='no'>dt</span>$<span class='no'>blocks</span>,
-              <span class='kw'>paths</span> <span class='kw'>=</span> <span class='no'>dt</span>$<span class='no'>paths</span>,
-              <span class='kw'>exogenous</span> <span class='kw'>=</span> <span class='no'>dt</span>$<span class='no'>exogenous</span>,
-              <span class='kw'>signals</span> <span class='kw'>=</span> <span class='no'>dt</span>$<span class='no'>signals</span>,
-              <span class='kw'>iter</span> <span class='kw'>=</span> <span class='fl'>2000</span>,
-              <span class='kw'>warmup</span> <span class='kw'>=</span> <span class='fl'>1000</span>,
-              <span class='kw'>chains</span> <span class='kw'>=</span> <span class='fl'>4</span>)
+<span class='no'>semfit</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>bsem</span><span class='kw ns'>::</span><span class='fu'>sem</span>(
+  <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>dt</span>$<span class='no'>data</span>,
+  <span class='kw'>blocks</span> <span class='kw'>=</span> <span class='no'>dt</span>$<span class='no'>blocks</span>,
+  <span class='kw'>paths</span> <span class='kw'>=</span> <span class='no'>dt</span>$<span class='no'>paths</span>,
+  <span class='kw'>exogenous</span> <span class='kw'>=</span> <span class='no'>dt</span>$<span class='no'>exogenous</span>,
+  <span class='kw'>signals</span> <span class='kw'>=</span> <span class='no'>dt</span>$<span class='no'>signals</span>,
+  <span class='kw'>iter</span> <span class='kw'>=</span> <span class='fl'>2000</span>,
+  <span class='kw'>warmup</span> <span class='kw'>=</span> <span class='fl'>1000</span>,
+  <span class='kw'>chains</span> <span class='kw'>=</span> <span class='fl'>4</span>
+)
 <span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='no'>semfit</span>)
 
 <span class='kw pkg'>gridExtra</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/gridExtra/man/arrangeGrob.html'>grid.arrange</a></span>(<span class='kw pkg'>bsem</span><span class='kw ns'>::</span><span class='fu'><a href='arrayplot.html'>arrayplot</a></span>(<span class='no'>semfit</span>$<span class='no'>mean_lambda</span>, <span class='kw'>main</span> <span class='kw'>=</span> <span class='st'>"estimates"</span>, <span class='kw'>mini</span> <span class='kw'>=</span> -<span class='fl'>4</span>, <span class='kw'>maxi</span> <span class='kw'>=</span> <span class='fl'>4</span>),
-<span class='kw pkg'>bsem</span><span class='kw ns'>::</span><span class='fu'><a href='arrayplot.html'>arrayplot</a></span>(<span class='no'>dt</span>$<span class='no'>real</span>$<span class='no'>lambda</span>, <span class='kw'>main</span> <span class='kw'>=</span> <span class='st'>"lambda (scores)"</span>, <span class='kw'>mini</span> <span class='kw'>=</span> -<span class='fl'>4</span>, <span class='kw'>maxi</span> <span class='kw'>=</span> <span class='fl'>4</span>),
-<span class='kw pkg'>bsem</span><span class='kw ns'>::</span><span class='fu'><a href='arrayplot.html'>arrayplot</a></span>(<span class='no'>semfit</span>$<span class='no'>mean_alpha</span>, <span class='kw'>main</span> <span class='kw'>=</span> <span class='st'>"estimates"</span>, <span class='kw'>mini</span> <span class='kw'>=</span> -<span class='fl'>4</span>, <span class='kw'>maxi</span> <span class='kw'>=</span> <span class='fl'>4</span>),
-<span class='kw pkg'>bsem</span><span class='kw ns'>::</span><span class='fu'><a href='arrayplot.html'>arrayplot</a></span>(<span class='no'>dt</span>$<span class='no'>real</span>$<span class='no'>alpha</span>, <span class='kw'>main</span> <span class='kw'>=</span> <span class='st'>"alpha (loadings)"</span>, <span class='kw'>mini</span> <span class='kw'>=</span> -<span class='fl'>4</span>, <span class='kw'>maxi</span> <span class='kw'>=</span> <span class='fl'>4</span>),
-<span class='kw'>layout_matrix</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>1</span>, <span class='fl'>1</span>, <span class='fl'>3</span>, <span class='fl'>3</span>, <span class='fl'>2</span>, <span class='fl'>2</span>, <span class='fl'>4</span>, <span class='fl'>4</span>), <span class='kw'>ncol</span> <span class='kw'>=</span> <span class='fl'>2</span>)
+  <span class='kw pkg'>bsem</span><span class='kw ns'>::</span><span class='fu'><a href='arrayplot.html'>arrayplot</a></span>(<span class='no'>dt</span>$<span class='no'>real</span>$<span class='no'>lambda</span>, <span class='kw'>main</span> <span class='kw'>=</span> <span class='st'>"lambda (scores)"</span>, <span class='kw'>mini</span> <span class='kw'>=</span> -<span class='fl'>4</span>, <span class='kw'>maxi</span> <span class='kw'>=</span> <span class='fl'>4</span>),
+  <span class='kw pkg'>bsem</span><span class='kw ns'>::</span><span class='fu'><a href='arrayplot.html'>arrayplot</a></span>(<span class='no'>semfit</span>$<span class='no'>mean_alpha</span>, <span class='kw'>main</span> <span class='kw'>=</span> <span class='st'>"estimates"</span>, <span class='kw'>mini</span> <span class='kw'>=</span> -<span class='fl'>4</span>, <span class='kw'>maxi</span> <span class='kw'>=</span> <span class='fl'>4</span>),
+  <span class='kw pkg'>bsem</span><span class='kw ns'>::</span><span class='fu'><a href='arrayplot.html'>arrayplot</a></span>(<span class='no'>dt</span>$<span class='no'>real</span>$<span class='no'>alpha</span>, <span class='kw'>main</span> <span class='kw'>=</span> <span class='st'>"alpha (loadings)"</span>, <span class='kw'>mini</span> <span class='kw'>=</span> -<span class='fl'>4</span>, <span class='kw'>maxi</span> <span class='kw'>=</span> <span class='fl'>4</span>),
+  <span class='kw'>layout_matrix</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>1</span>, <span class='fl'>1</span>, <span class='fl'>3</span>, <span class='fl'>3</span>, <span class='fl'>2</span>, <span class='fl'>2</span>, <span class='fl'>4</span>, <span class='fl'>4</span>), <span class='kw'>ncol</span> <span class='kw'>=</span> <span class='fl'>2</span>)
 )
 }</div></pre>
   </div>

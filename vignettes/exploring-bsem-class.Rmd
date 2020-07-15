@@ -1,6 +1,6 @@
 ---
 title: "Exploring bsem class"
-subtitle: "How to get information from the bsem package outcomes"
+subtitle: "How evaluate bsem package outcomes"
 author: 
   - name          : "Renato Panaro"
 keywords          : "sem, posterior, diagram, summary, plot"
@@ -26,94 +26,101 @@ text-align: justify
 
 # Examples
 
-This vignette describes how the package can be used to estimate artificial parameters. This is a former analysis in light of other studies based on replication such as Monte Carlo simulation study methods. There are two ways to specify a ``sem`` model: 
-
-1. the blocks, paths, exogenous, and the data set are not named by the user (internally named);
-
-2. named list are passed to their respective arguments and consequently to the automated plot function.
+This vignette describes how to explore the outcomes of estimates obtained with `bsem::sem`. In light of replication studies (e.g: Monte Carlo simulation study), we ran a former analysis to validate the proposed framework. We highly recommend the reader to take a look at [Get started](bsem.html) before reading this material as the general model described in the introduction vignette is presented next. 
   
-## CFA 
+## CFA
 
-The implemented routines allow semi or full confirmatory factor analysis (CFA). Thus, at least one variable must be chosen to express each construct before running into the analysis. In other words, the user needs to specify at least one manifest variable that leads each block. In this way, semi-confirmatory FA assists the researcher in evidencing the possible structures to be tested in a conceptual (full) CFA later on. The function `bsem::simdata` is used to generate the simulated data. This routine internally produces artificial variances that are used to generate normally distributed errors. Factor scores (lambda) are generated from a standard normal distribution and the factor loadings (alpha) from a uniform distribution with support ranging from 0.5 to 2. The factor loading direction is generated using signals simulated from the `sample` function. A new artificial data set is produced with the command below:
+The main `bsem::sem` routine allows semi or full confirmatory factor analysis (CFA). Thus, at least one variable must be chosen to express each construct before running into the analysis. In other words, the user needs to specify at least one manifest variable that leads each block. In this way, semi-confirmatory FA might assist the researcher in evidencing the possible structures to be tested in a conceptual (full) CFA later on.
 
-```{r}
-dt3 <- bsem::simdata(paths = NULL, 
-                     exogenous = NULL)
-```
-
-The `paths` and` exogenous` arguments must be defined as `NULL` to obtain a data set suitable for factor analysis. Now we can run `bsem::sem` to check whether the `bsem::sem` retrieve estimates close to the real values of the parameters. 
-
-- A list of blocks is always necessary to represent the manifest variables related to each construct of the outer model:
-
-```{r}
-dt3$blocks
-```
-
-
-- Descriptive statistics for the posterior factor loadings are showed in the result in `rstan` fashion (based on ``rstan::monitor``):
-
-```{r}
-cfa <- bsem::sem(data = dt3$data,
-                       blocks = dt3$blocks
-                       )
-```
-
-A warning is displayed in the direction of the outer model loadings that are not specified. In this case, random values are assigned.
-Descriptive statistics for the posterior factor loadings are shown in the R console inspired on the `rstan` fashion (based on ``rstan::monitor``). In general, the posterior mean is the Bayesian estimator first choice.
-
-- The structural model can be easily viewed with the plotting routine `bsem::plot`:
+The data used in this example was generated using the function `bsem::simdata`, that internally produces artificial variances used to generate normally distributed errors. Also, factor scores (lambda) are generated from a standard normal distribution, and the factor loadings (alpha) from a uniform distribution with support ranging from 0.5 to 2. The factor loading direction (signal) is generated using a simple random sampling. A new artificial data set is wrapped in a list object and can be produced with the following command:
 
 ```{r, echo = F}
-plot(cfa)
+set.seed(2020)
 ```
 
-The recursive arrows indicate the estimate for each error variance. From this example, we found that the estimates pattern is tightly close to the true values of the parameters even when the signals are not passed. Also, we have observed that the part of the analysis is intended to confirm the predefined constructs CFA (first loadings matrix lines) and the other is intended to express which variable can compose a later full CFA.
-
-Moreover, we can compare the posterior factor loadings and the scores with the true values using the `bsem::arrayplot` function. For example:
-
-```{r, echo = F}
-gridExtra::grid.arrange(
-  bsem::arrayplot(cfa$mean_lambda, main = "estimates", -4, 4),
-  bsem::arrayplot(dt3$real$lambda, main = "lambda (scores)", -4, 4),
-  bsem::arrayplot(cfa$mean_alpha, main = "estimates", -4, 4),
-  bsem::arrayplot(dt3$real$alpha, main = "alpha (loadings)", -4, 4),
-  layout_matrix = matrix(c(1, 1, 3, 3, 2, 2, 4, 4), ncol = 2)
+```{r}
+dt <- bsem::simdata(
+  paths = NULL,
+  exogenous = NULL
 )
 ```
 
-The ``bsem::arrayplot`` graphs show that the loadings and scores pattern was captured by the model. To get closer estimates it may be necessary to increase the number of iterations or the warmup period since this is a model with many parameters.
+The `paths` and` exogenous` arguments must be defined as `NULL` to obtain a data set suitable for factor analysis, in which paths or exogenous variables can not be considered. Now, we can run `bsem::sem` to check whether the estimates retrieved are close to the real values of the parameters.
 
-```{r, echo = F}
-loadings_names <- rownames(cfa$mean_alpha)
-find <- paste0("alpha[", which(loadings_names %in% unlist(cfa$blocks)), ",", rep(1:length(cfa$blocks), lengths(cfa$blocks)), "]")
+A data matrix and a list of blocks are the only mandatory arguments as they are necessary to represent the manifest variables related to each construct of the outer model. There are two ways to specify a ``sem`` model: 
 
-bayesplot::mcmc_trace(cfa$posterior$alpha[, , find])
+1. the blocks, paths and exogenous elements are integer vectors referring to the variable (column) position;
+
+2. named lists are defined by the user with the factor and variable names, that the automated print, summary, and plot functions will inherit.
+
+- In this example we go ahead with the first option, unnamed lists are internally named in both cases.
+
+```{r}
+dt$blocks
 ```
 
-Remember each chain runs in a separate thread, thus, it is recommended specifying the number of cores at least equal to the number of chains. Indeed, from our experience, an increase in the number of iterations raises the runtime but considerably improves the interval and point estimates. 
+Note that the list is named with `c("F1", "F2", "F3", "F4", "F5")`, but the elements refer to column positioning, variable names would be internally converted into positioning if that was the case.
 
+- Descriptive statistics were based on ``rstan::monitor``:
+
+```{r}
+cfa <- bsem::sem(
+  data = dt$data,
+  blocks = dt$blocks
+)
+```
+
+The descriptive statistics for the posterior factor loadings are shown in the R console inspired on the `rstan` fashion (based on ``rstan::monitor``). Besides, a warning is displayed to remind that the signals of the outer model loadings were not specified. Random initial values are assigned in this case.
+
+- The structural model can be easily viewed with the plotting routine `bsem::plot`:
+
+```{r}
+plot(cfa)
+```
+
+Another interesting visualization of the result is to compare the posterior factor loadings estimates, and also the score estimates, with the true values of these quantities using the `bsem::arrayplot` function. For example:
+
+```{r}
+gridExtra::grid.arrange(
+  bsem::arrayplot(cfa$mean_lambda, main = "estimates", -6, 6),
+  bsem::arrayplot(dt$real$lambda, main = "lambda (scores)", -6, 6)
+)
+
+gridExtra::grid.arrange(
+  bsem::arrayplot(cfa$mean_alpha, main = "estimates", -6, 6),
+  bsem::arrayplot(dt$real$alpha, main = "alpha (loadings)", -6, 6),
+  layout_matrix = matrix(c(1, 1, 2, 2), ncol = 2)
+)
+```
+
+From this example, we found that the estimates pattern is tightly close to the true values of the parameters even when the signals are not passed. Also, we have observed that the part of the analysis is intended to confirm the predefined constructs CFA (first loadings matrix lines) and the other is intended to express which variable can compose a later full CFA.
+
+Remember each chain runs in a separate thread, thus, it is recommended specifying (default) the number of cores at least equal to the number of chains. Indeed, from our experience, an increase in the number of iterations raises the runtime but considerably improves the interval and point estimates. 
 
 ## SEM
 
-For this model we will use the simulated data already described in the [Get started](bsem.html) vignette. This model includes variables that are explained by some common factors, those variables are referred to as the exogenous variables.
+For the SEM we also consider paths and exogenous variables as we  will use the simulated data already described in the [Get started](bsem.html) vignette. This model includes two additional kinds of relationships between observed and latent variables.
+
+1. Exogenous variable regression - variables that are explained by some common factors, those variables are referred to as the exogenous variables.
+
+2. Path modeling regression -  common factors that are explained by some other common factors form a path between two latent variables that we refer to.
+
+Again, we can use the predefined routine `simdata`.
 
 ```{r}
 dt <- bsem::simdata()
 ```
 
 ```{r}
-sem <- bsem::sem(data = dt$data,
-                       blocks = dt$blocks,
-                       paths = dt$paths,
-                       exogenous = dt$exogenous
-                       )
+sem <- bsem::sem(
+  data = dt$data,
+  blocks = dt$blocks,
+  paths = dt$paths,
+  exogenous = dt$exogenous
+)
 ```
 
-Similar outcomes can be also obtained for this model:
-
-```{r, echo = F}
-plot(sem)
-```
+Similar outcomes can be also obtained for this model and we can one more time conclude that the model estimates well under normality assumption for the errors:
 
 ```{r, echo = F}
 gridExtra::grid.arrange(
@@ -125,15 +132,56 @@ gridExtra::grid.arrange(
 )
 ```
 
+
+
+An analogous plot is retrieved but knows in addition to the ellipsoidal and the boxes we also have circles. The circles represent the exogenous variables, while the ellipses represent the common factors and the boxes the manifest variables. 
+
 ```{r, echo = F}
-loadings_names <- rownames(sem$mean_alpha)
-find <- paste0("alpha[", which(loadings_names %in% unlist(sem$blocks)), ",", rep(1:length(cfa$blocks), lengths(sem$blocks)), "]")
-bayesplot::mcmc_trace(sem$posterior$alpha[, , find])
+plot(sem)
 ```
+
+That is not all, the first thing to do after fitting a Bayesian model is to check the posterior to assess whether the estimates are good to describe the proposed CFA or the SEM model.
 
 # Graphical posterior analysis 
 
-The first thing to do after fitting the model is to check posterior statistics to assess whether the estimates are good to describe the proposed CFA or SEM model.
+This section is an introduction on how to diagnose the adequacy of the estimates using the outputs of `cfa` and `semfit`.
+
+## Plots
+
+### Tracelots
+
+```{r, echo = F}
+lnames <- rownames(sem$mean_alpha)
+
+lapply(seq(1,length(sem$blocks)), 
+       function(i) {
+  find <- paste0("alpha[", which(lnames %in% unlist(sem$blocks[i])), ",", 
+                 rep(i, lengths(sem$blocks)[i]), "]"
+                 )
+  bayesplot::mcmc_trace(sem$posterior$alpha[, , find],
+                        facet_args = list(nrow = 2)
+                        )
+  }
+)
+```
+
+
+### Density plots
+
+```{r, echo = F}
+lnames <- rownames(sem$mean_alpha)
+
+lapply(seq(1,length(sem$blocks)), 
+       function(i) {
+  find <- paste0("alpha[", which(lnames %in% unlist(sem$blocks[i])), ",", 
+                 rep(i, lengths(sem$blocks)[i]), "]"
+                 )
+  bayesplot::mcmc_dens(sem$posterior$alpha[, , find],
+                        facet_args = list(nrow = 2)
+                        )
+  }
+)
+```
 
 ## Interval estimate
 
@@ -217,4 +265,13 @@ gridExtra::grid.arrange(mcmc_areas(cfa$posterior$alpha[, , find]),
 )
 ````
 
-In addition to the possibilities for intervals, other `mcmc_.` graphs are recommended, several options include histograms, violin plots, pair plots, and others.
+In addition to the possibilities for intervals, other `mcmc_.` graphs are recommended, several options include histograms, violin plots, pair plots, and others. A good tutorial on how to analyze the posterior using `bayesplot` functions is available at the [bayesplot](https://mc-stan.org/users/interfaces/bayesplot) manual.
+
+
+The data visualization tools have been covered in this document. More than the options covered here, there is also a `runshiny()` that can be useful to understand the model. The user can upload a .csv dataset and follow the proposed workflow. The code to launch the app is:
+
+```{r, echo = F}
+bsem::runShiny()
+shinystan::launch_shinystan(semfit$stanfit)
+```
+

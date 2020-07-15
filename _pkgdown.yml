@@ -28,9 +28,11 @@ reference:
 - contents:
   - starts_with("plot")
   - ends_with("plot")
-- title: "Printing and summary functions"
+- title: "Example, printing and summary functions"
   desc: "Function to print bsem objects"
 - contents:
   - starts_with("print")
   - starts_with("summary")
+  - starts_with("run")
+  - starts_with("sim")
 

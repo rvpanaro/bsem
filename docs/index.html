@@ -90,11 +90,50 @@
       </header><div class="row">
   <div class="contents col-md-9">
 
+<div id="bsem-" class="section level2">
+<h2 class="hasAnchor">
+<a href="#bsem-" class="anchor"></a>bsem <a href="https://rvpanaro.github.io/bsem"><img src="https://github.com/rvpanaro/bsem/blob/master/inst/figures/bsem.png" align="right" height="139"></a>
+</h2>
+<hr>
+<div id="an-r-package-for-bayesian-structural-equation-modeling" class="section level3">
+<h3 class="hasAnchor">
+<a href="#an-r-package-for-bayesian-structural-equation-modeling" class="anchor"></a>An R package for Bayesian structural equation modeling.</h3>
+<p>The package allows Bayesian analysis for particular cases of structural equation models (SEMs) based on <a href="https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started">rstan</a> integration. Examples in <a href="https://rvpanaro.github.io/spsurv/articles/bsem.html">get started</a> and <a href="https://rvpanaro.github.io/spsurv/articles/exploring-bsem-class.html">exploring bsem</a> include confirmatory factor analysis and confirmatory SEM. The full SEM model (outer and inner models), enables the evaluation of user-defined latent variables along with the analysis of established linear relationships among the latent scores.</p>
+</div>
+</div>
+<div id="install" class="section level2">
+<h2 class="hasAnchor">
+<a href="#install" class="anchor"></a>Install</h2>
+<div class="sourceCode" id="cb1"><pre class="r"><span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span>(<span class="st">"rvpanaro/bsem"</span>)</pre></div>
+</div>
+<div id="basic-working-example" class="section level2">
+<h2 class="hasAnchor">
+<a href="#basic-working-example" class="anchor"></a>Basic working example</h2>
+<div class="sourceCode" id="cb2"><pre class="r"><span class="no">dt</span> <span class="kw">&lt;-</span> <span class="kw pkg">bsem</span><span class="kw ns">::</span><span class="fu"><a href="reference/simdata.html">simdata</a></span>()
 
-<div id="-bsem" class="section level1">
-<div class="page-header"><h1 class="hasAnchor">
-<a href="#-bsem" class="anchor"></a>## bsem</h1></div>
-<p>An R package for Bayesian structural equation modeling</p>
+<span class="no">semfit</span> <span class="kw">&lt;-</span> <span class="kw pkg">bsem</span><span class="kw ns">::</span><span class="fu"><a href="reference/sem.html">sem</a></span>(
+  <span class="kw">data</span> <span class="kw">=</span> <span class="no">dt</span>$<span class="no">data</span>,
+  <span class="kw">blocks</span> <span class="kw">=</span> <span class="no">dt</span>$<span class="no">blocks</span>,
+  <span class="kw">paths</span> <span class="kw">=</span> <span class="no">dt</span>$<span class="no">paths</span>,
+  <span class="kw">exogenous</span> <span class="kw">=</span> <span class="no">dt</span>$<span class="no">exogenous</span>,
+  <span class="kw">signals</span> <span class="kw">=</span> <span class="no">dt</span>$<span class="no">signals</span>,
+  <span class="kw">iter</span> <span class="kw">=</span> <span class="fl">2000</span>,
+  <span class="kw">warmup</span> <span class="kw">=</span> <span class="fl">1000</span>,
+  <span class="kw">chains</span> <span class="kw">=</span> <span class="fl">4</span>
+)
+
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span>(<span class="no">semfit</span>)
+<span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">semfit</span>)</pre></div>
+</div>
+<div id="access-to-shinyapp" class="section level2">
+<h2 class="hasAnchor">
+<a href="#access-to-shinyapp" class="anchor"></a>Access to ShinyApp</h2>
+<div class="sourceCode" id="cb3"><pre class="r"><span class="kw pkg">bsem</span><span class="kw ns">::</span><span class="fu"><a href="reference/runShiny.html">runShiny</a></span>()</pre></div>
+</div>
+<div id="future-work-and-improvements" class="section level2">
+<h2 class="hasAnchor">
+<a href="#future-work-and-improvements" class="anchor"></a>Future work and improvements</h2>
+<p>Feel free to collaborate or to open an issue.</p>
 </div>
 
   </div>
@@ -125,13 +164,7 @@
 </ul>
 </div>
 
-  <div class="dev-status">
-<h2>Dev status</h2>
-<ul class="list-unstyled">
-<li><a href="http://mc-stan.org"><img src="https://raw.githubusercontent.com/stan-dev/logos/master/logo_tm.png" align="right" width="120" alt="Stan Logo"></a></li>
-</ul>
-</div>
-</div>
+  </div>
 </div>
 
 
