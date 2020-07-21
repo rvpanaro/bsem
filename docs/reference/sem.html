@@ -272,7 +272,7 @@
          where \(\gamma\) is a column vector of constant coefficients and \(\gamma_0\) is the intercept. \(\lambda_{k x n}\) is the matrix of scores and the error assumes \(\xi_l~ N(0,\tau_l^2)\).</p>
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code>plot.sem</code>, <code><a href='simdata.html'>simdata</a></code>, <code><a href='arrayplot.html'>arrayplot</a></code>, <code>summary.sem</code>, <code>print.sem</code></p></div>
+    <div class='dont-index'><p><code><a href='plot.bsem.html'>plot.bsem</a></code>, <code><a href='simdata.html'>simdata</a></code>, <code><a href='arrayplot.html'>arrayplot</a></code>, <code><a href='summary.bsem.html'>summary.bsem</a></code>, <code><a href='print.bsem.html'>print.bsem</a></code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='no'>dt</span> <span class='kw'>&lt;-</span> <span class='kw pkg'>bsem</span><span class='kw ns'>::</span><span class='fu'><a href='simdata.html'>simdata</a></span>()
@@ -288,14 +288,7 @@
   <span class='kw'>warmup</span> <span class='kw'>=</span> <span class='fl'>1000</span>,
   <span class='kw'>chains</span> <span class='kw'>=</span> <span class='fl'>4</span>
 )
-<span class='fu'><a href='https://rdrr.io/r/base/plot.html'>plot</a></span>(<span class='no'>semfit</span>)
-
-<span class='kw pkg'>gridExtra</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/gridExtra/man/arrangeGrob.html'>grid.arrange</a></span>(<span class='kw pkg'>bsem</span><span class='kw ns'>::</span><span class='fu'><a href='arrayplot.html'>arrayplot</a></span>(<span class='no'>semfit</span>$<span class='no'>mean_lambda</span>, <span class='kw'>main</span> <span class='kw'>=</span> <span class='st'>"estimates"</span>, <span class='kw'>mini</span> <span class='kw'>=</span> -<span class='fl'>4</span>, <span class='kw'>maxi</span> <span class='kw'>=</span> <span class='fl'>4</span>),
-  <span class='kw pkg'>bsem</span><span class='kw ns'>::</span><span class='fu'><a href='arrayplot.html'>arrayplot</a></span>(<span class='no'>dt</span>$<span class='no'>real</span>$<span class='no'>lambda</span>, <span class='kw'>main</span> <span class='kw'>=</span> <span class='st'>"lambda (scores)"</span>, <span class='kw'>mini</span> <span class='kw'>=</span> -<span class='fl'>4</span>, <span class='kw'>maxi</span> <span class='kw'>=</span> <span class='fl'>4</span>),
-  <span class='kw pkg'>bsem</span><span class='kw ns'>::</span><span class='fu'><a href='arrayplot.html'>arrayplot</a></span>(<span class='no'>semfit</span>$<span class='no'>mean_alpha</span>, <span class='kw'>main</span> <span class='kw'>=</span> <span class='st'>"estimates"</span>, <span class='kw'>mini</span> <span class='kw'>=</span> -<span class='fl'>4</span>, <span class='kw'>maxi</span> <span class='kw'>=</span> <span class='fl'>4</span>),
-  <span class='kw pkg'>bsem</span><span class='kw ns'>::</span><span class='fu'><a href='arrayplot.html'>arrayplot</a></span>(<span class='no'>dt</span>$<span class='no'>real</span>$<span class='no'>alpha</span>, <span class='kw'>main</span> <span class='kw'>=</span> <span class='st'>"alpha (loadings)"</span>, <span class='kw'>mini</span> <span class='kw'>=</span> -<span class='fl'>4</span>, <span class='kw'>maxi</span> <span class='kw'>=</span> <span class='fl'>4</span>),
-  <span class='kw'>layout_matrix</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>1</span>, <span class='fl'>1</span>, <span class='fl'>3</span>, <span class='fl'>3</span>, <span class='fl'>2</span>, <span class='fl'>2</span>, <span class='fl'>4</span>, <span class='fl'>4</span>), <span class='kw'>ncol</span> <span class='kw'>=</span> <span class='fl'>2</span>)
-)
+<span class='fu'><a href='https://rdrr.io/r/base/summary.html'>summary</a></span>(<span class='no'>semfit</span>)
 }</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

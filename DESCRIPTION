@@ -28,14 +28,14 @@ Depends:
     coda (>= 0.19-3),
     lattice (>= 0.20-38),
     magrittr (>= 1.5),				
-    viridis (>= 0.5.1),
-    visNetwork (>= 2.0.9)
+    viridis (>= 0.5.1)
 Imports: 
+    visNetwork (>= 2.0.9),
+    shiny (>= 1.5.0),
     methods,
     Rcpp (>= 0.12.0),
     rstan (>= 2.18.1),
     rstantools (>= 1.5.1),
-    lattice (>= 0.20-38),
     DiagrammeR (>= 1.0.5)
 LinkingTo: 
     BH (>= 1.66.0),
@@ -52,7 +52,20 @@ Suggests:
     rmarkdown,
     bayesplot,
     tidybayes,
-    ggplot2
+    ggplot2,
+    gridExtra (>= 2.3),
+    shinythemes (>= 1.1.2),
+    ggfortify (>= 0.4.1),
+    shinyjs (>= 1.1),
+    shinycssloaders (>= 0.3),
+    plotly (>= 4.9.2.1),
+    ggridges (>= 0.5.2),
+    fmsb (>= 0.5.3),
+    visdat (>= 0.5.3),
+    DT (>= 0.14),
+    tidyr (>= 1.1.0),
+    dplyr (>= 1.0.0),
+    reshape2 (>= 1.4.4)
 Encoding: UTF-8
 LazyData: true
 SystemRequirements: GNU make
