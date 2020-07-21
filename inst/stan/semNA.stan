@@ -16,7 +16,7 @@ data{
   matrix[Nv,K] v;
 
   real<lower=0> dsigma2 [Nv];
-  real<lower=0> a [Nv];
+  real a [Nv];
   real<lower=0> b [Nv];
 
   real<lower=0> dbeta [sum(nbeta)];

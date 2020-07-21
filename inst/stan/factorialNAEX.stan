@@ -19,10 +19,10 @@ data{
   matrix<lower=0> [Nv-Nex,K] v;
 
   real<lower=0> dsigma2 [Nv-Nex];
-  real<lower=0> a [Nv-Nex];
+  real a [Nv-Nex];
   real<lower=0> b [Nv-Nex];
   real<lower=0> dtau2 [Nex];
-  real<lower=0> at [Nex];
+  real at [Nex];
   real<lower=0> bt [Nex];
 
 
