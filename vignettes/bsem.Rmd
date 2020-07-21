@@ -173,7 +173,7 @@ fit <- bsem::sem(
   paths = dt$paths,
   exogenous = dt$exogenous,
   signals = dt$signals,
-  chains = 1,
+  cores = 1,
   iter = 2000
 )
 ```

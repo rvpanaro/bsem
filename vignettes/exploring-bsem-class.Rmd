@@ -64,7 +64,8 @@ Note that the list is named with `c("F1", "F2", "F3", "F4", "F5")`, but the elem
 ```{r}
 cfa <- bsem::sem(
   data = dt$data,
-  blocks = dt$blocks
+  blocks = dt$blocks,
+  cores = 1
 )
 
 cfa
@@ -99,7 +100,7 @@ Remember each chain runs in a separate thread, thus, it is recommended to specif
 
 ## SEM
 
-In addition to the CFA structure above, for the SEM we wil also consider paths and exogenous variables. The simulated data already described in the [Get started](bsem.html) vignette includes two additional kinds of relationships among observed and latent variables.
+In addition to the CFA structure above, for the SEM we will also consider paths and exogenous variables. The simulated data already described in the [Get started](bsem.html) vignette includes two additional kinds of relationships among observed and latent variables.
 
 1. Exogenous variable regression - variables that are explained by some common factors, those variables are referred to as the exogenous variables.
 
@@ -116,7 +117,8 @@ sem <- bsem::sem(
   data = dt$data,
   blocks = dt$blocks,
   paths = dt$paths,
-  exogenous = dt$exogenous
+  exogenous = dt$exogenous,
+  cores = 1
 )
 ```
 
