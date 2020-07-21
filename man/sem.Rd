@@ -18,6 +18,8 @@ sem(
   iter = 2000,
   chains = 4,
   scaled = FALSE,
+  verbose = FALSE,
+  refresh = 100,
   ...
 )
 }
@@ -32,7 +34,7 @@ sem(
 
 \item{signals}{list referring to the signals of the factor loadings initial values; must be true: (length(signals) == length(blocks)) && (lengths(signals) == lengths(blocks)); (not allowed in runShiny)}
 
-\item{row_names}{optional identifier for the observations (observation = row);}
+\item{row_names}{optional identifier for the observations (observation = row)}
 
 \item{prior_specs}{prior settings for the Bayesian approach; only `normal` and `cauchy` for gamma0, gamma and beta; `gamma`, `lognormal` and `inv_gamma` for sigma2 and tau2 are available, those prior specifications are ignored if not needed (FA or SEM)}
 
@@ -45,6 +47,10 @@ sem(
 \item{chains}{number of chains}
 
 \item{scaled}{logical; indicates whether to center and scale the data; default FALSE}
+
+\item{verbose}{logical; see \code{\link[rstan]{sampling}}; default FALSE}
+
+\item{refresh}{defaults to 100; see \code{\link[rstan]{sampling}};}
 
 \item{...}{further arguments passed to Stan such as warmup, adapt_delta and others, see \code{\link[rstan]{sampling}}.}
 }
@@ -67,13 +73,13 @@ An object of class \code{bsem}; a list of 14 to 19:
    \item{credint}{Highest posterior density intervals (HPD)}
    \item{h}{vector of posterior communalities}
    \item{PTVE}{vector of total variance proportions}
-   \item{AFR2}{adjusted coefficient of determination}
+   \item{R2}{adjusted coefficient of determination}
    \item{SQE}{explained sums of squares}
    \item{SQT}{total sums of squares}
 }
 }
 \description{
-Structural Equation Models (SEM) and particular cases via rstan interface
+Structural Equation Models (SEM) and particular cases using rstan interface
 }
 \details{
 Fits the SEM to specific data
@@ -113,19 +119,12 @@ semfit <- bsem::sem(
   warmup = 1000,
   chains = 4
 )
-plot(semfit)
-
-gridExtra::grid.arrange(bsem::arrayplot(semfit$mean_lambda, main = "estimates", mini = -4, maxi = 4),
-  bsem::arrayplot(dt$real$lambda, main = "lambda (scores)", mini = -4, maxi = 4),
-  bsem::arrayplot(semfit$mean_alpha, main = "estimates", mini = -4, maxi = 4),
-  bsem::arrayplot(dt$real$alpha, main = "alpha (loadings)", mini = -4, maxi = 4),
-  layout_matrix = matrix(c(1, 1, 3, 3, 2, 2, 4, 4), ncol = 2)
-)
+summary(semfit)
 }
 
 }
 \seealso{
-\code{\link[bsem]{plot.sem}}, \code{\link[bsem]{simdata}}, \code{\link[bsem]{arrayplot}}, \code{\link[bsem]{summary.sem}}, \code{\link[bsem]{print.sem}}
+\code{\link[bsem]{plot.bsem}}, \code{\link[bsem]{simdata}}, \code{\link[bsem]{arrayplot}}, \code{\link[bsem]{summary.bsem}}, \code{\link[bsem]{print.bsem}}
 }
 \author{
 Renato Panaro

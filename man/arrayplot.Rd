@@ -40,7 +40,7 @@ arrayplot(dt$real$alpha, colors = 0)
 
 }
 \seealso{
-\code{\link[bsem]{bsem::simdata}}, \code{\link[bsem]{bsem::summary.sem}}, \code{\link[bsem]{bsem::plot}}, \code{\link[bsem]{bsem::sem}}, \code{\link[bsem]{bsem::runShiny}}
+\code{\link[bsem]{simdata}}, \code{\link[bsem]{summary.bsem}}, \code{\link[bsem]{plot.bsem}}, \code{\link[bsem]{sem}}, \code{\link[bsem]{runShiny}}
 }
 \author{
 VD Mayrink

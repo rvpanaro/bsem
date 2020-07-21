@@ -53,7 +53,7 @@ plot(semfit)
 
 }
 \seealso{
-\code{\link[bsem]{sem}}, \code{\link[bsem]{simdata}}, \code{\link[bsem]{arrayplot}}, \code{\link[bsem]{summary.sem}}, \code{\link[bsem]{print.sem}}
+\code{\link[bsem]{sem}}, \code{\link[bsem]{simdata}}, \code{\link[bsem]{arrayplot}}, \code{\link[bsem]{summary.bsem}}, \code{\link[bsem]{print.bsem}}
 }
 \author{
 RVPanaro

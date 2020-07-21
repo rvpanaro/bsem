@@ -61,5 +61,5 @@ arrayplot(dt$real$alpha, -4, 4)
 
 }
 \seealso{
-\code{\link[bsem]{plot.sem}}, \code{\link[bsem]{sem}}, \code{\link[bsem]{arrayplot}}, \code{\link[bsem]{summary.sem}}, \code{\link[bsem]{print.sem}}
+\code{\link[bsem]{plot.bsem}}, \code{\link[bsem]{sem}}, \code{\link[bsem]{arrayplot}}, \code{\link[bsem]{summary.bsem}}, \code{\link[bsem]{print.bsem}}
 }
