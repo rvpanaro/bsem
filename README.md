@@ -1,5 +1,5 @@
 [![Codecov test coverage](https://codecov.io/gh/rvpanaro/bsem/branch/master/graph/badge.svg)](https://codecov.io/gh/rvpanaro/bsem?branch=master)
-## bsem <a href='https://rvpanaro.github.io/bsem'><img src='https://github.com/rvpanaro/bsem/blob/master/inst/figures/bsem.png' align="right" height="139" /></a>
+## bsem <a href='https://rvpanaro.github.io/bsem/'><img src='https://raw.githubusercontent.com/rvpanaro/bsem/master/inst/figures/bsem.png' align="right" height="139" /></a>
 
 ---
 
