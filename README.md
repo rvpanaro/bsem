@@ -8,15 +8,29 @@ The package allows Bayesian analysis for particular cases of structural equation
 
 ## Install
 
+Due to R 4.0 chain info is not working properly. As discussed [here](https://github.com/tylermorganwall/rayshader/issues/113) a possible fix is to get the under development version with:
+
+```r
+remotes::install_github("stan-dev/rstan", ref = "develop", subdir = "rstan/rstan")
+```
+
+Afterwards, you can install bsem using:
+
 ```r
 devtools::install_github("rvpanaro/bsem")
 ```
 
 ## Basic working example
 
+- Get some simulated data.
+
 ```r
 dt <- bsem::simdata()
+```
 
+- Fit your SEM model
+
+```r
 semfit <- bsem::sem(
   data = dt$data,
   blocks = dt$blocks,
@@ -27,9 +41,24 @@ semfit <- bsem::sem(
   warmup = 1000,
   chains = 4
 )
+```
 
-plot(semfit)
+- Print the outcome:
+
+```r
+print(semfit) 
+```
+
+- Get posterior summary statistics:
+
+```r
 summary(semfit)
+```
+
+- Plot a diagram with the relatioships between variables:
+
+```r
+plot(semfit)
 ```
 
 ## Access to ShinyApp
