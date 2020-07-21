@@ -9,6 +9,13 @@ The package allows Bayesian analysis for particular cases of structural equation
 
 ## Install
 
+Please install remotes package and devtools before installing:
+
+```r
+install.packages("remotes")
+install.packages("devtools")
+```
+
 Due to R 4.0 chain info is not working properly. As discussed [here](https://github.com/tylermorganwall/rayshader/issues/113) a possible fix is to get the under development version with:
 
 ```r
