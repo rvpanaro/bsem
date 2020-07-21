@@ -14,7 +14,7 @@
 <script src="pkgdown.js"></script><!-- docsearch --><script src="docsearch.js"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/docsearch.js/2.6.3/docsearch.min.css" integrity="sha256-QOSRU/ra9ActyXkIBbiIB144aDBdtvXBcNc3OTNuX/Q=" crossorigin="anonymous">
 <link href="docsearch.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script><meta property="og:title" content="Bayesian Structural Equation Models using Rstan">
-<meta property="og:description" content="Flexible routines to allow Structural Equation modeling particular cases using rstan integration. bsem includes Bayesian Exploratory Analysis, Bayesian Confirmatory Analysis, Factor Analysis and Structural Equation Models. RV Panaro (2020).">
+<meta property="og:description" content="Flexible routines to allow structural equation modeling particular cases using rstan integration. bsem includes Bayesian Exploratory Analysis, Bayesian Confirmatory Analysis, Factor Analysis and Structural Equation Models.  VD Mayrink (2013) &lt;https://projecteuclid.org/DPubS?service=UI&amp;version=1.0&amp;verb=Display&amp;handle=euclid.aoas/1372338468&gt;.">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -104,14 +104,22 @@
 <div id="install" class="section level2">
 <h2 class="hasAnchor">
 <a href="#install" class="anchor"></a>Install</h2>
-<div class="sourceCode" id="cb1"><pre class="r"><span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span>(<span class="st">"rvpanaro/bsem"</span>)</pre></div>
+<p>Due to R 4.0 chain info is not working properly. As discussed <a href="https://github.com/tylermorganwall/rayshader/issues/113">here</a> a possible fix is to get the under development version with:</p>
+<div class="sourceCode" id="cb1"><pre class="r"><span class="kw pkg">remotes</span><span class="kw ns">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html">install_github</a></span>(<span class="st">"stan-dev/rstan"</span>, <span class="kw">ref</span> <span class="kw">=</span> <span class="st">"develop"</span>, <span class="kw">subdir</span> <span class="kw">=</span> <span class="st">"rstan/rstan"</span>)</pre></div>
+<p>Afterwards, you can install bsem using:</p>
+<div class="sourceCode" id="cb2"><pre class="r"><span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span>(<span class="st">"rvpanaro/bsem"</span>)</pre></div>
 </div>
 <div id="basic-working-example" class="section level2">
 <h2 class="hasAnchor">
 <a href="#basic-working-example" class="anchor"></a>Basic working example</h2>
-<div class="sourceCode" id="cb2"><pre class="r"><span class="no">dt</span> <span class="kw">&lt;-</span> <span class="kw pkg">bsem</span><span class="kw ns">::</span><span class="fu"><a href="reference/simdata.html">simdata</a></span>()
-
-<span class="no">semfit</span> <span class="kw">&lt;-</span> <span class="kw pkg">bsem</span><span class="kw ns">::</span><span class="fu"><a href="reference/sem.html">sem</a></span>(
+<ul>
+<li>Get some simulated data.</li>
+</ul>
+<div class="sourceCode" id="cb3"><pre class="r"><span class="no">dt</span> <span class="kw">&lt;-</span> <span class="kw pkg">bsem</span><span class="kw ns">::</span><span class="fu"><a href="reference/simdata.html">simdata</a></span>()</pre></div>
+<ul>
+<li>Fit your SEM model</li>
+</ul>
+<div class="sourceCode" id="cb4"><pre class="r"><span class="no">semfit</span> <span class="kw">&lt;-</span> <span class="kw pkg">bsem</span><span class="kw ns">::</span><span class="fu"><a href="reference/sem.html">sem</a></span>(
   <span class="kw">data</span> <span class="kw">=</span> <span class="no">dt</span>$<span class="no">data</span>,
   <span class="kw">blocks</span> <span class="kw">=</span> <span class="no">dt</span>$<span class="no">blocks</span>,
   <span class="kw">paths</span> <span class="kw">=</span> <span class="no">dt</span>$<span class="no">paths</span>,
@@ -120,15 +128,24 @@
   <span class="kw">iter</span> <span class="kw">=</span> <span class="fl">2000</span>,
   <span class="kw">warmup</span> <span class="kw">=</span> <span class="fl">1000</span>,
   <span class="kw">chains</span> <span class="kw">=</span> <span class="fl">4</span>
-)
-
-<span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span>(<span class="no">semfit</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">semfit</span>)</pre></div>
+)</pre></div>
+<ul>
+<li>Print the outcome:</li>
+</ul>
+<div class="sourceCode" id="cb5"><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/print.html">print</a></span>(<span class="no">semfit</span>)</pre></div>
+<ul>
+<li>Get posterior summary statistics:</li>
+</ul>
+<div class="sourceCode" id="cb6"><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/summary.html">summary</a></span>(<span class="no">semfit</span>)</pre></div>
+<ul>
+<li>Plot a diagram with the relatioships between variables:</li>
+</ul>
+<div class="sourceCode" id="cb7"><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/plot.html">plot</a></span>(<span class="no">semfit</span>)</pre></div>
 </div>
 <div id="access-to-shinyapp" class="section level2">
 <h2 class="hasAnchor">
 <a href="#access-to-shinyapp" class="anchor"></a>Access to ShinyApp</h2>
-<div class="sourceCode" id="cb3"><pre class="r"><span class="kw pkg">bsem</span><span class="kw ns">::</span><span class="fu"><a href="reference/runShiny.html">runShiny</a></span>()</pre></div>
+<div class="sourceCode" id="cb8"><pre class="r"><span class="kw pkg">bsem</span><span class="kw ns">::</span><span class="fu"><a href="reference/runShiny.html">runShiny</a></span>()</pre></div>
 </div>
 <div id="future-work-and-improvements" class="section level2">
 <h2 class="hasAnchor">
@@ -161,6 +178,8 @@
 </li>
 <li>Vinícius Mayrink <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-5683-8326" target="orcid.widget" aria-label="ORCID"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> <br><small>(http://www.est.ufmg.br/~vdinizm/)</small>
 </li>
+<li>Marcelo Costa <br><small class="roles"> Author </small>  <br><small>(http://somos.ufmg.br/professor/marcelo-azevedo-costa)</small>
+</li>
 </ul>
 </div>
 
@@ -169,7 +188,7 @@
 
 
       <footer><div class="copyright">
-  <p>Developed by Renato Panaro, Vinícius Mayrink.</p>
+  <p>Developed by Renato Panaro, Vinícius Mayrink, Marcelo Costa.</p>
 </div>
 
 <div class="pkgdown">

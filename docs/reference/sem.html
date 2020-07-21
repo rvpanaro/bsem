@@ -46,7 +46,7 @@
 
 
 <meta property="og:title" content="sem: The SEM Function — sem" />
-<meta property="og:description" content="Structural Equation Models (SEM) and particular cases via rstan interface" />
+<meta property="og:description" content="Structural Equation Models (SEM) and particular cases using rstan interface" />
 
 
 
@@ -141,7 +141,7 @@
     </div>
 
     <div class="ref-description">
-    <p>Structural Equation Models (SEM) and particular cases via rstan interface</p>
+    <p>Structural Equation Models (SEM) and particular cases using rstan interface</p>
     </div>
 
     <pre class="usage"><span class='fu'>sem</span>(
@@ -158,6 +158,8 @@
   <span class='kw'>iter</span> <span class='kw'>=</span> <span class='fl'>2000</span>,
   <span class='kw'>chains</span> <span class='kw'>=</span> <span class='fl'>4</span>,
   <span class='kw'>scaled</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>refresh</span> <span class='kw'>=</span> <span class='fl'>100</span>,
   <span class='no'>...</span>
 )</pre>
 
@@ -170,7 +172,7 @@
     </tr>
     <tr>
       <th>blocks</th>
-      <td><p>a mandatory named list of colnames (or integers in 1:ncol(data)) indicating the manisfest variables correpoding to each block; generic names are assumed for latent variables internally if not defined</p></td>
+      <td><p>a mandatory named list of colnames (or integers in 1:ncol(data)) indicating the manisfest variables corresponding to each block; generic names are assumed for latent variables internally if not defined</p></td>
     </tr>
     <tr>
       <th>paths</th>
@@ -186,7 +188,7 @@
     </tr>
     <tr>
       <th>row_names</th>
-      <td><p>optional identifier for the observations (observation = row);</p></td>
+      <td><p>optional identifier for the observations (observation = row)</p></td>
     </tr>
     <tr>
       <th>prior_specs</th>
@@ -198,7 +200,7 @@
     </tr>
     <tr>
       <th>pars</th>
-      <td><p>allows parameters to ommitted in the outcome; options are any subset of default c("alpha", "lambda", "sigma2")</p></td>
+      <td><p>allows parameters to omitted in the outcome; options are any subset of default c("alpha", "lambda", "sigma2")</p></td>
     </tr>
     <tr>
       <th>iter</th>
@@ -213,8 +215,16 @@
       <td><p>logical; indicates whether to center and scale the data; default FALSE</p></td>
     </tr>
     <tr>
+      <th>verbose</th>
+      <td><p>logical; see <code><a href='https://rdrr.io/pkg/rstan/man/stanmodel-method-sampling.html'>sampling</a></code>; default FALSE</p></td>
+    </tr>
+    <tr>
+      <th>refresh</th>
+      <td><p>defaults to 100; see <code><a href='https://rdrr.io/pkg/rstan/man/stanmodel-method-sampling.html'>sampling</a></code>;</p></td>
+    </tr>
+    <tr>
       <th>...</th>
-      <td><p>further arguments passed to Stan such as warmup, adapt_delta and others, see <code><a href='https://rdrr.io/pkg/rstan/man/stanmodel-method-sampling.html'>rstan::sampling</a></code>.</p></td>
+      <td><p>further arguments passed to Stan such as warmup, adapt_delta and others, see <code><a href='https://rdrr.io/pkg/rstan/man/stanmodel-method-sampling.html'>sampling</a></code>.</p></td>
     </tr>
     </table>
 
@@ -237,7 +247,7 @@
    <dt>credint</dt><dd><p>Highest posterior density intervals (HPD)</p></dd>
    <dt>h</dt><dd><p>vector of posterior communalities</p></dd>
    <dt>PTVE</dt><dd><p>vector of total variance proportions</p></dd>
-   <dt>AFR2</dt><dd><p>adjusted coefficient of determination</p></dd>
+   <dt>R2</dt><dd><p>adjusted coefficient of determination</p></dd>
    <dt>SQE</dt><dd><p>explained sums of squares</p></dd>
    <dt>SQT</dt><dd><p>total sums of squares</p></dd>
 
@@ -250,7 +260,7 @@
 
 <p>Consider:</p>
 <p>- the outer model as:
--- outter blocks:</p>
+-- outer blocks:</p>
 <p>$$X_{p x n} = \alpha_{p x k}\lambda_{k x n} + \epsilon_{p x n}$$
    where \(X\) is the data matrix with variables in the rows and sample elements in the columns,  \(\alpha_{p x j}\) is the column vector of loadings for the \(jth\) latent variable and \(\lambda_{j x n}\) is the row vector of scores for the  \(jth\) unobserved variable, \(j =1,\dots,k\). Normality is assumed for the errors as \(\epsilon_{ij}~ N(0, \sigma_i ^2)\) for \(i = 1,\dots, p\).</p>
 <p>- the inner model as:</p>
@@ -278,7 +288,7 @@
   <span class='kw'>warmup</span> <span class='kw'>=</span> <span class='fl'>1000</span>,
   <span class='kw'>chains</span> <span class='kw'>=</span> <span class='fl'>4</span>
 )
-<span class='fu'><a href='https://rdrr.io/r/graphics/plot.html'>plot</a></span>(<span class='no'>semfit</span>)
+<span class='fu'><a href='https://rdrr.io/r/base/plot.html'>plot</a></span>(<span class='no'>semfit</span>)
 
 <span class='kw pkg'>gridExtra</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/gridExtra/man/arrangeGrob.html'>grid.arrange</a></span>(<span class='kw pkg'>bsem</span><span class='kw ns'>::</span><span class='fu'><a href='arrayplot.html'>arrayplot</a></span>(<span class='no'>semfit</span>$<span class='no'>mean_lambda</span>, <span class='kw'>main</span> <span class='kw'>=</span> <span class='st'>"estimates"</span>, <span class='kw'>mini</span> <span class='kw'>=</span> -<span class='fl'>4</span>, <span class='kw'>maxi</span> <span class='kw'>=</span> <span class='fl'>4</span>),
   <span class='kw pkg'>bsem</span><span class='kw ns'>::</span><span class='fu'><a href='arrayplot.html'>arrayplot</a></span>(<span class='no'>dt</span>$<span class='no'>real</span>$<span class='no'>lambda</span>, <span class='kw'>main</span> <span class='kw'>=</span> <span class='st'>"lambda (scores)"</span>, <span class='kw'>mini</span> <span class='kw'>=</span> -<span class='fl'>4</span>, <span class='kw'>maxi</span> <span class='kw'>=</span> <span class='fl'>4</span>),
@@ -298,7 +308,7 @@
 
       <footer>
       <div class="copyright">
-  <p>Developed by Renato Panaro, Vinícius Mayrink.</p>
+  <p>Developed by Renato Panaro, Vinícius Mayrink, Marcelo Costa.</p>
 </div>
 
 <div class="pkgdown">

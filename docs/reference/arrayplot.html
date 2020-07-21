@@ -163,11 +163,11 @@
     </tr>
     <tr>
       <th>mini, </th>
-      <td><p>minimum color range (might cause blank spots if mispecified)</p></td>
+      <td><p>minimum color range (might cause blank spots if misspecified)</p></td>
     </tr>
     <tr>
       <th>maxi, </th>
-      <td><p>maximum color range (might cause blank spots if mispecified)</p></td>
+      <td><p>maximum color range (might cause blank spots if misspecified)</p></td>
     </tr>
     <tr>
       <th>colors</th>
@@ -189,11 +189,13 @@
 
     <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
 
-    <div class='dont-index'><p><code><a href='simdata.html'>bsem::simdata</a></code>, <code>bsem::summary.sem</code>, <code><a href='https://rdrr.io/r/graphics/plot.html'>bsem::plot</a></code>, <code><a href='sem.html'>bsem::sem</a></code>, <code><a href='runShiny.html'>bsem::runShiny</a></code></p></div>
+    <div class='dont-index'><p><code><a href='simdata.html'>bsem::simdata</a></code>, <code>bsem::summary.sem</code>, <code><a href='https://rdrr.io/r/base/plot.html'>bsem::plot</a></code>, <code><a href='sem.html'>bsem::sem</a></code>, <code><a href='runShiny.html'>bsem::runShiny</a></code></p></div>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/utils/data.html'>data</a></span>(<span class='no'>set2</span>)</div><div class='output co'>#&gt; <span class='warning'>Warning: data set ‘set2’ not found</span></div><div class='input'>
-<span class='fu'>arrayplot</span>(<span class='no'>set2</span>$<span class='no'>real</span>$<span class='no'>alpha</span>)</div><div class='output co'>#&gt; <span class='error'>Error in as.matrix(y): object 'set2' not found</span></div><div class='input'><span class='fu'>arrayplot</span>(<span class='no'>set2</span>$<span class='no'>real</span>$<span class='no'>alpha</span>, <span class='kw'>colors</span> <span class='kw'>=</span> <span class='fl'>0</span>)</div><div class='output co'>#&gt; <span class='error'>Error in as.matrix(y): object 'set2' not found</span></div></pre>
+    <pre class="examples"><div class='input'><span class='no'>dt</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='simdata.html'>simdata</a></span>()
+
+<span class='fu'>arrayplot</span>(<span class='no'>dt</span>$<span class='no'>real</span>$<span class='no'>alpha</span>)</div><div class='img'><img src='arrayplot-1.png' alt='' width='700' height='433' /></div><div class='input'><span class='fu'>arrayplot</span>(<span class='no'>dt</span>$<span class='no'>real</span>$<span class='no'>alpha</span>, <span class='kw'>colors</span> <span class='kw'>=</span> <span class='fl'>0</span>)</div><div class='img'><img src='arrayplot-2.png' alt='' width='700' height='433' /></div><div class='input'>
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -205,7 +207,7 @@
 
       <footer>
       <div class="copyright">
-  <p>Developed by Renato Panaro, Vinícius Mayrink.</p>
+  <p>Developed by Renato Panaro, Vinícius Mayrink, Marcelo Costa.</p>
 </div>
 
 <div class="pkgdown">
