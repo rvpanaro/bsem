@@ -1,13 +1,9 @@
-library(shiny)
-library(shinythemes)
-library(shinyjs)
-library(plotly)
+library(magrittr)
 library(visNetwork)
-library(shinycssloaders)
 source("helpers.R")
 
 fluidPage(
-  theme = shinytheme("cosmo"),
+  theme = shinythemes::shinytheme("cosmo"),
   tags$head(
     tags$style(
       HTML(".shiny-notification {
@@ -28,20 +24,20 @@ fluidPage(
         tabPanel(
           "Data loader",
           fileInput("datafile", "Choose CSV file",
-            accept = c("csv", "comma-separated-values", ".csv")
+                    accept=c('text/csv', 'text/comma-separated-values,text/plain')
           ),
           radioButtons("std",
             label = "Standardize?",
             choices = list("No" = 0, "Yes" = 1),
             selected = 0
           ),
-          dataTableOutput("table")
+          DT::DTOutput("table")
         ),
         "Descriptives",
         tabPanel(
           "Histogram",
           uiOutput("selectize1"),
-          plotlyOutput("hist")
+          plotly::plotlyOutput("hist")
         ),
         tabPanel(
           "Density",
@@ -51,12 +47,12 @@ fluidPage(
         tabPanel(
           "Boxplot",
           uiOutput("selectize2"),
-          plotlyOutput("boxp")
+          plotly::plotlyOutput("boxp")
         ),
         tabPanel(
           "Missing",
           uiOutput("selectize4"),
-          plotlyOutput("miss")
+          plotly::plotlyOutput("miss")
         ),
         tabPanel(
           a(img(src = "bsem.png", width = "70px"), href = "https://cran.r-project.org/web/packages/bsem/index.html")
@@ -136,8 +132,8 @@ fluidPage(
           ),
           br(),
           div(
-            downloadButton("downloadData", "Download result in .csv"),
-            downloadButton("downloadFit", "Download fit in .rda")
+            downloadButton("downloadData", "Download posterior (mean) factor scores .csv"),
+            downloadButton("downloadFit", "Download fit .rds")
           ),
           br(),
           br(),
@@ -162,7 +158,7 @@ fluidPage(
           "Posterior mean diagram",
           conditionalPanel(
             condition = "input.run1",
-            visNetworkOutput("network") %>% withSpinner(color = "#009933")
+            visNetworkOutput("network") %>%  shinycssloaders::withSpinner(color = "#009933")
           )
         ),
         tabPanel(
@@ -171,11 +167,11 @@ fluidPage(
             type = "tabs",
             tabPanel(
               "Loadings",
-              plotlyOutput("loadings") %>% withSpinner(color = "#009933")
+              plotly::plotlyOutput("loadings") %>%  shinycssloaders::withSpinner(color = "#009933")
             ),
             tabPanel(
               "Scores",
-              plotlyOutput("scores") %>% withSpinner(color = "#009933")
+              plotly::plotlyOutput("scores") %>%  shinycssloaders::withSpinner(color = "#009933")
             )
           )
         ),
@@ -186,12 +182,12 @@ fluidPage(
             tabPanel(
               "Loadings",
               uiOutput("selectize_trace_loadings"),
-              plotlyOutput("trace_loadings") %>% withSpinner(color = "#009933")
+              plotly::plotlyOutput("trace_loadings") %>%  shinycssloaders::withSpinner(color = "#009933")
             ),
             tabPanel(
               "Scores",
               uiOutput("selectize_trace_scores"),
-              plotlyOutput("trace_scores") %>% withSpinner(color = "#009933")
+              plotly::plotlyOutput("trace_scores") %>%  shinycssloaders::withSpinner(color = "#009933")
             )
           )
         ),
@@ -202,12 +198,12 @@ fluidPage(
             tabPanel(
               "Loadings",
               uiOutput("selectize_dens_loadings"),
-              plotlyOutput("dens_loadings") %>% withSpinner(color = "#009933")
+              plotly::plotlyOutput("dens_loadings") %>%  shinycssloaders::withSpinner(color = "#009933")
             ),
             tabPanel(
               "Scores",
               uiOutput("selectize_dens_scores"),
-              plotlyOutput("dens_scores") %>% withSpinner(color = "#009933")
+              plotly::plotlyOutput("dens_scores") %>%  shinycssloaders::withSpinner(color = "#009933")
             )
           )
         ),
@@ -217,7 +213,7 @@ fluidPage(
             style = "display:flex; padding: 14 px",
             uiOutput("selectize_biplot1"),
             uiOutput("selectize_biplot2")
-          ), plotlyOutput("biplot") %>% withSpinner(color = "#009933")
+          ), plotly::plotlyOutput("biplot") %>%  shinycssloaders::withSpinner(color = "#009933")
         ),
         tabPanel(
           "Radar plot",
@@ -225,7 +221,7 @@ fluidPage(
             style = "display:flex; padding: 14 px",
             uiOutput("selectize_hex1"),
             uiOutput("selectize_hex2")
-          ), plotlyOutput("hex") %>% withSpinner(color = "#009933")
+          ), plotly::plotlyOutput("hex") %>%  shinycssloaders::withSpinner(color = "#009933")
         ),
         tabPanel(
           a(img(src = "bsem.png", width = "70px"), href = "https://cran.r-project.org/web/packages/bsem/index.html")

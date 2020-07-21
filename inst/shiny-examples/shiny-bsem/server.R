@@ -1,17 +1,8 @@
-library(shiny)
-library(shinyjs)
-library(bsem)
-library(DT)
-library(tidyr)
-library(ggplot2)
-library(ggridges)
+library(visNetwork)
 library(dplyr)
-library(plotly)
-library(visdat)
-library(heatmaply)
-library(bayesplot)
-library(fmsb)
-theme_set(theme_bw())
+library(reshape2)
+library(ggplot2)
+ggplot2::theme_set(ggplot2::theme_bw())
 
 source("biplot.R")
 
@@ -24,12 +15,12 @@ shinyServer(
 
     filedata <- reactive({
       infile <- input$datafile
-      if (is.null(infile)) {
-        return(NULL)
-      }
-      else {
-        read.csv(infile$datapath, row.names = 1)
-      }
+
+      shiny::validate(
+        shiny::need(infile$type == "text/csv", "File must be .csv")
+      )
+        tbl <- read.csv(infile$datapath, row.names = 1)
+      return(tbl)
     })
 
     varnames <- reactive({
@@ -86,9 +77,9 @@ shinyServer(
       )
     })
 
-    output$table <- renderDataTable({
-      validate(
-        need(input$datafile, "Load your data!
+    output$table <- DT::renderDT({
+      shiny::validate(
+        shiny::need(input$datafile, "Load your data!
              Be aware that:
                 1) Only numeric variables are allowed.
                 2) All variables (columns) in the uploaded dataset are used to fit.
@@ -96,90 +87,88 @@ shinyServer(
              ")
       )
 
+      shiny::validate(
+        shiny::need(length(filedata())>0, "")
+        )
+
       if (input$std == "0") {
-        filedata()
+        tbl <- filedata()
       }
       else {
-        filedata() %>% scale()
+        tbl <- filedata() %>% scale()
       }
+      return(tbl)
     })
 
-    output$hist <- renderPlotly({
-      validate(
-        need(input$datafile, "Please load your data in the 'Data loader'.")
+    output$hist <- plotly::renderPlotly({
+      shiny::validate(
+        shiny::need(length(filedata())>0, "Please load your data in the 'Data loader'.")
       )
-      validate(
-        need(input$invar_hist, "Please select some numeric variable(s).")
+      shiny::validate(
+        shiny::need(input$invar_hist, "Please select some numeric variable(s).")
       )
 
-      if (input$std == "0") {
-        aux2 <- filedata()
-      }
-      else {
-        aux2 <- filedata() %>% scale()
-      }
-
-      aux <- aux2 %>%
+      aux <- filedata() %>%
         select(matches(gsub(" .*$", "", input$invar_hist))) %>%
-        gather()
+        tidyr::gather()
 
       p <- ggplot(aux, aes(x = value, color = key, fill = key)) +
         geom_histogram(alpha = 0.6, bins = 20)
       # +    geom_histogram(aes(y = ..density..))
 
-      print(ggplotly(p))
+      print(plotly::ggplotly(p))
     })
 
-    output$boxp <- renderPlotly({
-      validate(
-        need(input$datafile, "Please load your data in the 'Data loader'.")
+    output$boxp <- plotly::renderPlotly({
+      shiny::validate(
+        shiny::need(input$datafile, "Please load your data in the 'Data loader'.")
       )
 
-      validate(
-        need(input$invar_boxp, "Please select some numeric variable(s).")
+      shiny::validate(
+        shiny::need(input$invar_boxp, "Please select some numeric variable(s).")
       )
 
       aux <- filedata() %>%
         select(matches(gsub(" .*$", "", input$invar_boxp))) %>%
-        gather()
+        tidyr::gather()
       p <- ggplot(aux, aes(x = key, y = value, fill = key)) +
         geom_boxplot(alpha = 0.6)
 
-      print(ggplotly(p))
+      print(plotly::ggplotly(p))
     })
 
     output$dens <- renderPlot({
-      validate(
-        need(input$datafile, "Please load your data in the 'Data loader'.")
+      shiny::validate(
+        shiny::need(input$datafile, "Please load your data in the 'Data loader'.")
       )
 
-      validate(
-        need(input$invar_dens, "Please select some numeric variable(s).")
+      shiny::validate(
+        shiny::need(input$invar_dens, "Please select some numeric variable(s).")
       )
 
       aux <- filedata() %>%
         select(matches(gsub(" .*$", "", input$invar_dens))) %>%
-        gather()
+        tidyr::gather()
 
       ggplot(aux, aes(x = value, y = key, fill = key)) +
-        geom_density_ridges(alpha = 0.6)
+        ggridges::geom_density_ridges(alpha = 0.6)
     })
 
-    output$miss <- renderPlotly({
-      validate(
-        need(input$datafile, "Please load your data in the 'Data loader'.")
+    output$miss <- plotly::renderPlotly({
+      shiny::validate(
+        shiny::need(input$datafile, "Please load your data in the 'Data loader'.")
       )
 
-      validate(
-        need(input$invar_miss, "Please select some variable(s).")
+      shiny::validate(
+        shiny::need(input$invar_miss, "Please select some variable(s).")
       )
 
       aux <- filedata() %>%
         select(matches(gsub(" .*$", "", input$invar_miss)))
-      p <- vis_miss(aux)
+      p <- visdat::vis_miss(aux)
       # +    geom_histogram(aes(y = ..density..))
 
-      print(ggplotly(p))
+      print(plotly::ggplotly(p))
     })
 
     ## -----
@@ -197,60 +186,66 @@ shinyServer(
         select_if(Negate(is.null))
     })
 
-    rv <- reactiveValues(fit = NULL)
+    rv <- reactiveValues()
 
     observeEvent(input$run1, {
+      shiny::validate(
+        shiny::need(length(numericdata())>0, "Please load your data in the 'Data' > 'Data loader'.")
+      )
+
+      if (input$K > 0) {
+        for (i in 1:input$K) {
+          shiny::validate(
+            shiny::need(length(input[[paste0("invar_block", i)]]) > 0, "At least one manifest varible must be selected in 'Factors'.")
+          )
+        }
+      }
+
+      if (input$J > 0) {
+        for (i in 1:input$J) {
+          shiny::validate(
+            shiny::need(length(input[[paste0("invar_idlamb", i)]]) > 0, "At least one common factor should explain the response factor in 'Paths'.")
+          )
+        }
+      }
+
+      if (input$L > 0) {
+        for (i in 1:input$L) {
+          shiny::validate(
+            shiny::need(length(input[[paste0("invar_idex", i)]]) > 0, "At least one common factor should explain each exogenous response in 'Exogenous'.")
+          )
+        }
+      }
+
       withBusyIndicatorServer("run1", {
-        validate(
-          need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
-        )
-
-        if (input$K > 0) {
-          for (i in 1:input$K) {
-            validate(
-              need(length(input[[paste0("invar_block", i)]]) > 0, "At least one manifest varible must be selected in 'Factors'.")
-            )
-          }
-        }
-
-        if (input$J > 0) {
-          for (i in 1:input$J) {
-            validate(
-              need(length(input[[paste0("invar_idlamb", i)]]) > 0, "At least one common factor should explain the response factor in 'Paths'.")
-            )
-          }
-        }
-
-        if (input$L > 0) {
-          for (i in 1:input$L) {
-            validate(
-              need(length(input[[paste0("invar_idex", i)]]) > 0, "At least one common factor should explain each exogenous response in 'Exogenous'.")
-            )
-          }
-        }
-
         Sys.sleep(1)
-        print(blocks())
-        print(exogenous())
-        print(paths())
 
         if (blocks() %>% unlist() %>% is.null()) {
           stop("Please choose the desired variables for each block under 'Model' > 'Blocks'!")
         }
         else if (exogenous() %>% unlist() %>% is.null() && paths() %>% unlist() %>% is.null()) {
-          fit <- bsem::sem(data = numericdata(), blocks = blocks())
+          print(blocks())
+          rv$fit <- bsem::sem(data = numericdata(), blocks = blocks())
         }
         else if (paths() %>% unlist() %>% is.null()) {
-          fit <- bsem::sem(data = numericdata(), blocks = blocks(), exogenous = exogenous())
+          print(blocks())
+          print(exogenous())
+
+          rv$fit <- bsem::sem(data = numericdata(), blocks = blocks(), exogenous = exogenous())
         }
         else if (exogenous() %>% unlist() %>% is.null()) {
-          fit <- bsem::sem(data = numericdata(), blocks = blocks(), paths = paths())
+          print(blocks())
+          print(paths())
+
+          rv$fit <- bsem::sem(data = numericdata(), blocks = blocks(), paths = paths())
         }
         else {
-          fit <- bsem::sem(data = numericdata(), blocks = blocks(), paths = paths(), exogenous = exogenous())
-        }
+          print(blocks())
+          print(paths())
+          print(exogenous())
 
-        rv$fit <- fit
+          rv$fit <- bsem::sem(data = numericdata(), blocks = blocks(), paths = paths(), exogenous = exogenous())
+        }
 
         if (length(rv$fit) > 0) {
           shinyjs::hide("downloadData")
@@ -260,6 +255,7 @@ shinyServer(
           shinyjs::show("downloadData")
           shinyjs::show("downloadFit")
         }
+      })
 
         output$selectize_dens_loadings <- renderUI({
           selectizeInput(
@@ -267,10 +263,10 @@ shinyServer(
             "Select some loading",
             choices = sprintf(
               "alpha[%s,%s] (%s, %s)",
-              1:nrow(rv$fit$mean_alpha),
-              1:ncol(rv$fit$mean_alpha),
-              rownames(rv$fit$mean_alpha),
-              colnames(rv$fit$mean_alpha)
+              rep(1:nrow(rv$fit$mean_alpha), rep(ncol(rv$fit$mean_alpha), nrow(rv$fit$mean_alpha))),
+              rep(1:ncol(rv$fit$mean_alpha), nrow(rv$fit$mean_alpha)),
+              rep(rownames(rv$fit$mean_alpha), rep(ncol(rv$fit$mean_alpha), nrow(rv$fit$mean_alpha))),
+              rep(colnames(rv$fit$mean_alpha), nrow(rv$fit$mean_alpha))
             ),
             multiple = FALSE
           )
@@ -282,10 +278,10 @@ shinyServer(
             "Select some score",
             choices = sprintf(
               "lambda[%s,%s] (%s, %s)",
-              1:nrow(rv$fit$mean_lambda),
-              1:ncol(rv$fit$mean_lambda),
-              rownames(rv$fit$mean_lambda),
-              colnames(rv$fit$mean_lambda)
+              rep(1:nrow(rv$fit$mean_lambda), rep(ncol(rv$fit$mean_lambda), nrow(rv$fit$mean_lambda))),
+              rep(1:ncol(rv$fit$mean_lambda), nrow(rv$fit$mean_lambda)),
+              rep(rownames(rv$fit$mean_lambda), rep(ncol(rv$fit$mean_lambda), nrow(rv$fit$mean_lambda))),
+              rep(colnames(rv$fit$mean_lambda), nrow(rv$fit$mean_lambda))
             ),
             multiple = FALSE
           )
@@ -297,10 +293,10 @@ shinyServer(
             "Select some loading",
             choices = sprintf(
               "alpha[%s,%s] (%s, %s)",
-              1:nrow(rv$fit$mean_alpha),
-              1:ncol(rv$fit$mean_alpha),
-              rownames(rv$fit$mean_alpha),
-              colnames(rv$fit$mean_alpha)
+              rep(1:nrow(rv$fit$mean_alpha), rep(ncol(rv$fit$mean_alpha), nrow(rv$fit$mean_alpha))),
+              rep(1:ncol(rv$fit$mean_alpha), nrow(rv$fit$mean_alpha)),
+              rep(rownames(rv$fit$mean_alpha), rep(ncol(rv$fit$mean_alpha), nrow(rv$fit$mean_alpha))),
+              rep(colnames(rv$fit$mean_alpha), nrow(rv$fit$mean_alpha))
             ),
             multiple = FALSE
           )
@@ -311,11 +307,11 @@ shinyServer(
             inputId = "invar_trace_scores",
             "Select some score",
             choices = sprintf(
-              "lambda[%s, %s] (%s, %s)",
-              1:nrow(rv$fit$mean_lambda),
-              1:ncol(rv$fit$mean_lambda),
-              rownames(rv$fit$mean_lambda),
-              colnames(rv$fit$mean_lambda)
+              "lambda[%s,%s] (%s, %s)",
+              rep(1:nrow(rv$fit$mean_lambda), rep(ncol(rv$fit$mean_lambda), nrow(rv$fit$mean_lambda))),
+              rep(1:ncol(rv$fit$mean_lambda), nrow(rv$fit$mean_lambda)),
+              rep(rownames(rv$fit$mean_lambda), rep(ncol(rv$fit$mean_lambda), nrow(rv$fit$mean_lambda))),
+              rep(colnames(rv$fit$mean_lambda), nrow(rv$fit$mean_lambda))
             ),
             multiple = FALSE
           )
@@ -360,58 +356,60 @@ shinyServer(
             multiple = FALSE
           )
         })
-      })
     })
 
 
     output$network <- renderVisNetwork({
-      validate(
-        need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
+      shiny::validate(
+        shiny::need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
       )
 
-      validate(
-        need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
+      shiny::validate(
+        shiny::need(length(rv$fit) > 0, "Please choose the desired variables for each block under
+             'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
       )
 
       print(plot(rv$fit))
     })
 
-    output$scores <- renderPlotly({
-      validate(
-        need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
+    output$scores <- plotly::renderPlotly({
+      shiny::validate(
+        shiny::need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
       )
 
-      validate(
-        need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
+      shiny::validate(
+        shiny::need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
       )
 
+      aux <-  rownames(rv$fit$mean_lambda) %>% as.factor()
 
       rv$fit$mean_lambda %>%
         data.frame() %>%
-        mutate(fact = rownames(.)) %>%
-        gather(key = "key", value = "value", -fact) %>%
+        mutate(fact = aux) %>%
+        tidyr::gather(key = "key", value = "value", -fact) %>%
         ggplot(aes(key, fact, fill = value)) +
         geom_tile() +
         scale_fill_gradient2(
           limits = c(-max(abs(rv$fit$mean_lambda)), max(abs(rv$fit$mean_lambda))),
           low = "blue", mid = "white", high = "red"
         ) +
-        theme(axis.text.x = element_text(angle = 90, hjust = 1))
+        theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+        ylim(rev(levels(aux)))
     })
 
-    output$loadings <- renderPlotly({
-      validate(
-        need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
+    output$loadings <- plotly::renderPlotly({
+      shiny::validate(
+        shiny::need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
       )
 
-      validate(
-        need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
+      shiny::validate(
+        shiny::need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
       )
 
       rv$fit$mean_alpha %>%
         data.frame() %>%
         mutate(var = rownames(.)) %>%
-        gather(key = "fact", value = "value", -var) %>%
+        tidyr::gather(key = "fact", value = "value", -var) %>%
         ggplot(aes(fact, var, fill = value)) +
         geom_tile() +
         scale_fill_gradient2(
@@ -420,95 +418,95 @@ shinyServer(
         )
     })
 
-    output$trace_loadings <- renderPlotly({
-      validate(
-        need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
+    output$trace_loadings <- plotly::renderPlotly({
+      shiny::validate(
+        shiny::need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
       )
 
-      validate(
-        need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
+      shiny::validate(
+        shiny::need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
       )
 
-      p <- mcmc_trace(rv$fit$posterior$alpha,
+      p <- bayesplot::mcmc_trace(rv$fit$posterior$alpha,
         pars = gsub(" .*$", "", input$invar_trace_loadings)
       ) +
         theme(axis.text.x = element_blank()) +
         labs(title = "alpha")
 
       p %>%
-        ggplotly(
-          height = 400,
-          width = 600
+        plotly::ggplotly(
+          height = 300,
+          width = 500
         )
     })
 
-    output$trace_scores <- renderPlotly({
-      validate(
-        need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
+    output$trace_scores <- plotly::renderPlotly({
+      shiny::validate(
+        shiny::need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
       )
 
-      validate(
-        need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
+      shiny::validate(
+        shiny::need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
       )
 
-      p <- mcmc_trace(rv$fit$posterior$lambda, pars = gsub(" .*$", "", input$invar_trace_scores)) +
+      p <- bayesplot::mcmc_trace(rv$fit$posterior$lambda, pars = gsub(" .*$", "", input$invar_trace_scores)) +
         theme(axis.text.x = element_blank()) +
         labs(title = "lambda")
 
       p %>%
-        ggplotly(
-          height = 400,
-          width = 600
+        plotly::ggplotly(
+          height = 300,
+          width = 500
         )
     })
 
-    output$dens_loadings <- renderPlotly({
-      validate(
-        need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
+    output$dens_loadings <- plotly::renderPlotly({
+      shiny::validate(
+        shiny::need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
       )
 
-      validate(
-        need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
+      shiny::validate(
+        shiny::need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
       )
 
-      p <- mcmc_dens(rv$fit$posterior$alpha, pars = gsub(" .*$", "", input$invar_dens_loadings)) +
+      p <- bayesplot::mcmc_dens(rv$fit$posterior$alpha, pars = gsub(" .*$", "", input$invar_dens_loadings)) +
         theme(axis.text.x = element_blank()) +
         labs(title = "alpha")
 
       p %>%
-        ggplotly(
-          height = 400,
-          width = 600
+        plotly::ggplotly(
+          height = 300,
+          width = 500
         )
     })
 
-    output$dens_scores <- renderPlotly({
-      validate(
-        need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
+    output$dens_scores <- plotly::renderPlotly({
+      shiny::validate(
+        shiny::need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
       )
 
-      validate(
-        need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
+      shiny::validate(
+        shiny::need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
       )
 
-      p <- mcmc_dens(rv$fit$posterior$lambda, pars = gsub(" .*$", "", input$invar_dens_scores)) +
+      p <- bayesplot::mcmc_dens(rv$fit$posterior$lambda, pars = gsub(" .*$", "", input$invar_dens_scores)) +
         theme(axis.text.x = element_blank()) +
         labs(title = "lambda")
 
       p %>%
-        ggplotly(
-          height = 400,
-          width = 600
+        plotly::ggplotly(
+          height = 300,
+          width = 500
         )
     })
 
-    output$biplot <- renderPlotly({
-      validate(
-        need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
+    output$biplot <- plotly::renderPlotly({
+      shiny::validate(
+        shiny::need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
       )
 
-      validate(
-        need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
+      shiny::validate(
+        shiny::need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
       )
 
       p <- ubiplot(
@@ -521,37 +519,37 @@ shinyServer(
           Y = rv$fit$mean_alpha[, input$invar_y]
         )
       )
-      ggplotly(p)
+      plotly::ggplotly(p)
     })
 
-    output$hex <- renderPlotly({
-      validate(
-        need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
+    output$hex <- plotly::renderPlotly({
+      shiny::validate(
+        shiny::need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
       )
 
-      validate(
-        need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
+      shiny::validate(
+        shiny::need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) paths and exogenous variables. Then run 'Fit model' under 'Model' > 'Run'!")
       )
 
       h1 <- input$invar_h1
       h2 <- input$invar_h2
       cnames <- rv$fit$mean_lambda %>% colnames()
 
-      plot_ly(
+      plotly::plot_ly(
         type = "scatterpolar",
         fill = "toself"
       ) %>%
-        add_trace(
+        plotly::add_trace(
           r = c(rv$fit$mean_lambda[, cnames %in% h1], rv$fit$mean_lambda[1, cnames %in% h1]),
           theta = c(rownames(rv$fit$mean_lambda), rownames(rv$fit$mean_lambda)[1]),
           name = input$invar_h1
         ) %>%
-        add_trace(
+        plotly::add_trace(
           r = c(rv$fit$mean_lambda[, cnames %in% h2], rv$fit$mean_lambda[1, cnames %in% h2]),
           theta = c(rownames(rv$fit$mean_lambda), rownames(rv$fit$mean_lambda)[1]),
           name = input$invar_h2
         ) %>%
-        layout(
+        plotly::layout(
           polar = list(
             radialaxis = list(
               visible = T,
@@ -566,56 +564,56 @@ shinyServer(
     })
 
     output$text_blocks <- renderPrint({
-      validate(
-        need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
+      shiny::validate(
+        shiny::need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
       )
 
       for (i in 1:input$K) {
-        validate(
-          need(length(input[[paste0("invar_block", i)]]) > 0, "At least one manifest varible must be selected in each block.")
+        shiny::validate(
+          shiny::need(length(input[[paste0("invar_block", i)]]) > 0, "At least one manifest varible must be selected in each block.")
         )
       }
     })
 
     output$text_paths <- renderPrint({
-      validate(
-        need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
+      shiny::validate(
+        shiny::need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
       )
 
-      validate(
-        need(input$J > 0, "The path modeling is optional, it distinguishes the SEM model from the factor analysis (particular case). The number of paths (if specified) must be lower than the number of blocks in 'Factors', otherwise it must be set to 0.")
+      shiny::validate(
+        shiny::need(input$J > 0, "The path modeling is optional, it distinguishes the SEM model from the factor analysis (particular case). The number of paths (if specified) must be lower than the number of blocks in 'Factors', otherwise it must be set to 0.")
       )
 
       for (i in 1:input$J) {
-        validate(
-          need(length(input[[paste0("invar_idlamb", i)]]) > 0, "At least one common factor should explain the response factor in each path.")
+        shiny::validate(
+          shiny::need(length(input[[paste0("invar_idlamb", i)]]) > 0, "At least one common factor should explain the response factor in each path.")
         )
       }
     })
 
     output$text_exogenous <- renderPrint({
-      validate(
-        need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
+      shiny::validate(
+        shiny::need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
       )
 
-      validate(
-        need(input$L > 0, "Including exogenous variables is optional, set 0 to do not include any. The exogenous variables are explained by the common factors, they shoud not include any block variables previously defined in 'Factors'.")
+      shiny::validate(
+        shiny::need(input$L > 0, "Including exogenous variables is optional, set 0 to do not include any. The exogenous variables are explained by the common factors, they shoud not include any block variables previously defined in 'Factors'.")
       )
 
       for (i in 1:input$L) {
-        validate(
-          need(length(input[[paste0("invar_idex", i)]]) > 0, "At least one common factor should explain each exogenous response.")
+        shiny::validate(
+          shiny::need(length(input[[paste0("invar_idex", i)]]) > 0, "At least one common factor should explain each exogenous response.")
         )
       }
     })
 
     output$summary <- renderPrint({
-      validate(
-        need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
+      shiny::validate(
+        shiny::need(input$datafile, "Please load your data in the 'Data' > 'Data loader'.")
       )
 
-      validate(
-        need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) the paths and the exogenous variables. Then run 'Fit model' above!")
+      shiny::validate(
+        shiny::need(length(rv$fit) > 0, "Please choose the desired variables for each block under 'Model' > 'Factors', also specify (optional) the paths and the exogenous variables. Then run 'Fit model' above!")
       )
       summary(rv$fit)
     })
@@ -757,27 +755,32 @@ shinyServer(
         paste("data-bsem", Sys.Date(), ".csv", sep = "")
       },
       content = function(con) {
-        write.csv(data, con)
+        if(input$std == "0"){
+          write.csv(data.frame(filedata(), rv$fit$mean_lambda %>% t()), con)
+        }
+        else{
+          write.csv(data.frame(filedata() %>% scale, rv$fit$mean_lambda %>% t()), con)
+        }
       }
     )
 
     output$downloadFit <- downloadHandler(
       filename = function() {
-        paste("fit-bsem", Sys.Date(), ".rda", sep = "")
+        paste("fit-bsem", Sys.Date(), ".rds", sep = "")
       },
       content = function(con) {
-        write.csv(data, con)
+        saveRDS(object = rv$fit, file = con)
       }
     )
 
     observe({
       if (length(rv$fit) > 0) {
-        show(id = "downloadData")
-        show(id = "downloadFit")
+        shinyjs::show(id = "downloadData")
+        shinyjs::show(id = "downloadFit")
       }
       else {
-        hide(id = "downloadData")
-        hide(id = "downloadFit")
+        shinyjs::hide(id = "downloadData")
+        shinyjs::hide(id = "downloadFit")
       }
     })
 

@@ -1,12 +1,10 @@
-library(ggfortify)
-
 ubiplot <- function(scores, loadings) {
 
   X <- scores %>%
     as.data.frame() %>%
     mutate(observation = rownames(scores))
 
-  ggbiplot(
+  ggfortify::ggbiplot(
     plot.data = X,
     loadings.data = loadings %>% as.data.frame(),
     loadings = TRUE,
