@@ -1,4 +1,4 @@
-#' Structural Equation Models (SEM) and particular cases via rstan interface
+#' Structural Equation Models (SEM) and particular cases using rstan interface
 #'
 #' Fits the SEM to specific data
 #'
@@ -8,19 +8,21 @@
 #' @param paths  list referring to the inner model paths; a list of characters or integers referring to the scores relationship; the jth first latent variable are explained if names(paths) is NULL
 #' @param exogenous  list referring to the inner model exogenous; a list of characters or integers referring to relationship between exogenous and latent variables; the lth first columns are explained if names(exogenous) is NULL
 #' @param signals  list referring to the signals of the factor loadings initial values; must be true: (length(signals) == length(blocks)) && (lengths(signals) == lengths(blocks)); (not allowed in runShiny)
-#' @param row_names  optional identifier for the observations (observation = row);
+#' @param row_names  optional identifier for the observations (observation = row)
 #' @param prior_specs  prior settings for the Bayesian approach; only `normal` and `cauchy` for gamma0, gamma and beta; `gamma`, `lognormal` and `inv_gamma` for sigma2 and tau2 are available, those prior specifications are ignored if not needed (FA or SEM)
 #' @param pars  allows parameters to omitted in the outcome; options are any subset of default c("alpha", "lambda", "sigma2")
 #' @param cores  number of core threads to be used
 #' @param iter  number of iterations
 #' @param chains  number of chains
+#' @param refresh defaults to 100; see \code{\link[rstan]{sampling}};
+#' @param verbose  logical; see \code{\link[rstan]{sampling}}; default FALSE
 #' @param scaled  logical; indicates whether to center and scale the data; default FALSE
 #' @param ...  further arguments passed to Stan such as warmup, adapt_delta and others, see \code{\link[rstan]{sampling}}.
 #' @export sem
 #' @rdname sem
 #' @importFrom rstan stan sampling
 #' @importFrom coda  HPDinterval mcmc
-#' @importFrom stats .getXlevels as.formula contrasts dbeta density dist formula median model.extract pbeta pchisq printCoefmat qnorm rlogis rnorm rweibull sd terms
+#' @importFrom stats median na.omit rnorm runif
 #' @return  An object of class \code{bsem}; a list of 14 to 19:
 #' \describe{
 #'    \item{stanfit}{S4 object of class stanfit}
@@ -39,7 +41,7 @@
 #'    \item{credint}{Highest posterior density intervals (HPD)}
 #'    \item{h}{vector of posterior communalities}
 #'    \item{PTVE}{vector of total variance proportions}
-#'    \item{AFR2}{adjusted coefficient of determination}
+#'    \item{R2}{adjusted coefficient of determination}
 #'    \item{SQE}{explained sums of squares}
 #'    \item{SQT}{total sums of squares}
 #' }
@@ -78,18 +80,11 @@
 #'   warmup = 1000,
 #'   chains = 4
 #' )
-#' plot(semfit)
-#'
-#' gridExtra::grid.arrange(bsem::arrayplot(semfit$mean_lambda, main = "estimates", mini = -4, maxi = 4),
-#'   bsem::arrayplot(dt$real$lambda, main = "lambda (scores)", mini = -4, maxi = 4),
-#'   bsem::arrayplot(semfit$mean_alpha, main = "estimates", mini = -4, maxi = 4),
-#'   bsem::arrayplot(dt$real$alpha, main = "alpha (loadings)", mini = -4, maxi = 4),
-#'   layout_matrix = matrix(c(1, 1, 3, 3, 2, 2, 4, 4), ncol = 2)
-#' )
+#' summary(semfit)
 #' }
 #'
 #' @author Renato Panaro
-#' @seealso \code{\link[bsem]{plot.sem}}, \code{\link[bsem]{simdata}}, \code{\link[bsem]{arrayplot}}, \code{\link[bsem]{summary.sem}}, \code{\link[bsem]{print.sem}}
+#' @seealso \code{\link[bsem]{plot.bsem}}, \code{\link[bsem]{simdata}}, \code{\link[bsem]{arrayplot}}, \code{\link[bsem]{summary.bsem}}, \code{\link[bsem]{print.bsem}}
 
 sem <-
   function(data,
@@ -110,16 +105,19 @@ sem <-
            iter = 2000,
            chains = 4,
            scaled = FALSE,
+           verbose = FALSE,
+           refresh = 100,
            ...) {
+
     if (!class(data) %in% c("matrix", "data.frame")) {
-      stop("data misspecification: data should be matrix of numeric values")
+      stop("data should be matrix of numeric values")
     }
     else if (class(data) %in% "data.frame") {
       data <- as.data.frame.matrix(data)
     }
 
     if (all(!sapply(data, is.numeric))) {
-      stop("data misspecification: at least one column must be numeric")
+      stop("at least one column in data.frame must be numeric")
     }
     else {
       data <- data[, apply(data, 2, is.numeric)]
@@ -144,14 +142,11 @@ sem <-
         names(exogenous) <- colnames(data)[1:length(exogenous)]
         warning(
           gettextf(
-            "underspecification;  names(exogenous) is missing: the first %s [column] variables became exogenous",
+            "names(exogenous) is missing, the first %s [column] variables became exogenous",
             length(exogenous)
           )
         )
       }
-    }
-    if (missing(signals)) {
-      warning("underspecification; signals not specified: random initial values assigned for alpha")
     }
 
     # missing data
@@ -238,6 +233,10 @@ sem <-
       handler3(missing(signals))
     }
 
+    if (missing(signals)) {
+      warning("signals not specified: random initial values assigned for alpha")
+    }
+
     standata <-
       list(
         X = X,
@@ -275,9 +274,8 @@ sem <-
         if (missing(exogenous)) {
           ## blocks
 
-          stanfit <-
-            suppressWarnings(
-              sampling(
+          stanfit <- suppressWarnings(
+              rstan::sampling(
                 stanmodels$factorial,
                 data = standata,
                 pars = pars,
@@ -285,16 +283,17 @@ sem <-
                 chains = chains,
                 iter = iter,
                 cores = cores,
+                verbose = verbose,
+                refresh = refresh,
                 ...
               )
-            )
+          )
         }
         else {
           ## blocks + exogenous
           handler5()
-          stanfit <-
-            suppressWarnings(
-              sampling(
+          stanfit <- suppressWarnings(
+            rstan::sampling(
                 stanmodels$factorialEX,
                 data = standata,
                 pars = pars,
@@ -302,9 +301,11 @@ sem <-
                 chains = chains,
                 iter = iter,
                 cores = cores,
+                verbose = verbose,
+                refresh = refresh,
                 ...
               )
-            )
+          )
         }
       }
       else {
@@ -314,7 +315,7 @@ sem <-
           ## blocks + paths
 
           stanfit <- suppressWarnings(
-            sampling(
+            rstan::sampling(
               stanmodels$sem,
               data = standata,
               pars = pars,
@@ -322,6 +323,8 @@ sem <-
               chains = chains,
               iter = iter,
               cores = cores,
+              verbose = verbose,
+              refresh = refresh,
               ...
             )
           )
@@ -331,7 +334,7 @@ sem <-
           handler5()
 
           stanfit <- suppressWarnings(
-            sampling(
+            rstan::sampling(
               stanmodels$semEX,
               data = standata,
               pars = pars,
@@ -339,6 +342,8 @@ sem <-
               chains = chains,
               iter = iter,
               cores = cores,
+              verbose = verbose,
+              refresh = refresh,
               ...
             )
           )
@@ -356,9 +361,8 @@ sem <-
       if (missing(paths)) {
         if (missing(exogenous)) {
           ## blocks + missing
-          stanfit <-
-            suppressWarnings(
-              sampling(
+          stanfit <- suppressWarnings(
+            rstan::sampling(
                 stanmodels$factorialNA,
                 data = standata,
                 pars = pars,
@@ -366,16 +370,17 @@ sem <-
                 chains = chains,
                 iter = iter,
                 cores = cores,
+                verbose = verbose,
+                refresh = refresh,
                 ...
               )
-            )
+          )
         }
         else {
           handler5()
           ## blocks + missing + exogenous
-          stanfit <-
-            suppressWarnings(
-              sampling(
+          stanfit <- suppressWarnings(
+            rstan::sampling(
                 stanmodels$factorialNAEX,
                 data = standata,
                 pars = pars,
@@ -383,9 +388,11 @@ sem <-
                 chains = chains,
                 iter = iter,
                 cores = cores,
+                verbose = verbose,
+                refresh = refresh,
                 ...
               )
-            )
+          )
         }
       }
       else {
@@ -395,7 +402,7 @@ sem <-
         if (missing(exogenous)) {
           ## blocks + paths + missing
           stanfit <- suppressWarnings(
-            sampling(
+            rstan::sampling(
               stanmodels$semNA,
               data = standata,
               pars = pars,
@@ -403,6 +410,8 @@ sem <-
               chains = chains,
               iter = iter,
               cores = cores,
+              verbose = verbose,
+              refresh = refresh,
               ...
             )
           )
@@ -411,7 +420,7 @@ sem <-
           handler5()
           ## blocks + paths + missing + exogenous
           stanfit <- suppressWarnings(
-            sampling(
+            rstan::sampling(
               stanmodels$semNAEX,
               data = standata,
               pars = pars,
@@ -419,6 +428,8 @@ sem <-
               chains = chains,
               iter = iter,
               cores = cores,
+              verbose = verbose,
+              refresh = refresh,
               ...
             )
           )
@@ -594,8 +605,8 @@ sem <-
         output$mean_alpha %*% output$mean_lambda
       ))^2)
     output$SQT <- sum((standata$X - mean(standata$X))^2)
-    output$AFR2 <-
-      100 * (1 - output$SQE / output$SQT) # AFR2 = adapted to factor analisys R2
+    output$R2 <-
+      100 * (1 - output$SQE / output$SQT) # R2 = adapted to factor analisys R2
 
     if (Nna > 0) {
       output$idna <- idna

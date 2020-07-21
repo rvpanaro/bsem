@@ -6,8 +6,8 @@
 #' @param ... further arguments passed to or from print methods
 #' @method print bsem
 #' @return none
-#' @seealso \code{\link[bsem]{bsem::simdata}}, \code{\link[bsem]{bsem::arrayplot}}, \code{\link[bsem]{bsem::summary.sem}}, \code{\link[bsem]{bsem::sem}}, \code{\link[bsem]{bsem::runShiny}}
-#'
+#' @seealso \code{\link[bsem]{simdata}}, \code{\link[bsem]{arrayplot}}, \code{\link[bsem]{summary.bsem}}, \code{\link[bsem]{sem}}, \code{\link[bsem]{runShiny}}
+#' @importFrom utils capture.output head tail
 
  print.bsem <-
    function(x, digits = 4, ...){
@@ -237,7 +237,7 @@ summary.bsem <-
     cat("\nmedian PTVE: ", median(object$PTVE), "\n")
 
     if(object$model %in% c("sem", "semNA", "semEX", "semNAEX")){
-      cat("R2:", paste0(round(object$AFR2,2), '%'), "\n")
+      cat("R2:", paste0(round(object$R2,2), '%'), "\n")
     }
     summ <-list(blocks = aux_blocks,
                 var = aux_var,

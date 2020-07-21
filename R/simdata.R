@@ -28,7 +28,7 @@
 #' @importFrom lattice levelplot panel.levelplot
 #'
 #'
-#' @seealso \code{\link[bsem]{plot.sem}}, \code{\link[bsem]{sem}}, \code{\link[bsem]{arrayplot}}, \code{\link[bsem]{summary.sem}}, \code{\link[bsem]{print.sem}}
+#' @seealso \code{\link[bsem]{plot.bsem}}, \code{\link[bsem]{sem}}, \code{\link[bsem]{arrayplot}}, \code{\link[bsem]{summary.bsem}}, \code{\link[bsem]{print.bsem}}
 
 simdata <-
   function(paths = list(3:4, 4:5),
@@ -171,7 +171,7 @@ simdata <-
     }
 
     res = list(
-      "data" = data,
+      "data" = data %>% data.frame(),
       "real" = real,
       "blocks" = blocks,
       "signals" = S,

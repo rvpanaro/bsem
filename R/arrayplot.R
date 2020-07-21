@@ -10,6 +10,7 @@
 #' @param ylab y axis label passed to \code{lattice::levelplot}  function
 #' @param xlab x axis label passed to \code{lattice::levelplot} function
 #' @param main plot title passed to \code{lattice::levelplot} function
+#' @importFrom grDevices colorRampPalette
 #' @examples
 #' dt <- simdata()
 #'
@@ -19,7 +20,7 @@
 #' @importFrom lattice levelplot panel.levelplot
 #'
 #' @author VD Mayrink
-#' @seealso \code{\link[bsem]{bsem::simdata}}, \code{\link[bsem]{bsem::summary.sem}}, \code{\link[bsem]{bsem::plot}}, \code{\link[bsem]{bsem::sem}}, \code{\link[bsem]{bsem::runShiny}}
+#' @seealso \code{\link[bsem]{simdata}}, \code{\link[bsem]{summary.bsem}}, \code{\link[bsem]{plot.bsem}}, \code{\link[bsem]{sem}}, \code{\link[bsem]{runShiny}}
 
 
 arrayplot <-

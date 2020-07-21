@@ -7,7 +7,7 @@
 #'    \item{stanfit}{S4 object of class stanfit}
 #'  }
 #'
-#' @seealso \code{\link[bsem]{sem}}, \code{\link[bsem]{simdata}}, \code{\link[bsem]{arrayplot}}, \code{\link[bsem]{summary.sem}}, \code{\link[bsem]{print.sem}}
+#' @seealso \code{\link[bsem]{sem}}, \code{\link[bsem]{simdata}}, \code{\link[bsem]{arrayplot}}, \code{\link[bsem]{summary.bsem}}, \code{\link[bsem]{print.bsem}}
 #' @examples
 #'
 #' \dontrun{

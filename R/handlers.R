@@ -4,6 +4,10 @@ handler1 <- function() {
 
   # ----
   ## array of priors for beta
+  if(any(!names(e$prior_specs) %in% c("beta", "gamma", "gamma0", "sigma2", "tau2"))){
+    stop("prior_specs names should include c('beta', 'gamma', 'gamma0', 'sigma2', 'tau2') only")
+  }
+
   betap <- try(lapply(e$prior_specs$beta, read_prior), silent = T)
   if (is.null(betap[2]) || length(betap) == 0) betap <- lapply("normal(0,1)", read_prior)
 
@@ -18,8 +22,12 @@ handler1 <- function() {
     )
   })
 
-  if (is.null(priordist_beta)) {
-    stop("prior_specs misspecification: 'beta prior should be normal or cauchy, try prior_specs = list(beta = normal(...,...), ...) instead'")
+  if (any(is.null(unlist(priordist_beta)))) {
+    stop(" 'beta prior should be normal or cauchy, try prior_specs = list(beta = normal(...,...), ...) instead'")
+  }
+
+  if(as.numeric(par2) < 0){
+    stop(priordist, " distribution parameter 2 should be greater than zero.")
   }
 
   if (exists("paths", envir = e, mode = "list", inherits = F)) {
@@ -54,8 +62,17 @@ handler1 <- function() {
     }
   )
 
-  if (is.null(priordist_sigma2)) {
-    stop("prior_specs misspecification: sigma2 prior should be gamma, inv_gamma or lognormal, try prior_specs = list(sigma2 = inv_gamma(...,...), ...) instead'")
+
+  if (any(is.null(unlist(priordist_sigma2)))) {
+    stop(" sigma2 prior should be gamma, inv_gamma or lognormal, try prior_specs = list(sigma2 = inv_gamma(...,...), ...) instead'")
+  }
+
+  if(priordist_sigma2 !=  2 && as.numeric(par1) < 0){
+    stop(priordist, " distribution parameter 1 should be greater than zero.")
+  }
+
+  if(as.numeric(par2) < 0){
+    stop(priordist, " distribution parameter 2 should be greater than zero.")
   }
 
   ## Recycling the prior specs
@@ -80,6 +97,7 @@ handler1 <- function() {
   par1 <- sapply(gammap, `[[`, 2)
   par2 <- sapply(gammap, `[[`, 3)
 
+
   priordist_gamma <- sapply(priordist, function(x) {
     switch(x,
       "normal" = 0,
@@ -87,8 +105,12 @@ handler1 <- function() {
     )
   })
 
-  if (is.null(priordist_gamma)) {
-    stop("prior_specs misspecification: gamma prior should be normal or cauchy, try prior_specs = list(gamma = normal(...,...), ...) instead'")
+  if (any(is.null(unlist(priordist_gamma)))) {
+    stop(" gamma prior should be normal or cauchy, try prior_specs = list(gamma = normal(...,...), ...) instead'")
+  }
+
+  if(as.numeric(par2) < 0){
+    stop(priordist, " distribution parameter 2 should be greater than zero.")
   }
 
   # ## Recycling the prior specs
@@ -118,8 +140,12 @@ handler1 <- function() {
     )
   })
 
-  if (is.null(priordist_gamma0)) {
-    stop("prior_specs misspecification: gamma0 prior should be normal or cauchy, try prior_specs = list(gamma0 = normal(...,...), ...) instead'")
+  if (any(is.null(unlist(priordist_gamma0)))) {
+    stop(" gamma0 prior should be normal or cauchy, try prior_specs = list(gamma0 = normal(...,...), ...) instead'")
+  }
+
+  if(as.numeric(par2) < 0){
+    stop(priordist, " distribution parameter 2 should be greater than zero.")
   }
 
   # ## Recycling the prior specs
@@ -154,8 +180,16 @@ handler1 <- function() {
     }
   )
 
-  if (is.null(priordist_tau2)) {
-    stop("prior_specs misspecification: tau2 prior should be gamma, inv_gamma or lognormal, try prior_specs = list(tau2 = inv_gamma(...,...), ...) instead'")
+  if (any(is.null(unlist(priordist_tau2)))) {
+    stop(" tau2 prior should be gamma, inv_gamma or lognormal, try prior_specs = list(tau2 = inv_gamma(...,...), ...) instead'")
+  }
+
+  if(as.numeric(par2) < 0){
+    stop(priordist, " distribution parameter 2 should be greater than zero.")
+  }
+
+  if(priordist_tau2 !=  2 && as.numeric(par1) < 0){
+    stop(priordist, " distribution parameter 1 should be greater than zero.")
   }
 
   if (exists("exogenous", envir = e, mode = "list", inherits = F)) {
@@ -181,7 +215,7 @@ handler2 <- function() {
     aux <- pmatch(names(e$stanArgs), stanformals, nomatch = 0)
 
     if (any(aux == 0)) {
-      stop(gettextf("arguments misspecification; arguments %s not matched", paste(names(e$stanArgs)[aux == 0], collapse = ", ")))
+      stop(gettextf(" arguments %s not matched", paste(names(e$stanArgs)[aux == 0], collapse = ", ")))
     }
   }
 }
@@ -253,7 +287,7 @@ handler4 <- function() {
     else if (class(e$paths[[i]]) %in% c("numeric", "integer", "vector")) {
       if (!all(e$paths[[i]] == floor(e$paths[[i]]))) {
         stop(gettextf(
-          "paths misspecification: %s must be integer",
+          "path[s] %s positioning must be integer",
           paste0(i, collapse = ", ")
         ))
       }
@@ -275,7 +309,7 @@ handler4 <- function() {
 
   if (any(aux == 0)) {
     stop(gettextf(
-      "paths misspecification; latent variable[s] %s in unlist(paths) not matched names(blocks)",
+      " latent variable[s] %s in unlist(paths) not matched names(blocks)",
       paste(unlist(e$paths)[aux == F], collapse = ", ")
     ))
   }
@@ -284,7 +318,7 @@ handler4 <- function() {
 
   if (any(aux == 0)) {
     stop(gettextf(
-      "paths misspecification; latent variable[s] %s in names(paths) not matched names(blocks)",
+      " latent variable[s] %s in names(paths) not matched names(blocks)",
       paste(names(e$paths)[aux == F], collapse = ", ")
     ))
   }
@@ -420,7 +454,7 @@ handler6 <- function() {
             }
           }
         }
-        if (e$stanfit@model_name %in% c("factorialNA", "factorialNAEX", "semNA", "semNAEX")) {
+        if (e$stanfit@model_name %in% c("factorialEX", "factorialNAEX", "semEX", "semNAEX")) {
           if (k %in% array(e$standata$idex)) {
             for (j in which(array(e$standata$idex) == k)) {
               e$samples$gamma[, , j] <- e$samples$gamma[, , j] %*% -diag(2 * (c_means[, 1] > 0) - 1)
