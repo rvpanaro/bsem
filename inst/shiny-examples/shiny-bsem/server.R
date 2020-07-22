@@ -698,7 +698,6 @@ shinyServer(
       })
     })
 
-
     observeEvent(
       {
         if (input$L > 0) TRUE
@@ -707,8 +706,6 @@ shinyServer(
         updateNumericInput(session, "L", value = input$L, max = ncol(nonmissnumericdata()))
       }
     )
-
-
 
     observe({
       if (input$L > 0) {
@@ -755,12 +752,23 @@ shinyServer(
         paste("data-bsem", Sys.Date(), ".csv", sep = "")
       },
       content = function(con) {
+
+        median_lambda <- matrix(rv$fit$stats[startsWith(rownames(rv$fit$stats), "lambda"), "50%"], nrow = input$K) %>% t()
+        colnames(median_lambda) <- paste0("F", 1:ncol(median_lambda), "_median")
+
         if(input$std == "0"){
-          write.csv(data.frame(filedata(), rv$fit$mean_lambda %>% t()), con)
+          aux <- numericdata()
         }
         else{
-          write.csv(data.frame(filedata() %>% scale, rv$fit$mean_lambda %>% t()), con)
+          aux <- numericdata() %>% scale()
         }
+
+        if(length(rv$fit$mean_Xna)>0){
+          for (i in 1:nrow(rv$fit$idna)){
+            aux[rv$fit$idna[i,2], rv$fit$idna[i,1]] <- rv$fit$mean_Xna[i]
+          }
+        }
+        write.csv(data.frame(aux, rv$fit$mean_lambda %>% t(), median_lambda), con)
       }
     )
 
