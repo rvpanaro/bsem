@@ -76,9 +76,9 @@ bsem::runShiny()
 ```
 
 
-<img src=gallery/img1.png width=33.3% />&nbsp; <img src=gallery/img2.png width=33.3% /> &nbsp;<img src=gallery/img3.png width=33.3% />&nbsp;<img src=gallery/img4.png width=33.3% />&nbsp; <img src=gallery/img5.png width=33.3% /> &nbsp;<img src=gallery/img6.png width=33.3% />&nbsp;<img src=gallery/img7.png width=33.3% />&nbsp; <img src=gallery/img8.png width=33.3% />
+<img src=https://raw.githubusercontent.com/rvpanaro/bsem/master/docs/gallery/img1.png width=33.3% />&nbsp; <img src=https://raw.githubusercontent.com/rvpanaro/bsem/master/docs/gallery/img2.png width=33.3% /> &nbsp;<img src=https://raw.githubusercontent.com/rvpanaro/bsem/master/docs/gallery/img3.png width=33.3% />&nbsp;<img src=https://raw.githubusercontent.com/rvpanaro/bsem/master/docs/gallery/img4.png width=33.3% />&nbsp; <img src=https://raw.githubusercontent.com/rvpanaro/bsem/master/docs/gallery/img5.png width=33.3% /> &nbsp;<img src=https://raw.githubusercontent.com/rvpanaro/bsem/master/docs/gallery/img6.png width=33.3% />&nbsp;<img src=https://raw.githubusercontent.com/rvpanaro/bsem/master/docs/gallery/img7.png width=33.3% />&nbsp; <img src=https://raw.githubusercontent.com/rvpanaro/bsem/master/docs/gallery/img8.png width=33.3% />
 
 
 ## Future work and improvements
 
-Feel free to collaborate or to open an issue.
+Feel free to collaborate with me or to open an issue.
