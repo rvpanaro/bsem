@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Bayesian Structural Equation Models using Rstan • bsem</title>
+<title>Bayesian Structural Equation Models • bsem</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/cosmo/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="bootstrap-toc.css">
 <script src="bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
@@ -13,8 +13,8 @@
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
 <script src="pkgdown.js"></script><!-- docsearch --><script src="docsearch.js"></script><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/docsearch.js/2.6.3/docsearch.min.css" integrity="sha256-QOSRU/ra9ActyXkIBbiIB144aDBdtvXBcNc3OTNuX/Q=" crossorigin="anonymous">
 <link href="docsearch.css" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script><meta property="og:title" content="Bayesian Structural Equation Models using Rstan">
-<meta property="og:description" content="Flexible routines to allow structural equation modeling particular cases using rstan integration. bsem includes Bayesian Exploratory Analysis, Bayesian Confirmatory Analysis, Factor Analysis and Structural Equation Models.  VD Mayrink (2013) &lt;https://projecteuclid.org/DPubS?service=UI&amp;version=1.0&amp;verb=Display&amp;handle=euclid.aoas/1372338468&gt;.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script><meta property="og:title" content="Bayesian Structural Equation Models">
+<meta property="og:description" content="Flexible routines to allow structural equation modeling particular cases using rstan integration. bsem includes Bayesian semi Confirmatory Factor Analysis, Confirmatory Factor Analysis, and Structural Equation Model.  VD Mayrink (2013) &lt;https://projecteuclid.org/DPubS?service=UI&amp;version=1.0&amp;verb=Display&amp;handle=euclid.aoas/1372338468&gt;.">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -99,7 +99,7 @@
 <div id="an-r-package-for-bayesian-structural-equation-modeling" class="section level3">
 <h3 class="hasAnchor">
 <a href="#an-r-package-for-bayesian-structural-equation-modeling" class="anchor"></a>An R package for Bayesian structural equation modeling.</h3>
-<p>The package allows Bayesian analysis for particular cases of structural equation models (SEMs) based on <a href="https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started">rstan</a> integration. Examples in <a href="https://rvpanaro.github.io/spsurv/articles/bsem.html">get started</a> and <a href="https://rvpanaro.github.io/spsurv/articles/exploring-bsem-class.html">exploring bsem</a> include confirmatory factor analysis and confirmatory SEM. The full SEM model (outer and inner models), enables the evaluation of user-defined latent variables along with the analysis of established linear relationships among the latent scores.</p>
+<p>The package allows Bayesian analysis for particular cases of structural equation models (SEMs) based on <a href="https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started">rstan</a> integration. Examples in <a href="https://rvpanaro.github.io/bsem/articles/bsem.html">get started</a> and <a href="https://rvpanaro.github.io/bsem/articles/exploring-bsem-class.html">exploring bsem</a> include confirmatory factor analysis and confirmatory SEM. The full SEM model (outer and inner models), enables the evaluation of user-defined latent variables along with the analysis of established linear relationships among the latent scores.</p>
 </div>
 </div>
 <div id="install" class="section level2">
@@ -150,6 +150,7 @@
 <h2 class="hasAnchor">
 <a href="#access-to-shinyapp" class="anchor"></a>Access to ShinyApp</h2>
 <div class="sourceCode" id="cb9"><pre class="r"><span class="kw pkg">bsem</span><span class="kw ns">::</span><span class="fu"><a href="reference/runShiny.html">runShiny</a></span>()</pre></div>
+<p><img src="gallery/img1.png" width="33.3%">  <img src="gallery/img2.png" width="33.3%">  <img src="gallery/img3.png" width="33.3%"> <img src="gallery/img4.png" width="33.3%">  <img src="gallery/img5.png" width="33.3%">  <img src="gallery/img6.png" width="33.3%"> <img src="gallery/img7.png" width="33.3%">  <img src="gallery/img8.png" width="33.3%"></p>
 </div>
 <div id="future-work-and-improvements" class="section level2">
 <h2 class="hasAnchor">
