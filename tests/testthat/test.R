@@ -319,7 +319,7 @@ expect_error(
     iter = 2,
     warmup = 0,
     chains = 1,
-    prior_specs = list(lognsdçkj = "normal(0,2)")
+    prior_specs = list(gammar = "normal(0,2)")
   )
 )
 
@@ -331,7 +331,7 @@ expect_error(
     iter = 2,
     warmup = 0,
     chains = 1,
-    prior_specs = list(beta = "lognsdçkj(0,2)")
+    prior_specs = list(beta = "gammar(0,2)")
   )
 )
 
@@ -342,7 +342,7 @@ expect_error(
     iter = 2,
     warmup = 0,
     chains = 1,
-    prior_specs = list(gamma = "lognsdçkj(0,2)")
+    prior_specs = list(gamma = "gammar(0,2)")
   )
 )
 
@@ -353,7 +353,7 @@ expect_error(
     iter = 2,
     warmup = 0,
     chains = 1,
-    prior_specs = list(gamma0 = "lognsdçkj(0,2)")
+    prior_specs = list(gamma0 = "gammar(0,2)")
   )
 )
 
@@ -364,7 +364,7 @@ expect_error(
     iter = 2,
     warmup = 0,
     chains = 1,
-    prior_specs = list(sigma2 = "lognsdçkj(0,2)")
+    prior_specs = list(sigma2 = "nrlme(0,2)")
   )
 )
 
@@ -375,7 +375,7 @@ expect_error(
     iter = 2,
     warmup = 0,
     chains = 1,
-    prior_specs = list(tau2 = "lognsdçkj(0,2)")
+    prior_specs = list(tau2 = "gammar(0,2)")
   )
 )
 
@@ -465,7 +465,7 @@ expect_error(
     iter = 2,
     warmup = 0,
     chains = 1,
-    cilkdlçskjs = 1
+    coress = 1
   )
 )
 
