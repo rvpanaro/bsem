@@ -15,19 +15,18 @@
      on.exit(options(savedig))
 
      cat("\n\n---\nbsem model: ", x$model, "\n")
-     cat("latent variables (outter model): ", length(x$blocks), "\n")
+     cat("latent variables (outer model): ", length(x$blocks), "\n")
      if(x$model %in%  c("semNA", "sem", "semNAEX", "semEX")){cat("regressions (inner model): ", length(x$paths), "\n")}
      if(x$model %in%  c("factorialNAEX", "factorialEX", "semNAEX", "semEX")){cat("exogenous variables: ", length(x$exogenous), "\n")}
 
      invisible(capture.output(y <- summary(x, digits = digits)))
 
-    cat("\n\n outter model loadings (alpha):\n")
+    cat("\n\n outer model loadings (alpha):\n")
     for(i in 1:length(x$blocks)){
       cat("\n", names(x$blocks)[i], "\n")
       print(round(y$blocks[[i]],
             digits = digits), digits = digits)
     }
-
 
      if(x$model %in% c("semNA", "sem", "semNAEX", "semEX")){
        cat("\n---\n\n\n inner model regression coefficients (beta):\n")
@@ -37,7 +36,6 @@
                digits = digits), digits = digits)
        }
      }
-
 
     if(x$model %in% c("factorialNAEX", "factorialEX", "semNAEX", "semEX")){
       cat("\n---\n\n\n exogenous variables regression coefficients (gamma) :\n")
@@ -72,7 +70,7 @@ summary.bsem <-
     stats <- object$stats
 
     cat("\n\n---\nbsem model: ", object$model, "\n")
-    cat("latent variables (outter model): ", length(object$blocks), "\n")
+    cat("latent variables (outer model): ", length(object$blocks), "\n")
 
     if(object$model %in%  c("semNA", "sem", "semNAEX", "semEX")){
       cat("regressions (inner model): ", length(object$paths), "\n")
@@ -81,7 +79,7 @@ summary.bsem <-
       cat("missing: ", length(object$mean_Xna), "\n")
       }
 
-    cat("\n\n outter model loadings (alpha):\n")
+    cat("\n\n outer model loadings (alpha):\n")
 
     aux_blocks <- list()
     aux_credint_blocks <- list()

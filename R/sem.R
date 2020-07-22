@@ -610,6 +610,7 @@ sem <-
 
     if (Nna > 0) {
       output$idna <- idna
+      names(output$mean_Xna) <- paste0("Xna[", idna[,1], ",", idna[,2], "]")
     }
 
     ifelse(missing(exogenous),
