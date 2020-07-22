@@ -1,6 +1,6 @@
 Package: bsem
 Type: Package
-Title: Bayesian Structural Equation Models using Rstan
+Title: Bayesian Structural Equation Models
 Version: 1.0.0
 Authors@R: 
     c(person(given = "Renato",
@@ -20,7 +20,7 @@ Authors@R:
            comment = c(URL= "http://somos.ufmg.br/professor/marcelo-azevedo-costa"))
            )         
 Maintainer: Renato Panaro <renatovp@ime.usp.br>
-Description: Flexible routines to allow structural equation modeling particular cases using rstan integration. 'bsem' includes Bayesian Exploratory Analysis, Bayesian Confirmatory Analysis, Factor Analysis and Structural Equation Models.  VD Mayrink (2013) <https://projecteuclid.org/DPubS?service=UI&version=1.0&verb=Display&handle=euclid.aoas/1372338468>.
+Description: Flexible routines to allow structural equation modeling particular cases using 'rstan' integration. 'bsem' includes Bayesian semi Confirmatory Factor Analysis, Confirmatory Factor Analysis, and Structural Equation Model.  VD Mayrink (2013) <https://projecteuclid.org/DPubS?service=UI&version=1.0&verb=Display&handle=euclid.aoas/1372338468>.
 License: GPL-3
 Biarch: true
 Depends: 
