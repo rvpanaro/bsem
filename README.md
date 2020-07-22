@@ -5,7 +5,7 @@
 
 ### An R package for Bayesian structural equation modeling. 
 
-The package allows Bayesian analysis for particular cases of structural equation models (SEMs) based on [rstan](https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started) integration. Examples in [get started](https://rvpanaro.github.io/spsurv/articles/bsem.html) and [exploring bsem](https://rvpanaro.github.io/spsurv/articles/exploring-bsem-class.html) include confirmatory factor analysis and confirmatory SEM. The full SEM model (outer and inner models), enables the evaluation of user-defined latent variables along with the analysis of established linear relationships among the latent scores.
+The package allows Bayesian analysis for particular cases of structural equation models (SEMs) based on [rstan](https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started) integration. Examples in [get started](https://rvpanaro.github.io/bsem/articles/bsem.html) and [exploring bsem](https://rvpanaro.github.io/bsem/articles/exploring-bsem-class.html) include confirmatory factor analysis and confirmatory SEM. The full SEM model (outer and inner models), enables the evaluation of user-defined latent variables along with the analysis of established linear relationships among the latent scores.
 
 ## Install
 
@@ -74,6 +74,10 @@ plot(semfit)
 ```r
 bsem::runShiny()
 ```
+
+
+<img src=gallery/img1.png width=33.3% />&nbsp; <img src=gallery/img2.png width=33.3% /> &nbsp;<img src=gallery/img3.png width=33.3% />&nbsp;<img src=gallery/img4.png width=33.3% />&nbsp; <img src=gallery/img5.png width=33.3% /> &nbsp;<img src=gallery/img6.png width=33.3% />&nbsp;<img src=gallery/img7.png width=33.3% />&nbsp; <img src=gallery/img8.png width=33.3% />
+
 
 ## Future work and improvements
 
