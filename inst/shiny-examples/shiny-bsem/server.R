@@ -17,7 +17,7 @@ shinyServer(
       infile <- input$datafile
 
       shiny::validate(
-        shiny::need(infile$type == "text/csv", "File must be .csv")
+        shiny::need(strsplit(infile$name, ".", fixed = TRUE)[[1]][2] == "csv", "File must be .csv")
       )
         tbl <- read.csv(infile$datapath, row.names = 1)
       return(tbl)
