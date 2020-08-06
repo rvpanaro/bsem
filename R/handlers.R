@@ -397,7 +397,7 @@ handler5 <- function() {
     }
   }
 
-  e$standata$idex <- which(names(e$exogenous) %in% colnames(e$data))
+  e$standata$idex <- which(colnames(e$data) %in% names(e$exogenous))
   e$standata$idexi <- which(unlist(e$exogenous) %in% names(e$blocks))
   e$standata$Nex <- length(e$exogenous)
   e$standata$ngamma <- lengths(e$exogenous)

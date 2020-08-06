@@ -68,21 +68,17 @@
 #' @examples
 #' dt <- bsem::simdata()
 #' names(dt)
-#' \dontrun{
-#'
+#' \donttest{
 #' semfit <- bsem::sem(
 #'   data = dt$data,
 #'   blocks = dt$blocks,
 #'   paths = dt$paths,
 #'   exogenous = dt$exogenous,
 #'   signals = dt$signals,
-#'   iter = 2000,
-#'   warmup = 1000,
-#'   chains = 4
+#'   cores = 1
 #' )
 #' summary(semfit)
 #' }
-#'
 #' @author Renato Panaro
 #' @seealso \code{\link[bsem]{plot.bsem}}, \code{\link[bsem]{simdata}}, \code{\link[bsem]{arrayplot}}, \code{\link[bsem]{summary.bsem}}, \code{\link[bsem]{print.bsem}}
 
@@ -292,6 +288,7 @@ sem <-
         else {
           ## blocks + exogenous
           handler5()
+
           stanfit <- suppressWarnings(
             rstan::sampling(
                 stanmodels$factorialEX,
@@ -436,7 +433,7 @@ sem <-
         }
       }
     }
-    cat("\nExtracting posterior samples, please wait...\n")
+    message("\nExtracting posterior samples, please wait...\n")
     samples <-
       list(
         alpha = rstan::extract(
@@ -613,25 +610,30 @@ sem <-
       names(output$mean_Xna) <- paste0("Xna[", idna[,1], ",", idna[,2], "]")
     }
 
-    ifelse(missing(exogenous),
-      rownames(output$mean_alpha) <- colnames(data),
+    if(length(exogenous) > 0) {
       rownames(output$mean_alpha) <- colnames(data)[-standata$idex]
-    )
+    }
+    else{
+      rownames(output$mean_alpha) <- colnames(data)
+    }
 
     colnames(output$mean_alpha) <- names(blocks)
     rownames(output$mean_lambda) <- names(blocks)
 
     colnames(output$mean_lambda) <- row_names
 
-    ifelse(missing(exogenous),
-      names(output$mean_sigma2) <- colnames(data),
+    if(length(exogenous) > 0) {
       names(output$mean_sigma2) <- colnames(data)[-standata$idex]
-    )
+    }
+    else{
+      names(output$mean_sigma2) <- colnames(data)
+    }
+
     if (!missing(exogenous)) {
       names(output$mean_tau2) <- names(exogenous)
     }
 
-    cat("\nDone!\n")
+    message("\nDone!\n")
     class(output) <- "bsem"
 
     return(output)
