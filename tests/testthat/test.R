@@ -524,14 +524,4 @@ expect_error(
 )
 rm(aux)
 
-expect_error(
-  sem(
-    data = dt$data,
-    blocks = dt$blocks,
-    paths = c(1),
-    signals = dt$signals,
-    iter = 2,
-    warmup = 0,
-    chains = 1
-  )
-)
+
