@@ -178,6 +178,84 @@ fit <- bsem::sem(
   exogenous = dt$exogenous,
   signals = dt$signals
   )
+
+fit
+```
+
+```r
+---
+bsem model:  semEX 
+latent variables (outer model):  5 
+regressions (inner model):  2 
+exogenous variables:  1 
+
+
+ outer model loadings (alpha):
+
+ F1 
+      mean     50%     sd   HPD.l   HPD.u n_eff  Rhat
+X1  1.8197  1.7972 0.2605  1.3350  2.3161   316 1.012
+X2 -0.3477 -0.3406 0.1566 -0.6556 -0.0429  2525 1.000
+X3  2.1240  2.0980 0.3056  1.5541  2.7079   308 1.012
+
+ F2 
+      mean     50%     sd   HPD.l   HPD.u n_eff  Rhat
+X4 -0.6499 -0.6326 0.1816 -0.9907 -0.2947  1098 1.003
+X5  1.7495  1.7178 0.2580  1.2934  2.2814   368 1.009
+X6 -1.4583 -1.4304 0.2916 -2.0355 -0.8950   666 1.005
+X7  1.0505  1.0325 0.1617  0.7577  1.3752   409 1.009
+
+ F3 
+      mean    50%     sd   HPD.l  HPD.u n_eff  Rhat
+X8   1.223  1.206 0.3445  0.5423  1.890  1478 1.000
+X9  -1.893 -1.860 0.2805 -2.4365 -1.385   436 1.002
+X10 -1.463 -1.438 0.2210 -1.9096 -1.073   438 1.002
+
+ F4 
+       mean     50%     sd  HPD.l   HPD.u n_eff  Rhat
+X11 -0.9687 -0.9521 0.1607 -1.292 -0.6674   517 1.009
+X12  0.2422  0.2433 0.2520 -0.240  0.7702  5447 1.002
+X13 -1.9023 -1.8692 0.2806 -2.470 -1.3909   409 1.012
+X14  1.0326  1.0120 0.3873  0.267  1.7872  2056 1.002
+X15 -1.1645 -1.1491 0.1774 -1.539 -0.8550   438 1.010
+X16 -1.4857 -1.4598 0.2156 -1.923 -1.0949   402 1.012
+
+ F5 
+       mean     50%     sd   HPD.l   HPD.u n_eff  Rhat
+X17 -1.9887 -1.9565 0.2819 -2.5169 -1.4736   381 1.004
+X18  1.4600  1.4349 0.3714  0.7853  2.2319  1082 1.002
+X19 -1.9699 -1.9393 0.2792 -2.4921 -1.4650   380 1.005
+X20  0.3432  0.3361 0.2211 -0.0969  0.7885  4658 1.001
+X21 -1.7444 -1.7163 0.2480 -2.2093 -1.2973   394 1.006
+
+---
+
+
+ inner model regression coefficients (beta):
+
+ F1 
+      mean     50%     sd   HPD.l   HPD.u n_eff  Rhat
+F3  0.8727  0.8567 0.2720  0.3744  1.4327   763 1.004
+F4 -0.7390 -0.7340 0.2677 -1.2848 -0.2276   930 1.004
+
+ F2 
+      mean     50%     sd   HPD.l   HPD.u n_eff  Rhat
+F4 -1.0935 -1.0764 0.2867 -1.6376 -0.5264   848 1.003
+F5  0.7629  0.7514 0.2510  0.2962  1.2730   699 1.004
+
+---
+
+
+ exogenous variables regression coefficients (gamma) :
+
+ Y1 
+             mean     50%     sd   HPD.l   HPD.u n_eff   Rhat
+intercept  1.5024  1.5020 0.1401  1.2286  1.7820  5869 1.0004
+F1         0.6172  0.6076 0.1417  0.3586  0.9127   805 1.0029
+F2        -1.0714 -1.0542 0.1789 -1.4198 -0.7312   493 1.0059
+tau2[1]    0.5109  0.4863 0.1527  0.2531  0.8064  4351 0.9999
+
+---
 ```
 
 After fitting the model we can to obtain a ``visNetwork`` graph using:
@@ -206,7 +284,6 @@ gridExtra::grid.arrange(
 ```
 
 <img src="alpha-bsem.png" width="700"  />
-
 <img src="lambda-bsem.png" width="700"  />
 
 For this vignette we fitted the model using just one chain, it is recommended up to 4 chains with 2000 iterations and 1000 warmup samples (standard) to reach the equilibrium distribution. Even so, we found that the estimates follow the pattern of the true values of the parameters:
@@ -341,7 +418,6 @@ R2: 27.28%
 
 ```
 
-
 The effective sample size  ``n_eff`` gives an estimate of the independent draws from the posterior distribution, and ``Rhat`` referred to as the potential scale reduction statistic,  is one of the useful ways to monitor whether a chain has converged to the equilibrium distribution. This statistic measures the ratio between the average variation of the samples within each chain and the variation of the combined samples in the chains; if the chains have not converged to a common region, this statistic will be greater than one. Along with the estimates and posterior descriptives, the ``summary`` also provides quantities for the diagnosis of the quality of fit of the factorial model: the percentage of the total variability (of variables in X) explained by factors (``PVTE``) and the $R^2$ statistics adapted for factor analysis (``R2``). 
 
 A crucial difference in obtaining the same statistics printed by the `bsem::summary` function is the use of the ``signals``. The signal specification, (-1 or 1) for each of the factor loadings, forces the initial values of each chain to have the same direction, and, naturally, these chains converge to nearby regions. Otherwise, the loadings signals between chains are often opposite as a consequence of random initialization. To circumvent this issue, the package automatically transforms posterior chains using simple `for` loops and `if` statements to recalculate the descriptives using `rstan::monitor`.
@@ -356,6 +432,3 @@ The results obtained with this package vary according to the initial values set 
 
 This document is part of the content submitted to [CRAN](https://cran.r-project.org/). The package is also in public use and is available at
 the GitHub development platform, the link is https://github.com/rvpanaro/bsem.
-
-
-
