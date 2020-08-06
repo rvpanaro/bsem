@@ -107,21 +107,17 @@ Consider:
 \examples{
 dt <- bsem::simdata()
 names(dt)
-\dontrun{
-
+\donttest{
 semfit <- bsem::sem(
   data = dt$data,
   blocks = dt$blocks,
   paths = dt$paths,
   exogenous = dt$exogenous,
   signals = dt$signals,
-  iter = 2000,
-  warmup = 1000,
-  chains = 4
+  cores = 1
 )
 summary(semfit)
 }
-
 }
 \seealso{
 \code{\link[bsem]{plot.bsem}}, \code{\link[bsem]{simdata}}, \code{\link[bsem]{arrayplot}}, \code{\link[bsem]{summary.bsem}}, \code{\link[bsem]{print.bsem}}

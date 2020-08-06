@@ -36,7 +36,7 @@ a visNetwork graph:
 
 dt <- bsem::simdata()
 names(dt)
-\dontrun{
+\donttest{
 
 semfit <- bsem::sem(
   data = dt$data,
@@ -44,9 +44,7 @@ semfit <- bsem::sem(
   paths = dt$paths,
   exogenous = dt$exogenous,
   signals = dt$signals,
-  iter = 2000,
-  warmup = 1000,
-  chains = 4
+  cores = 1
 )
 plot(semfit)
 }
