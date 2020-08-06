@@ -25,7 +25,7 @@ remotes::install_github("stan-dev/rstan", ref = "develop", subdir = "rstan/rstan
 Afterwards, you can install bsem using:
 
 ```r
-devtools::install_github("rvpanaro/bsem")
+devtools::install_github("rvpanaro/bsem", dependencies = TRUE)
 ```
 
 ## Basic working example
