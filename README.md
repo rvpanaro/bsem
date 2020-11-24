@@ -1,5 +1,11 @@
+## bsem <a href='https://rvpanaro.github.io/bsem'><img src='https://raw.githubusercontent.com/rvpanaro/bsem/master/inst/figures/bsem.png' align="right" height="139" /></a>
+
+[![CRAN status](https://www.r-pkg.org/badges/version/bsem)](https://cran.r-project.org/package=bsem)
+[![CRAN RStudio mirror downloads](http://cranlogs.r-pkg.org/badges/bsem)](http://www.r-pkg.org/pkg/bsem)
+[![R build status](https://github.com/rvpanaro/bsem/workflows/R-CMD-check/badge.svg)](https://github.com/rvpanaro/bsem/actions)
+[![Travis build status](https://travis-ci.org/rvpanaro/bsem.svg?branch=master)](https://travis-ci.org/rvpanaro/bsem)
 [![Codecov test coverage](https://codecov.io/gh/rvpanaro/bsem/branch/master/graph/badge.svg)](https://codecov.io/gh/rvpanaro/bsem?branch=master)
-## bsem <a href='https://rvpanaro.github.io/bsem/'><img src='https://raw.githubusercontent.com/rvpanaro/bsem/master/inst/figures/bsem.png' align="right" height="139" /></a>
+
 
 ---
 
